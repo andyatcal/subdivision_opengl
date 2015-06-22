@@ -8,13 +8,9 @@
 #include <Eigen/Geometry>
 
 #define PI 3.14159265  // Should be used from mathlib
-inline float sqr(float x) { return x*x; }
 
 using namespace std;
 using namespace Eigen;
-//****************************************************
-// Some Classes
-//****************************************************
 
 class Viewport;
 
@@ -22,7 +18,6 @@ class Viewport {
   public:
     int w, h; // width and height
 };
-
 
 //****************************************************
 // Global Variables
@@ -51,7 +46,6 @@ GLfloat zoom = 0.1;
 // Simple init function
 //****************************************************
 void OnInit() {
-	// enable depth testing
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
