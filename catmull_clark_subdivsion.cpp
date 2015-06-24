@@ -69,6 +69,35 @@ public:
     Vector3f normal;
 };
 
+// DEFINITION of point
+class AWPoint{
+public:
+    Vector3f position;
+};
+
+class AWPolygon{
+public:
+    vector<AWPoint> points; // The vertices of the face, should be larger than 3.
+    void addPoint(AWPoint newPoint) {
+        points.push_back(newPoint);
+    }
+    void computeNewFacePoint(){
+        Vector3f result = Vector3f(0, 0, 0);
+        for(vector<AWPoint>::iterator it = points.begin(); it != points.end(); it++) {
+            result += *it;
+        }
+        result /= points.length();
+    }
+};
+
+class AWEdge{
+public:
+    AWPolygon left;
+    AWPolygon right;
+    AWPoint start;
+    AWPoint end;
+};
+
 // A cube defined by its center and size.
 class Cube{
 public:
