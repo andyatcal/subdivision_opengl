@@ -63,30 +63,39 @@ void draw3DPoint3f(Vector3f vertex) {
     glVertex3f(vertex[0], vertex[1], vertex[2]);
 }
 
-class Vertex{
-public:
-    Vector3f position;
-    Vector3f normal;
-};
-
 // DEFINITION of point
 class AWPoint{
 public:
     Vector3f position;
+    bool exist;
+    AWPoint(){exist = FALSE};
+    AWPoint(float x, float y, float z){
+        exist = TRUE;
+        position = Vector3f(x, y, z);
+    }
 };
 
 class AWPolygon{
 public:
     vector<AWPoint> points; // The vertices of the face, should be larger than 3.
+    AWPoint newFacePoint;
+    AWPolygon(){
+        points.clear();
+    }
     void addPoint(AWPoint newPoint) {
         points.push_back(newPoint);
+    }
+    int size(){
+        return points.size();
     }
     void computeNewFacePoint(){
         Vector3f result = Vector3f(0, 0, 0);
         for(vector<AWPoint>::iterator it = points.begin(); it != points.end(); it++) {
-            result += *it;
+            AWPoint currentPoint = *it;
+            result += currentPoint.position;
         }
-        result /= points.length();
+        result /= size();
+        newFacePoint.position = result;
     }
 };
 
@@ -96,8 +105,51 @@ public:
     AWPolygon right;
     AWPoint start;
     AWPoint end;
+    AWPoint newEdgePoint;
+    void computeNewEdgePoint(){
+        if(left.size() != 0 && right.size() != 0){
+            Vector3f result = Vector3f(0, 0, 0);
+            result += start.position;
+            result += end.position;
+            result += left.newFacePoint.position;
+            result += right.newFacePoint.position;
+            result /= 4;
+            newEdgePoint.position = result;
+        } else {
+            newEdgePoint.exist = FALSE;
+        }
+    }
 };
 
+void testAWPolygon(){
+    AWPoint p1 = AWPoint(1, 1, 1);
+    AWPoint p2 = AWPoint(1, 1, -1);
+    AWPoint p3 = AWPoint(1, -1, -1);
+    AWPoint p4 = AWPoint(1, -1, 1);
+    AWPoint p5 = AWPoint(-1, 1, 1);
+    AWPoint p6 = AWPoint(-1, 1, -1);
+    AWPoint p7 = AWPoint(-1, -1, -1);
+    AWPoint p8 = AWPoint(-1, -1, 1);
+    AWPolygon A;
+    AWPolygon B;
+    A.addPoint(p1);
+    A.addPoint(p2);
+    A.addPoint(p3);
+    A.addPoint(p4);
+    B.addPoint(p5);
+    B.addPoint(p6);
+    B.addPoint(p2);
+    B.addPoint(p1);
+    A.computeNewFacePoint();
+    B.computeNewFacePoint();
+    AWEdge e1;
+    e1.left = A;
+    e1.right = B;
+    e1.start = p2;
+    e1.end = p1;
+    e1.computeNewEdgePoint();
+    cout<<e1.newEdgePoint.position;
+}
 // A cube defined by its center and size.
 class Cube{
 public:
@@ -324,6 +376,7 @@ int main(int argc, char *argv[]) {
     glutInitWindowPosition(50, 50);
     glutCreateWindow("Catmull Clark Subdivision");
     init();
+    testAWPolygon();
     glutDisplayFunc(render);
     glutReshapeFunc(reshape);
     glutIdleFunc(myFrameMove); 
