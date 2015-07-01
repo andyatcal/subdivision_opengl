@@ -2,18 +2,18 @@ Log of meeting on June 24th 2015
 
 1. We will use halfedge data structure for this cc project. (cc : catmull-clark)
 
-1.1 With the coming "misoritable" object feature, we need to modify the traversal of halfedges. Possibly: go to the sibling edge -> move forward once -> move backward twice.
+1.1 With the coming "misorintable" object feature, we need to modify the traversal of halfedges. Possibly: go to the sibling edge -> move forward once -> move backward twice.
 
 2. We will implement the first level of cc, then move on to the recursive generation of sublevels.
 
-3. Milestonnes of this cc project.
+3. Milestones of this cc project.
 
 3.1 Normal cc -> test with cube and normal strip. First Level.
 3.2 CC with infinite sharp edge-> test with normal strip. First Level.
 3.3 CC complied with "misorintable" object. First Level.
 3.4 Recursively generation of sublevels.
 
-4. Generate new mesh from the original mesh without changing the oringinal mesh. And show both in OpenGL.
+4. Generate new mesh from the original mesh without changing the original mesh. And show both in OpenGL.
 
 5. Reference of cc project: 
 
@@ -21,10 +21,10 @@ Log of meeting on June 24th 2015
 5.2 Jordan Smith - slide.
 
 6. Do the topology of subdivision first: adding methods to the halfedge data structure. Then compute the values of those points.
-Topology: edgepoint -> facepoint -> vertexpoint
+Topology: vertexpoint -> edgepoint -> facepoint
 Compute: facepoint -> edgepoint -> vertexpoint
 
 7. Offset in the future:
 
-7.1 1) Crossproduct of vectors to two adjacent neighbour. 2) Normalize and average all crossproducts.
+7.1 1) Crossproduct of vectors to two adjacent neighbor. 2) Normalize and average all crossproducts.
 7.2 Newell algorithm for plane fitting -> plane normal
