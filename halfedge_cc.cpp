@@ -42,14 +42,460 @@ bool lightOn = false; //Initial state of GL_Light
 // among those geometries.
 class Mesh;
 
-// Face class. A Face class represents a list of vertices (more than 3)
-// connected by edges.
+// Face class. A face represents a list of vertices (more than 3)
+// connected by edges. Initially, set as a quad.
 class Face;
 
 // Halfedge class. A halfedge represents an edge starting from one vertex
 // and pointing to another vertex.
 class Halfedge;
 
+// Vertex class. A vertex contains a point in the 3D space. With
+// one out-going halfedge
+class Vertex;
+
+class Vertex{
+public:
+    Vertex();
+    Vertex(float ix, float iy, float iz);
+    float x, y, z;
+    Halfedge * oneOutEdge;
+    Vector3f normal;
+};
+
+Vertex::Vertex(){
+    x = y = z = 0.0;
+    oneOutEdge = NULL;
+}
+
+Vertex::Vertex(float ix, float iy, float iz) {
+    x = ix;
+    y = iy;
+    z = iz;
+    oneOutEdge = NULL;
+}
+
+class Face{
+public:
+    Face();
+    Vertex * v1; // Use vector<Vertex*> vertices later.
+    Vertex * v2;
+    Vertex * v3;
+    Vertex * v4;
+    Halfedge * oneSideEdge;
+    Vertex * facePoint;
+};
+
+Face::Face(){
+    oneSideEdge = NULL;
+    facePoint = NULL;
+    v1 = v2 = v3 = v4 = NULL;
+}
+
+class Halfedge{
+public:
+    Halfedge();
+    Vertex * start;
+    Vertex * end;
+    Halfedge * sibling;
+    Halfedge * next;
+    Face * heFace;
+    // Do we need a pointer to the sibling halfedge?
+
+    Vertex * edgePoint;
+    Halfedge * firstHalf;
+    Halfedge * secondHalf;
+};
+
+Halfedge::Halfedge(){
+    start = end = NULL;
+    sibling = NULL;
+    next = NULL;
+    heFace = NULL;
+    edgePoint = NULL;
+    firstHalf = secondHalf = NULL;
+}
+
+class Mesh{
+public:
+    Mesh();
+    vector<Vertex*> glVertVect;
+    vector<Halfedge*> glEdgeVect;
+    vector<Face*> glFaceVect;
+    Mesh duplicate(Mesh original);
+};
+
+Mesh::Mesh(){}
+Mesh Mesh::duplicate(Mesh original){
+    Mesh newMesh = Mesh();
+    // Need to be modified
+    return newMesh;
+}
+
+//************************************************************
+//          Subdivision Functions
+//************************************************************
+
+// Construct facepoints
+void makeFacePoints(vector<Face*> &faceVect, vector<Vertex*> &vertVect){
+    vector<Face*>::iterator it;
+
+    for(it = faceVect.begin(); it < faceVect.end(); it++){
+        Vertex vertex1 = *((*it) -> v1);
+        Vertex vertex2 = *((*it) -> v2);
+        Vertex vertex3 = *((*it) -> v3);
+        Vertex vertex4 = *((*it) -> v4);
+
+        // Facepoint is the average of vertices in this face
+        Vertex * newFacePoint = new Vertex;
+        (*newFacePoint).x = (vertex1.x + vertex2.x + vertex3.x + vertex4.x)/4;
+        (*newFacePoint).y = (vertex1.y + vertex2.y + vertex3.y + vertex4.y)/4;
+        (*newFacePoint).z = (vertex1.z + vertex2.z + vertex3.z + vertex4.z)/4;
+        (*it) -> facePoint = newFacePoint;
+
+        vertVect.push_back(newFacePoint);
+    }
+}
+
+// Construct edge points
+void makeEdgePoints(vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect){
+    vector<Halfedge*>::iterator it;
+
+    for(it = edgeVect.begin(); it < edgeVect.end(); it++){
+        if((*it) -> sibling -> edgePoint != NULL){
+            (*it) -> edgePoint = (*it) -> sibling -> edgePoint;
+        } else{
+            Vertex faceVert1 = *((*it) -> heFace -> facePoint);
+            Vertex faceVert2 = *((*it) -> sibling -> heFace -> facePoint);
+            Vertex edgeVert1 = *((*it) -> end);
+            Vertex edgeVert2 = *((*it) -> sibling -> end);
+
+            Vertex * newEdgePoint = new Vertex;
+            (*newEdgePoint).x = (faceVert1.x + faceVert2.x + edgeVert1.x + edgeVert2.x)/4;
+            (*newEdgePoint).y = (faceVert1.y + faceVert2.y + edgeVert1.y + edgeVert2.y)/4;
+            (*newEdgePoint).z = (faceVert1.z + faceVert2.z + edgeVert1.z + edgeVert2.z)/4;
+            (*it) -> edgePoint = newEdgePoint;
+
+            vertVect.push_back(newEdgePoint);
+        }
+    }
+}
+
+void makeVertexPoints(vector<Vertex*> &vertVect){
+    vector<Vertex*>::iterator it;
+
+    Halfedge * edge1;
+    Halfedge * edge2;
+    Halfedge * edge3;
+    Halfedge * edge4;
+    Halfedge * edge5;
+
+    Vertex facePoint1;
+    Vertex facePoint2;
+    Vertex facePoint3;
+    Vertex facePoint4;
+    Vertex facePoint5;
+    Vertex facePointAvg;
+
+    Vertex edgePoint1;
+    Vertex edgePoint2;
+    Vertex edgePoint3;
+    Vertex edgePoint4;
+    Vertex edgePoint5;
+    Vertex edgePointAvg;
+
+    Vertex * currVert;
+
+    for(it = vertVect.begin(); it < vertVect.end(); it++){
+        currVert = *it;
+
+        edge1 = currVert -> oneOutEdge;
+        edge2 = edge1->next->next->next->sibling;
+        edge3 = edge2->next->next->next->sibling;
+        edge4 = edge3->next->next->next->sibling;
+        edge5 = edge4->next->next->next->sibling;
+
+        edgePoint1 = *(edge1->edgePoint); 
+        edgePoint2 = *(edge2->edgePoint); 
+        edgePoint3 = *(edge3->edgePoint); 
+        edgePoint4 = *(edge4->edgePoint); 
+        edgePoint5 = *(edge5->edgePoint); 
+
+        facePoint1 = *(edge1->heFace->facePoint);
+        facePoint2 = *(edge2->heFace->facePoint);
+        facePoint3 = *(edge3->heFace->facePoint);
+        facePoint4 = *(edge4->heFace->facePoint);
+        facePoint5 = *(edge5->heFace->facePoint);
+    
+        int n;
+        if (edge1 == edge4){
+            edgePointAvg.x = (edgePoint1.x + edgePoint2.x + edgePoint3.x)/3;
+            edgePointAvg.y = (edgePoint1.y + edgePoint2.y + edgePoint3.y)/3;
+            edgePointAvg.z = (edgePoint1.z + edgePoint2.z + edgePoint3.z)/3;
+
+            facePointAvg.x = (facePoint1.x + facePoint2.x + facePoint3.x)/3;
+            facePointAvg.y = (facePoint1.y + facePoint2.y + facePoint3.y)/3;
+            facePointAvg.z = (facePoint1.z + facePoint2.z + facePoint3.z)/3;
+            n = 3;
+        } else if(edge1 == edge5){
+            edgePointAvg.x = (edgePoint1.x + edgePoint2.x + edgePoint3.x + edgePoint4.x)/4;
+            edgePointAvg.y = (edgePoint1.y + edgePoint2.y + edgePoint3.y + edgePoint4.y)/4;
+            edgePointAvg.z = (edgePoint1.z + edgePoint2.z + edgePoint3.z + edgePoint4.z)/4;
+
+            facePointAvg.x = (facePoint1.x + facePoint2.x + facePoint3.x + facePoint4.x)/4;
+            facePointAvg.y = (facePoint1.y + facePoint2.y + facePoint3.y + facePoint4.y)/4;
+            facePointAvg.z = (facePoint1.z + facePoint2.z + facePoint3.z + facePoint4.z)/4;
+            n = 4;
+        } else { // The polygons have less than or equal to 5 edges
+            edgePointAvg.x = (edgePoint1.x + edgePoint2.x + edgePoint3.x + edgePoint4.x + edgePoint5.x)/5;
+            edgePointAvg.y = (edgePoint1.y + edgePoint2.y + edgePoint3.y + edgePoint4.y + edgePoint5.y)/5;
+            edgePointAvg.z = (edgePoint1.z + edgePoint2.z + edgePoint3.z + edgePoint4.z + edgePoint5.z)/5;
+
+            facePointAvg.x = (facePoint1.x + facePoint2.x + facePoint3.x + facePoint4.x + facePoint5.x)/5;
+            facePointAvg.y = (facePoint1.y + facePoint2.y + facePoint3.y + facePoint4.y + facePoint5.y)/5;
+            facePointAvg.z = (facePoint1.z + facePoint2.z + facePoint3.z + facePoint4.z + facePoint5.z)/5;
+            n = 5;
+        }
+        // Update the vertex point
+        currVert->x = ((n-3)*currVert->x +  2*edgePointAvg.x + facePointAvg.x)/n; 
+        currVert->y = ((n-3)*currVert->y +  2*edgePointAvg.y + facePointAvg.y)/n; 
+        currVert->z = ((n-3)*currVert->z +  2*edgePointAvg.z + facePointAvg.z)/n; 
+    }
+}
+
+// Create conections between the new points
+void compileNewMesh(std::vector<Face*> &faceVect, std::vector<Face*> &newFaceVect, std::vector<Halfedge*> &newEdgeVect){
+    std::vector<Face*>::iterator it;
+
+    for(it = faceVect.begin(); it < faceVect.end(); it++){
+        Face currFace = **it;
+
+        Halfedge * edge1 = currFace.oneSideEdge;
+        Halfedge * edge2 = edge1->next;
+        Halfedge * edge3 = edge2->next;
+        Halfedge * edge4 = edge3->next;
+
+        Halfedge * edge1a = new Halfedge;
+        Halfedge * edge1b = new Halfedge;
+        Halfedge * edge2a = new Halfedge;
+        Halfedge * edge2b = new Halfedge;
+        Halfedge * edge3a = new Halfedge;
+        Halfedge * edge3b = new Halfedge;
+        Halfedge * edge4a = new Halfedge;
+        Halfedge * edge4b = new Halfedge;
+
+        Halfedge * edge1in = new Halfedge;
+        Halfedge * edge1out = new Halfedge;
+        Halfedge * edge2in = new Halfedge;
+        Halfedge * edge2out = new Halfedge;
+        Halfedge * edge3in = new Halfedge;
+        Halfedge * edge3out = new Halfedge;
+        Halfedge * edge4in = new Halfedge;
+        Halfedge * edge4out = new Halfedge;
+
+        //border edges 
+        edge1->firstHalf = edge1a; 
+        edge1->secondHalf = edge1b;
+        edge2->firstHalf = edge2a; 
+        edge2->secondHalf = edge2b;
+        edge3->firstHalf = edge3a; 
+        edge3->secondHalf = edge3b;
+        edge4->firstHalf = edge4a; 
+        edge4->secondHalf = edge4b;
+
+        //replace edge1
+        edge1a->start = edge1->start;
+        edge1a->end = edge1->edgePoint;
+        edge1b->start = edge1->edgePoint;
+        edge1b->end = edge1->end; 
+        if(edge1->sibling->firstHalf != NULL){
+            edge1b->sibling = edge1->sibling->firstHalf;
+            edge1a->sibling = edge1->sibling->secondHalf;
+            
+            edge1->sibling->firstHalf->sibling = edge1b;
+            edge1->sibling->secondHalf->sibling = edge1a;
+        }
+        //adjust edge pointer from start vertex
+        edge1->start->oneOutEdge = edge1a;
+        //inner edge from edge 1
+        edge1in->start = edge1->edgePoint;
+        edge1in->end = currFace.facePoint;
+        edge1out->end = edge1->edgePoint;
+        edge1out->start = currFace.facePoint;
+        edge1in->sibling = edge1out;
+        edge1out->sibling = edge1in;
+        //set edge pointer from edge1 vertex
+        edge1->edgePoint->oneOutEdge = edge1in;
+
+        //replace edge2
+        edge2a->start = edge2->start;
+        edge2a->end = edge2->edgePoint;
+        edge2b->start = edge2->edgePoint;
+        edge2b->end = edge2->end; 
+        if(edge2->sibling->firstHalf != NULL){
+            edge2b->sibling = edge2->sibling->firstHalf;
+            edge2a->sibling = edge2->sibling->secondHalf;
+            edge2->sibling->firstHalf->sibling = edge2b;
+            edge2->sibling->secondHalf->sibling = edge2a;
+        }
+        //adjust edge pointer from start vertex
+        edge2->start->oneOutEdge = edge2a;
+        //inner edge from edge 2
+        edge2in->start = edge2->edgePoint;
+        edge2in->end = currFace.facePoint;
+        edge2out->end = edge2->edgePoint;
+        edge2out->start = currFace.facePoint;
+        edge2in->sibling = edge2out;
+        edge2out->sibling = edge2in;
+        //set edge pointer from edge2 vertex
+        edge2->edgePoint->oneOutEdge = edge2in;
+
+
+        //replace edge3
+        edge3a->start = edge3->start;
+        edge3a->end = edge3->edgePoint;
+        edge3b->start = edge3->edgePoint;
+        edge3b->end = edge3->end; 
+        if(edge3->sibling->firstHalf != NULL){
+            edge3b->sibling = edge3->sibling->firstHalf;
+            edge3a->sibling = edge3->sibling->secondHalf;
+            edge3->sibling->firstHalf->sibling = edge3b;
+            edge3->sibling->secondHalf->sibling = edge3a;
+        }
+        //adjust edge pointer from start vertex
+        edge2->start->oneOutEdge = edge2a;
+        //inner edge from edge 3
+        edge3in->start = edge3->edgePoint;
+        edge3in->end = currFace.facePoint;
+        edge3out->end = edge3->edgePoint;
+        edge3out->start = currFace.facePoint;
+        edge3in->sibling = edge3out;
+        edge3out->sibling = edge3in;
+        //set edge pointer from edge3 vertex
+        edge3->edgePoint->oneOutEdge = edge3in;
+
+
+        //replace edge4
+        edge4a->start = edge4->start;
+        edge4a->end = edge4->edgePoint;
+        edge4b->start = edge4->edgePoint;
+        edge4b->end = edge4->end; 
+        if(edge4->sibling->firstHalf != NULL){
+            edge4b->sibling = edge4->sibling->firstHalf;
+            edge4a->sibling = edge4->sibling->secondHalf;
+            //modify so that BOTH sets of half edges have
+            edge4->sibling->firstHalf->sibling = edge4b;
+            edge4->sibling->secondHalf->sibling = edge4a;
+
+        }
+        //adjust edge pointer from start vertex
+        edge4->start->oneOutEdge = edge4a;
+        //inner edge from edge 4
+        edge4in->start = edge4->edgePoint;
+        edge4in->end = currFace.facePoint;
+        edge4out->end = edge4->edgePoint;
+        edge4out->start = currFace.facePoint;
+        edge4in->sibling = edge4out;
+        edge4out->sibling = edge4in;
+        //set edge pointer from edge4 vertex
+        edge4->edgePoint->oneOutEdge = edge4in;
+
+        //set face vertex edge pointer
+        currFace.facePoint->oneOutEdge = edge4out;
+
+        //set all next pointers
+        edge1a->next = edge1in;
+        edge1in->next = edge4out;
+        edge4out->next = edge4b; 
+        edge4b->next = edge1a;
+
+        edge2a->next = edge2in;
+        edge2in->next = edge1out;
+        edge1out->next = edge1b; 
+        edge1b->next = edge2a;
+
+        edge3a->next = edge3in;
+        edge3in->next = edge2out;
+        edge2out->next = edge2b; 
+        edge2b->next = edge3a;
+
+        edge4a->next = edge4in;
+        edge4in->next = edge3out;
+        edge3out->next = edge3b; 
+        edge3b->next = edge4a;
+            
+        //create new faces/connect all face pointers
+        Face *face1 = new Face;
+        face1->v1 = edge1a->start;
+        edge1a->heFace = face1;
+        face1->v2 = edge1in->start;
+        edge1in->heFace = face1;
+        face1->v3 = edge4out->start;
+        edge4out->heFace = face1;
+        face1->v4 = edge4b->start;
+        edge4b->heFace = face1;
+        face1->oneSideEdge = edge4b;
+
+        Face *face2 = new Face;
+        face2->v1 = edge2a->start;
+        edge2a->heFace = face2;
+        face2->v2 = edge2in->start;
+        edge2in->heFace = face2;
+        face2->v3 = edge1out->start;
+        edge1out->heFace = face2;
+        face2->v4 = edge1b->start;
+        edge1b->heFace = face2;
+        face2->oneSideEdge = edge1b;
+
+        Face *face3 = new Face;
+        face3->v1 = edge3a->start;
+        edge3a->heFace = face3;
+        face3->v2 = edge3in->start;
+        edge3in->heFace = face3;
+        face3->v3 = edge2out->start;
+        edge2out->heFace = face3;
+        face3->v4 = edge2b->start;
+        edge2b->heFace = face3;
+        face3->oneSideEdge = edge2b;
+
+        Face *face4 = new Face;
+        face4->v1 = edge4a->start;
+        edge4a->heFace = face4;
+        face4->v2 = edge4in->start;
+        edge4in->heFace = face4;
+        face4->v3 = edge3out->start;
+        edge3out->heFace = face4;
+        face4->v4 = edge3b->start;
+        edge3b->heFace = face4;
+        face4->oneSideEdge = edge3b;
+
+        //load each face into the new face vector
+        newFaceVect.push_back(face1); 
+        newFaceVect.push_back(face2); 
+        newFaceVect.push_back(face3); 
+        newFaceVect.push_back(face4); 
+
+        //push all new edges onto the new edge vector
+        newEdgeVect.push_back(edge1a);
+        newEdgeVect.push_back(edge1b);
+        newEdgeVect.push_back(edge2a);
+        newEdgeVect.push_back(edge2b);
+        newEdgeVect.push_back(edge3a);
+        newEdgeVect.push_back(edge3b);
+        newEdgeVect.push_back(edge4a);
+        newEdgeVect.push_back(edge4b);
+
+        newEdgeVect.push_back(edge1in);
+        newEdgeVect.push_back(edge1out);
+        newEdgeVect.push_back(edge2in);
+        newEdgeVect.push_back(edge2out);
+        newEdgeVect.push_back(edge3in);
+        newEdgeVect.push_back(edge3out);
+        newEdgeVect.push_back(edge4in);
+        newEdgeVect.push_back(edge4out);
+
+    }
+}
 //************************************************************
 //          OpenGL Display Functions
 //************************************************************
@@ -139,7 +585,7 @@ int main(int argc, char** argv) {
 
     glutInitWindowSize(viewport.width, viewport.hight);
     glutInitWindowPosition(100, 100);
-    glutCreateWindow("Catmull Clark Subdivision");
+    glutCreateWindow(argv[0]);
 
 
     glutDisplayFunc(render);
