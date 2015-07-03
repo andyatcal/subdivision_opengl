@@ -228,6 +228,7 @@ void makeVertexPoints(vector<Vertex*> &vertVect){
         facePoint5 = *(edge5->heFace->facePoint);
     
         int n;
+
         if (edge1 == edge4){
             edgePointAvg.x = (edgePoint1.x + edgePoint2.x + edgePoint3.x)/3;
             edgePointAvg.y = (edgePoint1.y + edgePoint2.y + edgePoint3.y)/3;
@@ -236,6 +237,7 @@ void makeVertexPoints(vector<Vertex*> &vertVect){
             facePointAvg.x = (facePoint1.x + facePoint2.x + facePoint3.x)/3;
             facePointAvg.y = (facePoint1.y + facePoint2.y + facePoint3.y)/3;
             facePointAvg.z = (facePoint1.z + facePoint2.z + facePoint3.z)/3;
+
             n = 3;
         } else if(edge1 == edge5){
             edgePointAvg.x = (edgePoint1.x + edgePoint2.x + edgePoint3.x + edgePoint4.x)/4;
@@ -245,6 +247,7 @@ void makeVertexPoints(vector<Vertex*> &vertVect){
             facePointAvg.x = (facePoint1.x + facePoint2.x + facePoint3.x + facePoint4.x)/4;
             facePointAvg.y = (facePoint1.y + facePoint2.y + facePoint3.y + facePoint4.y)/4;
             facePointAvg.z = (facePoint1.z + facePoint2.z + facePoint3.z + facePoint4.z)/4;
+
             n = 4;
         } else { // The polygons have less than or equal to 5 edges
             edgePointAvg.x = (edgePoint1.x + edgePoint2.x + edgePoint3.x + edgePoint4.x + edgePoint5.x)/5;
@@ -254,18 +257,19 @@ void makeVertexPoints(vector<Vertex*> &vertVect){
             facePointAvg.x = (facePoint1.x + facePoint2.x + facePoint3.x + facePoint4.x + facePoint5.x)/5;
             facePointAvg.y = (facePoint1.y + facePoint2.y + facePoint3.y + facePoint4.y + facePoint5.y)/5;
             facePointAvg.z = (facePoint1.z + facePoint2.z + facePoint3.z + facePoint4.z + facePoint5.z)/5;
+
             n = 5;
         }
         // Update the vertex point
-        currVert->x = ((n-3)*currVert->x +  2*edgePointAvg.x + facePointAvg.x)/n; 
-        currVert->y = ((n-3)*currVert->y +  2*edgePointAvg.y + facePointAvg.y)/n; 
-        currVert->z = ((n-3)*currVert->z +  2*edgePointAvg.z + facePointAvg.z)/n; 
+        currVert->x = ((n - 3)*currVert->x +  2*edgePointAvg.x + facePointAvg.x)/n; 
+        currVert->y = ((n - 3)*currVert->y +  2*edgePointAvg.y + facePointAvg.y)/n; 
+        currVert->z = ((n - 3)*currVert->z +  2*edgePointAvg.z + facePointAvg.z)/n; 
     }
 }
 
 // Create conections between the new points
-void compileNewMesh(std::vector<Face*> &faceVect, std::vector<Face*> &newFaceVect, std::vector<Halfedge*> &newEdgeVect){
-    std::vector<Face*>::iterator it;
+void compileNewMesh(vector<Face*> &faceVect, vector<Face*> &newFaceVect, vector<Halfedge*> &newEdgeVect){
+    vector<Face*>::iterator it;
 
     for(it = faceVect.begin(); it < faceVect.end(); it++){
         Face currFace = **it;
