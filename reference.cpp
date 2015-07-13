@@ -1,8 +1,5 @@
-#include <GLUT/glut.h>
-#include <math.h>
-#include <vector.h>
 
-#define#include <GL/glut.h>
+#include <GL/glut.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <math.h>

@@ -119,9 +119,9 @@ Halfedge::Halfedge(){
 class Mesh{
 public:
     Mesh();
-    vector<Vertex*> glVertVect;
-    vector<Halfedge*> glEdgeVect;
-    vector<Face*> glFaceVect;
+    vector<Vertex*> VertVect;
+    vector<Halfedge*> EdgeVect;
+    vector<Face*> FaceVect;
     Mesh duplicate(Mesh original);
 };
 
@@ -131,6 +131,9 @@ Mesh Mesh::duplicate(Mesh original){
     // Need to be modified
     return newMesh;
 }
+
+//global variable for mesh
+Mesh glMesh;
 
 //************************************************************
 //          Subdivision Functions
@@ -500,6 +503,45 @@ void compileNewMesh(vector<Face*> &faceVect, vector<Face*> &newFaceVect, vector<
 
     }
 }
+
+void ccSubDivision(){
+    Mesh mesh;
+    Halfedge * tempEdge;
+    Face * tempFace;
+
+    mesh.VertVect = glMesh.VertVect;
+
+    makeFacePoints(glMesh.FaceVect, glMesh.VertVect);
+
+    makeEdgePoints(glMesh.EdgeVect, glMesh.VertVect);
+
+    makeAdjustedVerts(mesh.VertVect);
+
+    compileNewMesh(glMesh.FaceVect, mesh.FaceVect, mesh.EdgeVect);
+
+    computeNormals(glMesh.VertVect);
+
+    //delete all old edges and faces
+    while(!glMesh.FaceVect.empty()){
+        tempFace = glMesh.FaceVect.back();
+        glMesh.FaceVect.pop_back();
+        delete tempFace;
+
+    }
+
+    while(!glMesh.EdgeVect.empty()){
+        tempEdge = glMesh.EdgeVect.back();
+        glMesh.EdgeVect.pop_back();
+        delete tempEdge;
+
+    }
+
+    glMesh.FaceVect = nFaceVect;
+    glMesh.EdgeVect = nEdgeVect;
+
+}
+
+
 //************************************************************
 //          OpenGL Display Functions
 //************************************************************
