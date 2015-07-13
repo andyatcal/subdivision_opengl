@@ -32,6 +32,8 @@ string USAGE = "USAGE: cc SUBDIVSION_LEVEL";
 bool wireframe = false; //Initial state of wireframe
 bool smoothShading = false; //Initial state of smooth shading
 bool lightOn = false; //Initial state of GL_Light
+float angle = 0.0; //Initial Rotation Angle
+bool checkCC = true;
 
 //************************************************************
 //          Geometry Classes
@@ -165,9 +167,10 @@ void makeEdgePoints(vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect){
     vector<Halfedge*>::iterator it;
 
     for(it = edgeVect.begin(); it < edgeVect.end(); it++){
+        
         if((*it) -> sibling -> edgePoint != NULL){
             (*it) -> edgePoint = (*it) -> sibling -> edgePoint;
-        } else{
+        } else {
             Vertex faceVert1 = *((*it) -> heFace -> facePoint);
             Vertex faceVert2 = *((*it) -> sibling -> heFace -> facePoint);
             Vertex edgeVert1 = *((*it) -> end);
@@ -181,6 +184,7 @@ void makeEdgePoints(vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect){
 
             vertVect.push_back(newEdgePoint);
         }
+        
     }
 }
 
@@ -393,7 +397,6 @@ void compileNewMesh(vector<Face*> &faceVect, vector<Face*> &newFaceVect, vector<
             //modify so that BOTH sets of half edges have
             edge4->sibling->firstHalf->sibling = edge4b;
             edge4->sibling->secondHalf->sibling = edge4a;
-
         }
         //adjust edge pointer from start vertex
         edge4->start->oneOutEdge = edge4a;
@@ -504,6 +507,72 @@ void compileNewMesh(vector<Face*> &faceVect, vector<Face*> &newFaceVect, vector<
     }
 }
 
+//compute the normal vector of the vertex at the end of the input half edge
+Vector3f getNormal(Halfedge currEdge){
+    Vertex v1 = *(currEdge.start);
+    Vertex v2 = *(currEdge.end);
+    Vertex v3 = *((currEdge.next)->end);
+
+    Vector3f outNorm;
+
+    Vector3f oneEdge = Vector3f((v2.x - v1.x),(v2.y - v1.y),(v2.z - v1.z));
+    Vector3f secondEdge = Vector3f((v3.x - v2.x), (v3.y - v2.y),(v3.z - v2.z));
+
+    return oneEdge.cross(secondEdge);
+}
+
+//iterate over every vertex in the mesh and compute its normal
+void computeNormals(vector<Vertex*> &vertVect){
+    vector<Vertex*>::iterator it;
+
+    Halfedge* edge1;
+    Halfedge* edge2;
+    Halfedge* edge3;
+    Halfedge* edge4;
+    Halfedge* edge5;
+
+    Vector3f norm1;
+    Vector3f norm2;
+    Vector3f norm3;
+    Vector3f norm4;
+    Vector3f norm5;
+    Vector3f avgNorm;
+
+    Vertex * currVert;
+
+    for(it = vertVect.begin(); it < vertVect.end(); it++){
+        currVert = *it;
+
+        edge1 = currVert->oneOutEdge;
+        edge2 = edge1->next->next->next->sibling;
+        edge3 = edge2->next->next->next->sibling;
+        edge4 = edge3->next->next->next->sibling;
+        edge5 = edge4->next->next->next->sibling;
+
+        norm1 = getNormal(*edge1);
+        norm2 = getNormal(*edge2);
+        norm3 = getNormal(*edge3);
+        norm4 = getNormal(*edge4);
+        norm5 = getNormal(*edge5);
+       
+        if(edge1 == edge4){
+            avgNorm[0] =  (norm1[0] + norm2[0] + norm3[0])/3;
+            avgNorm[1] =  (norm1[1] + norm2[1] + norm3[1])/3;
+            avgNorm[2] =  (norm1[2] + norm2[2] + norm3[2])/3;
+        } else if(edge1 == edge5){
+            //average the face points and the edge points
+            avgNorm[0] =  (norm1[0] + norm2[0] + norm3[0] + norm4[0])/4;
+            avgNorm[1] =  (norm1[1] + norm2[1] + norm3[1] + norm4[1])/4;
+            avgNorm[2] =  (norm1[2] + norm2[2] + norm3[2] + norm4[2])/4;
+        } else{
+            avgNorm[0] =  (norm1[0] + norm2[0] + norm3[0] + norm4[0] + norm5[0])/5;
+            avgNorm[1] =  (norm1[1] + norm2[1] + norm3[1] + norm4[1] + norm5[1])/5;
+            avgNorm[2] =  (norm1[2] + norm2[2] + norm3[2] + norm4[2] + norm5[2])/5;    
+        }
+        currVert->normal = avgNorm;
+    }
+}
+
 void ccSubDivision(){
     Mesh mesh;
     Halfedge * tempEdge;
@@ -515,36 +584,168 @@ void ccSubDivision(){
 
     makeEdgePoints(glMesh.EdgeVect, glMesh.VertVect);
 
-    makeAdjustedVerts(mesh.VertVect);
+    //makeVertexPoints(mesh.VertVect);
 
-    compileNewMesh(glMesh.FaceVect, mesh.FaceVect, mesh.EdgeVect);
+    //compileNewMesh(glMesh.FaceVect, mesh.FaceVect, mesh.EdgeVect);
 
-    computeNormals(glMesh.VertVect);
+    //computeNormals(glMesh.VertVect);
 
     //delete all old edges and faces
     while(!glMesh.FaceVect.empty()){
         tempFace = glMesh.FaceVect.back();
         glMesh.FaceVect.pop_back();
         delete tempFace;
-
     }
 
     while(!glMesh.EdgeVect.empty()){
         tempEdge = glMesh.EdgeVect.back();
         glMesh.EdgeVect.pop_back();
         delete tempEdge;
-
     }
 
-    glMesh.FaceVect = nFaceVect;
-    glMesh.EdgeVect = nEdgeVect;
-
+    glMesh.FaceVect = mesh.FaceVect;
+    glMesh.EdgeVect = mesh.EdgeVect;
 }
 
+//************************************************************
+//          Let's build a Cube!!
+//************************************************************
+
+void makeOneFace(Vertex * va, Vertex* vb, Vertex * vc, Vertex * vd, 
+                vector<Face*> &faceVect, 
+                vector<Halfedge*> &edgeVect){
+    Face * nextFace = new Face;
+    Halfedge *e1, *e2, *e3, *e4;
+
+    e1 = new Halfedge;
+    e2 = new Halfedge;
+    e3 = new Halfedge;
+    e4 = new Halfedge;
+
+    nextFace->v1 = va;
+    nextFace->v2 = vb;
+    nextFace->v3 = vc;
+    nextFace->v4 = vd;
+
+    e1->start = va;
+    e2->start = vb;
+    e3->start = vc;
+    e4->start = vd;
+    e1->end = vb;
+    e2->end = vc;
+    e3->end = vd;
+    e4->end = va;
+
+    va->oneOutEdge = e1;
+    vb->oneOutEdge = e2;
+    vc->oneOutEdge = e3;
+    vd->oneOutEdge = e4;
+
+    e1->next = e2;
+    e2->next = e3;
+    e3->next = e4;
+    e4->next = e1;
+    
+    e1->heFace = nextFace;
+    e2->heFace = nextFace;
+    e3->heFace = nextFace;
+    e4->heFace = nextFace;
+
+    nextFace->oneSideEdge = e4;
+
+    faceVect.push_back(nextFace);
+    edgeVect.push_back(e1);
+    edgeVect.push_back(e2);
+    edgeVect.push_back(e3);
+    edgeVect.push_back(e4);
+}
+
+void makeCube(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect){
+    vector<Face*>::iterator faceIt;
+    vector<Halfedge*>::iterator edgeIt;
+    Vertex * tempVert;
+    Halfedge * tempEdge;
+    Face * tempFace;
+
+    //Flush the old mesh
+    while(!faceVect.empty()){
+        tempFace = faceVect.back();
+        faceVect.pop_back();
+        delete tempFace;
+    }
+    while(!edgeVect.empty()){
+        tempEdge = edgeVect.back();
+        edgeVect.pop_back();
+        delete tempEdge;
+    }
+    while(!vertVect.empty()){
+        tempVert = vertVect.back();
+        vertVect.pop_back();
+        delete tempVert;
+    }
+
+    //make new mesh
+    Vertex * v1 = new Vertex;
+    Vertex * v2 = new Vertex;
+    Vertex * v3 = new Vertex;
+    Vertex * v4 = new Vertex;
+    Vertex * v5 = new Vertex;
+    Vertex * v6 = new Vertex;
+    Vertex * v7 = new Vertex;
+    Vertex * v8 = new Vertex;
+
+    //push on all new verts
+    vertVect.push_back(v1);
+    vertVect.push_back(v2);
+    vertVect.push_back(v3);
+    vertVect.push_back(v4);
+    vertVect.push_back(v5);
+    vertVect.push_back(v6);
+    vertVect.push_back(v7);
+    vertVect.push_back(v8);
+ 
+    v1->x = v2->x = v5->x = v6->x = 1;
+    v4->x = v3->x = v8->x = v7->x = -1;
+
+    v1->y = v4->y = v8->y = v5->y = 1;
+    v2->y = v3->y = v7->y = v6->y = -1;
+
+    v1->z = v2->z = v3->z = v4->z = 1;
+    v5->z = v6->z = v7->z = v8->z = -1;
+
+    //topFace
+    makeOneFace(v1, v2, v3, v4, faceVect, edgeVect);
+    //bottomFace
+    makeOneFace(v5, v6, v7, v8, faceVect, edgeVect);
+    //leftFace
+    makeOneFace(v3, v2, v6, v7, faceVect, edgeVect);
+    //rightFace
+    makeOneFace(v1, v4, v8, v5, faceVect, edgeVect);
+    //frontFace
+    makeOneFace(v2, v1, v5, v6, faceVect, edgeVect);
+    //baceFace
+    makeOneFace(v4, v3, v7, v8, faceVect, edgeVect);
+
+    vector<Halfedge*>::iterator edgeIt1;
+    vector<Halfedge*>::iterator edgeIt2;
+
+    for( edgeIt1 = edgeVect.begin(); edgeIt1 < edgeVect.end(); edgeIt1 ++){
+        for(edgeIt2 = edgeIt1 +1; edgeIt2 < edgeVect.end(); edgeIt2++){
+            if(((*edgeIt1)->start == (*edgeIt2)->end) &&((*edgeIt1)->end == (*edgeIt2)->start)){
+        
+                (*edgeIt1)->sibling = *edgeIt2;
+                (*edgeIt2)->sibling = *edgeIt1;
+                
+            }
+        }
+    }
+}
 
 //************************************************************
 //          OpenGL Display Functions
 //************************************************************
+void init(void);
+
 void render(void);
 
 void reshape(int w, int h);
@@ -553,8 +754,44 @@ void keyboard(unsigned char c, int x, int y);
 
 void mouse(int button, int state, int x, int y);
 
+void init(void){
+    makeCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
+    cout<< glMesh.FaceVect.size()<<" "<<glMesh.EdgeVect.size()<<" "<<glMesh.VertVect.size();
+    //computeNormals(glMesh.VertVect);
+    //ccSubDivision();
+}
+
 void render(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glLoadIdentity();
+    gluLookAt(5, 0, 0, 0, 0, 0, 0, 0, 1);   //  eye position, aim point, up direction
+
+    vector<Face*>::iterator dispFaceIt;
+    Face * tempFace;
+    angle += 0.5;
+    if (angle > 360) {angle -= 360;}
+    glRotatef(angle, 1, 1, 1);
+/*
+    for(dispFaceIt = glMesh.FaceVect.begin(); dispFaceIt < glMesh.FaceVect.end(); dispFaceIt++){
+        tempFace = *dispFaceIt;
+        Vertex *tempv1 = tempFace->v1;
+        Vertex *tempv2 = tempFace->v2;
+        Vertex *tempv3 = tempFace->v3;
+        Vertex *tempv4 = tempFace->v4;
+        glBegin(GL_QUADS);
+
+        glNormal3f(tempv1->normal[0],tempv1->normal[1],tempv1->normal[2]);
+        glVertex3f(tempv1->x, tempv1->y, tempv1->z); 
+        glNormal3f(tempv2->normal[0],tempv2->normal[1],tempv2->normal[2]);
+        glVertex3f(tempv2->x, tempv2->y, tempv2->z); 
+        glNormal3f(tempv3->normal[0],tempv3->normal[1],tempv3->normal[2]); 
+        glVertex3f(tempv3->x,tempv3->y, tempv3->z); 
+        glNormal3f(tempv4->normal[0],tempv4->normal[1],tempv4->normal[2]); 
+        glVertex3f(tempv4->x, tempv4->y, tempv4->z); 
+        
+        glEnd();
+    }
+*/
 
     glutSwapBuffers();
 }
@@ -628,7 +865,7 @@ int main(int argc, char** argv) {
 
     viewport.width = 640;
     viewport.hight = 480;
-
+    init();
     glutInitWindowSize(viewport.width, viewport.hight);
     glutInitWindowPosition(100, 100);
     glutCreateWindow(argv[0]);

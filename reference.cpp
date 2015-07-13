@@ -1064,6 +1064,9 @@ void display(void)
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	glBindTexture (GL_TEXTURE_2D, texNames[0]);
 
+    angle += 0.5;
+    if (angle > 360) {angle -= 360;}
+    glRotatef(angle, 1, 1, 1);
 
 	std::vector<face*>::iterator dispFaceIt;
 	face* tempFace;
