@@ -245,7 +245,7 @@ void makeVertexPoints(vector<Vertex*> &vertVect){
             facePointAvg.y = (facePoint1.y + facePoint2.y + facePoint3.y)/3;
             facePointAvg.z = (facePoint1.z + facePoint2.z + facePoint3.z)/3;
 
-            n = 3;
+            n = 4;
         } else if(edge1 == edge5){
             edgePointAvg.x = (edgePoint1.x + edgePoint2.x + edgePoint3.x + edgePoint4.x)/4;
             edgePointAvg.y = (edgePoint1.y + edgePoint2.y + edgePoint3.y + edgePoint4.y)/4;
@@ -523,6 +523,7 @@ Vector3f getNormal(Halfedge currEdge){
 
 //iterate over every vertex in the mesh and compute its normal
 void computeNormals(vector<Vertex*> &vertVect){
+
     vector<Vertex*>::iterator it;
 
     Halfedge* edge1;
@@ -541,11 +542,15 @@ void computeNormals(vector<Vertex*> &vertVect){
     Vertex * currVert;
 
     for(it = vertVect.begin(); it < vertVect.end(); it++){
+
         currVert = *it;
 
         edge1 = currVert->oneOutEdge;
+
         edge2 = edge1->next->next->next->sibling;
+
         edge3 = edge2->next->next->next->sibling;
+
         edge4 = edge3->next->next->next->sibling;
         edge5 = edge4->next->next->next->sibling;
 
@@ -584,13 +589,12 @@ void ccSubDivision(){
 
     makeEdgePoints(glMesh.EdgeVect, glMesh.VertVect);
 
-    //makeVertexPoints(mesh.VertVect);
+    makeVertexPoints(mesh.VertVect);
 
-    //compileNewMesh(glMesh.FaceVect, mesh.FaceVect, mesh.EdgeVect);
+    compileNewMesh(glMesh.FaceVect, mesh.FaceVect, mesh.EdgeVect);
 
-    //computeNormals(glMesh.VertVect);
+    computeNormals(glMesh.VertVect);
 
-    //delete all old edges and faces
     while(!glMesh.FaceVect.empty()){
         tempFace = glMesh.FaceVect.back();
         glMesh.FaceVect.pop_back();
@@ -716,7 +720,7 @@ void makeCube(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Verte
     //topFace
     makeOneFace(v1, v2, v3, v4, faceVect, edgeVect);
     //bottomFace
-    makeOneFace(v5, v6, v7, v8, faceVect, edgeVect);
+    makeOneFace(v6, v5, v8, v7, faceVect, edgeVect);
     //leftFace
     makeOneFace(v3, v2, v6, v7, faceVect, edgeVect);
     //rightFace
@@ -728,14 +732,13 @@ void makeCube(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Verte
 
     vector<Halfedge*>::iterator edgeIt1;
     vector<Halfedge*>::iterator edgeIt2;
-
     for( edgeIt1 = edgeVect.begin(); edgeIt1 < edgeVect.end(); edgeIt1 ++){
         for(edgeIt2 = edgeIt1 +1; edgeIt2 < edgeVect.end(); edgeIt2++){
             if(((*edgeIt1)->start == (*edgeIt2)->end) &&((*edgeIt1)->end == (*edgeIt2)->start)){
-        
+                
                 (*edgeIt1)->sibling = *edgeIt2;
                 (*edgeIt2)->sibling = *edgeIt1;
-                
+
             }
         }
     }
@@ -744,7 +747,7 @@ void makeCube(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Verte
 //************************************************************
 //          OpenGL Display Functions
 //************************************************************
-void init(void);
+void init(int level);
 
 void render(void);
 
@@ -754,11 +757,13 @@ void keyboard(unsigned char c, int x, int y);
 
 void mouse(int button, int state, int x, int y);
 
-void init(void){
+void init(int level){
     makeCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
-    cout<< glMesh.FaceVect.size()<<" "<<glMesh.EdgeVect.size()<<" "<<glMesh.VertVect.size();
+    //cout<< glMesh.FaceVect.size()<<" "<<glMesh.EdgeVect.size()<<" "<<glMesh.VertVect.size();
     //computeNormals(glMesh.VertVect);
-    //ccSubDivision();
+    for(int i = 0; i < level; i++) {
+        ccSubDivision();
+    }
 }
 
 void render(void) {
@@ -770,8 +775,8 @@ void render(void) {
     Face * tempFace;
     angle += 0.5;
     if (angle > 360) {angle -= 360;}
-    glRotatef(angle, 1, 1, 1);
-/*
+    glRotatef(angle, 0, 0, 1);
+
     for(dispFaceIt = glMesh.FaceVect.begin(); dispFaceIt < glMesh.FaceVect.end(); dispFaceIt++){
         tempFace = *dispFaceIt;
         Vertex *tempv1 = tempFace->v1;
@@ -791,7 +796,7 @@ void render(void) {
         
         glEnd();
     }
-*/
+
 
     glutSwapBuffers();
 }
@@ -865,7 +870,7 @@ int main(int argc, char** argv) {
 
     viewport.width = 640;
     viewport.hight = 480;
-    init();
+    init(2);
     glutInitWindowSize(viewport.width, viewport.hight);
     glutInitWindowPosition(100, 100);
     glutCreateWindow(argv[0]);
