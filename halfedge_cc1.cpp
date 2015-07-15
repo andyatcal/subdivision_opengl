@@ -394,7 +394,7 @@ void makeTriFace(Vertex * va, Vertex* vb, Vertex * vc,
                 vector<Face*> &faceVect, 
                 vector<Halfedge*> &edgeVect){
     Face * nextFace = new Face;
-    Halfedge *e1, *e2, *e3, *e4;
+    Halfedge *e1, *e2, *e3;
 
     e1 = new Halfedge;
     e2 = new Halfedge;
@@ -480,6 +480,41 @@ void makeRectFace(Vertex * va, Vertex* vb, Vertex * vc, Vertex * vd,
     edgeVect.push_back(e4);
 }
 
+void makePolygonFace(vector<Vertex*> vertices, 
+                vector<Face*> &faceVect, 
+                vector<Halfedge*> &edgeVect){
+    Face * nextFace = new Face;
+    vector<Halfedge*> edges;
+    vector<Vertex*>::iterator vIt;
+    Vertex * currVert;
+    Halfedge * currEdge;
+    for(vIt = vertices.begin(); vIt < vertices.end(); vIt++) {
+        currVert = *vIt;
+        Halfedge * tempEdge = new Halfedge;
+        tempEdge -> start = *vIt;
+        if(vIt == vertices.begin()) {
+            tempEdge -> end = *(vertices.end() - 1);
+        } else {
+            tempEdge -> end = *(vIt + 1);
+        }
+        edges.push_back(tempEdge);
+        currVert -> oneOutEdge = tempEdge;
+        nextFace -> addVertex(*vIt);
+    }
+    vector<Halfedge*>::iterator eIt;
+    for(eIt = edges.begin(); eIt < edges.end(); eIt++) {
+        currEdge = *eIt;
+        if(eIt == (edges.end() - 1)) {
+            currEdge -> next = *edges.begin();
+        } else {
+            currEdge -> next = *(eIt + 1);
+        }
+        edgeVect.push_back(*eIt);
+    }
+    nextFace -> oneSideEdge = *(edges.end()-1);
+    faceVect.push_back(nextFace);
+}
+
 void makePyramid(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect){
     vector<Face*>::iterator faceIt;
     vector<Halfedge*>::iterator edgeIt;
@@ -524,8 +559,13 @@ void makePyramid(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Ve
     v4 -> position = Vector3f(-1, -1, -1);
     v5 -> position = Vector3f(-1, 1, -1);
 
+    vector<Vertex *> bottomFace;
+    bottomFace.push_back(v2);
+    bottomFace.push_back(v5);
+    bottomFace.push_back(v4);
+    bottomFace.push_back(v3);
     //bottomFace
-    makeRectFace(v2, v5, v4, v3, faceVect, edgeVect);
+    makePolygonFace(bottomFace, faceVect, edgeVect);
     //topfrontFace
     makeTriFace(v1, v2, v3, faceVect, edgeVect);
     //topbackFace
