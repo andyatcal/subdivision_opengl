@@ -759,14 +759,10 @@ void mouse(int button, int state, int x, int y);
 
 void init(int level){
     makeCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
-    //cout<< glMesh.FaceVect.size()<<" "<<glMesh.EdgeVect.size()<<" "<<glMesh.VertVect.size();
     //computeNormals(glMesh.VertVect);
     for(int i = 0; i < level; i++) {
         ccSubDivision();
     }
-    cout<<"Num of Faces: "<<glMesh.FaceVect.size()<<endl;
-    cout<<"Num of Edges: "<<glMesh.EdgeVect.size()<<endl;
-    cout<<"Num of Vertices: "<<glMesh.VertVect.size()<<endl;
 }
 
 void render(void) {
