@@ -764,6 +764,9 @@ void init(int level){
     for(int i = 0; i < level; i++) {
         ccSubDivision();
     }
+    cout<<"Num of Faces: "<<glMesh.FaceVect.size()<<endl;
+    cout<<"Num of Edges: "<<glMesh.EdgeVect.size()<<endl;
+    cout<<"Num of Vertices: "<<glMesh.VertVect.size()<<endl;
 }
 
 void render(void) {
@@ -870,7 +873,7 @@ int main(int argc, char** argv) {
 
     viewport.width = 640;
     viewport.hight = 480;
-    init(2);
+    init(1);
     glutInitWindowSize(viewport.width, viewport.hight);
     glutInitWindowPosition(100, 100);
     glutCreateWindow(argv[0]);

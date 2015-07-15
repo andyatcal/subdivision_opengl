@@ -155,11 +155,11 @@ void makeFacePoints(vector<Face*> &faceVect, vector<Vertex*> &vertVect){
         vector<Vertex*> vertices = (*it) -> vertices;
         // Facepoint is the average of vertices in this face
         Vertex * newFacePoint = new Vertex;
-        Vector3f newFacePointPosition;
+        Vector3f newFacePointPosition = Vector3f(0, 0, 0);
         vector<Vertex*>::iterator vIt;
         if(!vertices.empty()) {
             for(vIt = vertices.begin(); vIt < vertices.end(); vIt++) {
-                newFacePointPosition += (*vIt) -> position;
+                newFacePointPosition += ((*vIt) -> position);
             }
             newFacePointPosition /= vertices.size();
             newFacePoint -> position = newFacePointPosition;
@@ -206,8 +206,8 @@ void makeVertexPoints(vector<Vertex*> &vertVect){
         Halfedge * firstOutEdge;
         firstOutEdge = currVert -> oneOutEdge;
         Halfedge * nextOutEdge = firstOutEdge;
-        Vector3f newFacePointAvgPosition;
-        Vector3f newEdgePointAvgPoistion;
+        Vector3f newFacePointAvgPosition = Vector3f(0, 0, 0);
+        Vector3f newEdgePointAvgPoistion = Vector3f(0, 0, 0);
         int n = 0;
         do {
             newEdgePointAvgPoistion += nextOutEdge -> edgePoint -> position;
@@ -217,8 +217,10 @@ void makeVertexPoints(vector<Vertex*> &vertVect){
         } while ( nextOutEdge != firstOutEdge); // Need to check if we can go back to the first when there are borders;
         newFacePointAvgPosition /= n;
         newEdgePointAvgPoistion /= n;
+        edgePointAvg.position = newEdgePointAvgPoistion;
+        facePointAvg.position = newFacePointAvgPosition;
         // A special case when n == 3.
-        if(n == 3) { n = 4; }
+        if(n == 3) { n = 4; cout<<"yep, it is 3"<<endl;}
         currVert->position = ((n - 3)*currVert->position +  2*edgePointAvg.position + facePointAvg.position)/n; 
     }
 }
@@ -341,7 +343,7 @@ void computeNormals(vector<Vertex*> &vertVect){
         firstOutEdge = currVert -> oneOutEdge;
         nextOutEdge = firstOutEdge;
         do {
-            avgNorm += getNormal(nextOutEdge -> sibling);
+            avgNorm += getNormal(nextOutEdge);
             n += 1;
             nextOutEdge = nextOutEdge -> sibling -> next;
         } while ( nextOutEdge != firstOutEdge); // Need to check if we can go back to the first when there are borders;
@@ -509,7 +511,7 @@ void makeCube(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Verte
     for( edgeIt1 = edgeVect.begin(); edgeIt1 < edgeVect.end(); edgeIt1 ++){
         for(edgeIt2 = edgeIt1 +1; edgeIt2 < edgeVect.end(); edgeIt2++){
             if(((*edgeIt1)->start == (*edgeIt2)->end) &&((*edgeIt1)->end == (*edgeIt2)->start)){
-                
+                //cout<<"1";
                 (*edgeIt1)->sibling = *edgeIt2;
                 (*edgeIt2)->sibling = *edgeIt1;
 
@@ -538,6 +540,9 @@ void init(int level){
     for(int i = 0; i < level; i++) {
         ccSubDivision();
     }
+    cout<<"Num of Faces: "<<glMesh.FaceVect.size()<<endl;
+    cout<<"Num of Edges: "<<glMesh.EdgeVect.size()<<endl;
+    cout<<"Num of Vertices: "<<glMesh.VertVect.size()<<endl;
 }
 
 void render(void) {
@@ -547,20 +552,26 @@ void render(void) {
 
     vector<Face*>::iterator dispFaceIt;
     Face * tempFace;
-    angle += 0.5;
+    angle += 0.1;
     if (angle > 360) {angle -= 360;}
     glRotatef(angle, 0, 0, 1);
-
     for(dispFaceIt = glMesh.FaceVect.begin(); dispFaceIt < glMesh.FaceVect.end(); dispFaceIt++){
         tempFace = *dispFaceIt;
         Vertex * tempv;
         vector<Vertex*>::iterator vIt;
         vector<Vertex*> vertices = tempFace -> vertices;
         glBegin(GL_POLYGON);
-        for(vIt = vertices.begin(); vIt < vertices.end(); vIt ++) {
+        for(vIt = vertices.begin(); vIt < vertices.end(); vIt++) {
             tempv = *vIt;
-            glNormal3f(tempv -> normal[0], tempv -> normal[1], tempv -> normal[2]);
-            glVertex3f(tempv -> position[0], tempv -> position[2], tempv -> position[2]);
+            float normx = tempv -> position[0];
+            float normy = tempv -> position[1];
+            float normz = tempv -> position[2];
+            glNormal3f(normx, normy, normz);
+            float x = tempv -> position[0];
+            float y = tempv -> position[1];
+            float z = tempv -> position[2];
+            //cout<<"x: "<<x<<" y: "<<y<<" z: "<<z<<endl;
+            glVertex3f(x, y, z);
         }
         glEnd();
     }
@@ -633,17 +644,14 @@ void mouse(int button, int state, int x, int y) {
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-
     viewport.width = 640;
     viewport.hight = 480;
-    init(2);
+    int level = stoi(argv[1]);
+    init(level);
     glutInitWindowSize(viewport.width, viewport.hight);
     glutInitWindowPosition(100, 100);
     glutCreateWindow(argv[0]);
-
-
     glutDisplayFunc(render);
-
     // General UI functions
     glutReshapeFunc(reshape);
     glutIdleFunc(myFrameMove); 
