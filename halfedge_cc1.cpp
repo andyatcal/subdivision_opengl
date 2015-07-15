@@ -390,8 +390,48 @@ void ccSubDivision(){
 //************************************************************
 //          Let's build a Cube!!
 //************************************************************
+void makeTriFace(Vertex * va, Vertex* vb, Vertex * vc, 
+                vector<Face*> &faceVect, 
+                vector<Halfedge*> &edgeVect){
+    Face * nextFace = new Face;
+    Halfedge *e1, *e2, *e3, *e4;
 
-void makeOneFace(Vertex * va, Vertex* vb, Vertex * vc, Vertex * vd, 
+    e1 = new Halfedge;
+    e2 = new Halfedge;
+    e3 = new Halfedge;
+
+    nextFace -> addVertex(va);
+    nextFace -> addVertex(vb);
+    nextFace -> addVertex(vc);
+
+    e1->start = va;
+    e2->start = vb;
+    e3->start = vc;
+    e1->end = vb;
+    e2->end = vc;
+    e3->end = va;
+
+    va->oneOutEdge = e1;
+    vb->oneOutEdge = e2;
+    vc->oneOutEdge = e3;
+
+    e1->next = e2;
+    e2->next = e3;
+    e3->next = e1;
+    
+    e1->heFace = nextFace;
+    e2->heFace = nextFace;
+    e3->heFace = nextFace;
+
+    nextFace->oneSideEdge = e3;
+
+    faceVect.push_back(nextFace);
+    edgeVect.push_back(e1);
+    edgeVect.push_back(e2);
+    edgeVect.push_back(e3);
+}
+
+void makeRectFace(Vertex * va, Vertex* vb, Vertex * vc, Vertex * vd, 
                 vector<Face*> &faceVect, 
                 vector<Halfedge*> &edgeVect){
     Face * nextFace = new Face;
@@ -438,6 +478,75 @@ void makeOneFace(Vertex * va, Vertex* vb, Vertex * vc, Vertex * vd,
     edgeVect.push_back(e2);
     edgeVect.push_back(e3);
     edgeVect.push_back(e4);
+}
+
+void makePyramid(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect){
+    vector<Face*>::iterator faceIt;
+    vector<Halfedge*>::iterator edgeIt;
+    Vertex * tempVert;
+    Halfedge * tempEdge;
+    Face * tempFace;
+
+    //Flush the old mesh
+    while(!faceVect.empty()){
+        tempFace = faceVect.back();
+        faceVect.pop_back();
+        delete tempFace;
+    }
+    while(!edgeVect.empty()){
+        tempEdge = edgeVect.back();
+        edgeVect.pop_back();
+        delete tempEdge;
+    }
+    while(!vertVect.empty()){
+        tempVert = vertVect.back();
+        vertVect.pop_back();
+        delete tempVert;
+    }
+
+    //make new mesh
+    Vertex * v1 = new Vertex;
+    Vertex * v2 = new Vertex;
+    Vertex * v3 = new Vertex;
+    Vertex * v4 = new Vertex;
+    Vertex * v5 = new Vertex;
+
+    //push on all new verts
+    vertVect.push_back(v1);
+    vertVect.push_back(v2);
+    vertVect.push_back(v3);
+    vertVect.push_back(v4);
+    vertVect.push_back(v5);
+ 
+    v1 -> position = Vector3f(0, 0, 1);
+    v2 -> position = Vector3f(1, 1, -1);
+    v3 -> position = Vector3f(1, -1, -1);
+    v4 -> position = Vector3f(-1, -1, -1);
+    v5 -> position = Vector3f(-1, 1, -1);
+
+    //bottomFace
+    makeRectFace(v2, v5, v4, v3, faceVect, edgeVect);
+    //topfrontFace
+    makeTriFace(v1, v2, v3, faceVect, edgeVect);
+    //topbackFace
+    makeTriFace(v1, v3, v4, faceVect, edgeVect);
+    //topleftFace
+    makeTriFace(v1, v4, v5, faceVect, edgeVect);
+    //toprightFace
+    makeTriFace(v1, v5, v2, faceVect, edgeVect);
+
+    vector<Halfedge*>::iterator edgeIt1;
+    vector<Halfedge*>::iterator edgeIt2;
+    for( edgeIt1 = edgeVect.begin(); edgeIt1 < edgeVect.end(); edgeIt1 ++){
+        for(edgeIt2 = edgeIt1 +1; edgeIt2 < edgeVect.end(); edgeIt2++){
+            if(((*edgeIt1)->start == (*edgeIt2)->end) &&((*edgeIt1)->end == (*edgeIt2)->start)){
+                //cout<<"1";
+                (*edgeIt1)->sibling = *edgeIt2;
+                (*edgeIt2)->sibling = *edgeIt1;
+
+            }
+        }
+    }
 }
 
 void makeCube(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect){
@@ -494,17 +603,17 @@ void makeCube(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Verte
     v8 -> position = Vector3f(-1, 1, -1);
 
     //topFace
-    makeOneFace(v1, v2, v3, v4, faceVect, edgeVect);
+    makeRectFace(v1, v2, v3, v4, faceVect, edgeVect);
     //bottomFace
-    makeOneFace(v6, v5, v8, v7, faceVect, edgeVect);
+    makeRectFace(v6, v5, v8, v7, faceVect, edgeVect);
     //leftFace
-    makeOneFace(v3, v2, v6, v7, faceVect, edgeVect);
+    makeRectFace(v3, v2, v6, v7, faceVect, edgeVect);
     //rightFace
-    makeOneFace(v1, v4, v8, v5, faceVect, edgeVect);
+    makeRectFace(v1, v4, v8, v5, faceVect, edgeVect);
     //frontFace
-    makeOneFace(v2, v1, v5, v6, faceVect, edgeVect);
+    makeRectFace(v2, v1, v5, v6, faceVect, edgeVect);
     //baceFace
-    makeOneFace(v4, v3, v7, v8, faceVect, edgeVect);
+    makeRectFace(v4, v3, v7, v8, faceVect, edgeVect);
 
     vector<Halfedge*>::iterator edgeIt1;
     vector<Halfedge*>::iterator edgeIt2;
@@ -534,15 +643,13 @@ void keyboard(unsigned char c, int x, int y);
 void mouse(int button, int state, int x, int y);
 
 void init(int level){
-    makeCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
+    //makeCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
+    makePyramid(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //cout<< glMesh.FaceVect.size()<<" "<<glMesh.EdgeVect.size()<<" "<<glMesh.VertVect.size();
     //computeNormals(glMesh.VertVect);
     for(int i = 0; i < level; i++) {
         ccSubDivision();
     }
-    cout<<"Num of Faces: "<<glMesh.FaceVect.size()<<endl;
-    cout<<"Num of Edges: "<<glMesh.EdgeVect.size()<<endl;
-    cout<<"Num of Vertices: "<<glMesh.VertVect.size()<<endl;
 }
 
 void render(void) {
