@@ -220,7 +220,7 @@ void makeVertexPoints(vector<Vertex*> &vertVect){
         edgePointAvg.position = newEdgePointAvgPoistion;
         facePointAvg.position = newFacePointAvgPosition;
         // A special case when n == 3.
-        if(n == 3) { n = 4; cout<<"yep, it is 3"<<endl;}
+        if(n == 3) { n = 4;}
         currVert->position = ((n - 3)*currVert->position +  2*edgePointAvg.position + facePointAvg.position)/n; 
     }
 }
@@ -492,8 +492,8 @@ void makePolygonFace(vector<Vertex*> vertices,
         currVert = *vIt;
         Halfedge * tempEdge = new Halfedge;
         tempEdge -> start = *vIt;
-        if(vIt == vertices.begin()) {
-            tempEdge -> end = *(vertices.end() - 1);
+        if(vIt == (vertices.end() - 1)) {
+            tempEdge -> end = *(vertices.begin());
         } else {
             tempEdge -> end = *(vIt + 1);
         }
@@ -501,17 +501,19 @@ void makePolygonFace(vector<Vertex*> vertices,
         currVert -> oneOutEdge = tempEdge;
         nextFace -> addVertex(*vIt);
     }
+    
     vector<Halfedge*>::iterator eIt;
     for(eIt = edges.begin(); eIt < edges.end(); eIt++) {
         currEdge = *eIt;
         if(eIt == (edges.end() - 1)) {
-            currEdge -> next = *edges.begin();
+            currEdge -> next = *(edges.begin());
         } else {
             currEdge -> next = *(eIt + 1);
         }
+        currEdge -> heFace = nextFace;
         edgeVect.push_back(*eIt);
     }
-    nextFace -> oneSideEdge = *(edges.end()-1);
+    nextFace -> oneSideEdge = *(edges.begin());
     faceVect.push_back(nextFace);
 }
 
@@ -559,13 +561,15 @@ void makePyramid(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Ve
     v4 -> position = Vector3f(-1, -1, -1);
     v5 -> position = Vector3f(-1, 1, -1);
 
-    vector<Vertex *> bottomFace;
+    vector<Vertex*> bottomFace;
+    bottomFace.push_back(v3);
     bottomFace.push_back(v2);
     bottomFace.push_back(v5);
     bottomFace.push_back(v4);
-    bottomFace.push_back(v3);
     //bottomFace
     makePolygonFace(bottomFace, faceVect, edgeVect);
+    //cout<<faceVect[0];
+    //makeRectFace(v3, v2, v5, v4, faceVect, edgeVect);
     //topfrontFace
     makeTriFace(v1, v2, v3, faceVect, edgeVect);
     //topbackFace
@@ -580,7 +584,7 @@ void makePyramid(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Ve
     for( edgeIt1 = edgeVect.begin(); edgeIt1 < edgeVect.end(); edgeIt1 ++){
         for(edgeIt2 = edgeIt1 +1; edgeIt2 < edgeVect.end(); edgeIt2++){
             if(((*edgeIt1)->start == (*edgeIt2)->end) &&((*edgeIt1)->end == (*edgeIt2)->start)){
-                //cout<<"1";
+
                 (*edgeIt1)->sibling = *edgeIt2;
                 (*edgeIt2)->sibling = *edgeIt1;
 
@@ -687,9 +691,10 @@ void init(int level){
     makePyramid(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //cout<< glMesh.FaceVect.size()<<" "<<glMesh.EdgeVect.size()<<" "<<glMesh.VertVect.size();
     //computeNormals(glMesh.VertVect);
-    for(int i = 0; i < level; i++) {
-        ccSubDivision();
-    }
+ccSubDivision();
+    //for(int i = 0; i < level; i++) {
+    //    ccSubDivision();
+    //}
 }
 
 void render(void) {
