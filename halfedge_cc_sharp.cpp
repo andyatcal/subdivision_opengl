@@ -1,4 +1,5 @@
 // Catmull-Clark Subdivision Project
+// With sharp edge feature.
 // Andy Wang, UC Berkeley July 1st 2015
 
 #include <GLUT/GLUT.h>
@@ -114,6 +115,7 @@ public:
     Vertex * edgePoint;
     Halfedge * firstHalf;
     Halfedge * secondHalf;
+    bool * isSharp;
 };
 
 Halfedge::Halfedge(){
