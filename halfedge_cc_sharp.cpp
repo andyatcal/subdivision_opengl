@@ -115,7 +115,7 @@ public:
     Vertex * edgePoint;
     Halfedge * firstHalf;
     Halfedge * secondHalf;
-    bool * isSharp;
+    bool isSharp;
 };
 
 Halfedge::Halfedge(){
@@ -125,6 +125,7 @@ Halfedge::Halfedge(){
     heFace = NULL;
     edgePoint = NULL;
     firstHalf = secondHalf = NULL;
+    isSharp = false; // On the border
 }
 
 class Mesh{
@@ -345,7 +346,7 @@ void computeNormals(vector<Vertex*> &vertVect){
         firstOutEdge = currVert -> oneOutEdge;
         nextOutEdge = firstOutEdge;
         do {
-            avgNorm += getNormal(nextOutEdge);
+            avgNorm += getNormal(nextOutEdge -> sibling);
             n += 1;
             nextOutEdge = nextOutEdge -> sibling -> next;
         } while ( nextOutEdge != firstOutEdge); // Need to check if we can go back to the first when there are borders;
@@ -691,9 +692,10 @@ void mouse(int button, int state, int x, int y);
 void init(int level){
     //makeCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     makePyramid(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
+    makeCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //cout<< glMesh.FaceVect.size()<<" "<<glMesh.EdgeVect.size()<<" "<<glMesh.VertVect.size();
     //computeNormals(glMesh.VertVect);
-ccSubDivision();
+    ccSubDivision();
     //for(int i = 0; i < level; i++) {
     //    ccSubDivision();
     //}
@@ -800,8 +802,8 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     viewport.width = 640;
     viewport.hight = 480;
-    int level = stoi(argv[1]);
-    init(level);
+    //int level = stoi(argv[1]);
+    //init(level);
     glutInitWindowSize(viewport.width, viewport.hight);
     glutInitWindowPosition(100, 100);
     glutCreateWindow(argv[0]);
