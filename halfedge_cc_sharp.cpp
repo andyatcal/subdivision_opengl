@@ -115,7 +115,11 @@ public:
     Vertex * edgePoint;
     Halfedge * firstHalf;
     Halfedge * secondHalf;
+
+    // Sharp and Boundary features
     bool isSharp;
+    Halfedge * nextBoundary;
+    Halfedge * previousBoundary;
 };
 
 Halfedge::Halfedge(){
@@ -126,6 +130,8 @@ Halfedge::Halfedge(){
     edgePoint = NULL;
     firstHalf = secondHalf = NULL;
     isSharp = false; // On the border
+    nextBoundary = NULL;
+    previousBoundary = NULL;
 }
 
 class Mesh{
@@ -167,7 +173,7 @@ void makeFacePoints(vector<Face*> &faceVect, vector<Vertex*> &vertVect){
             newFacePointPosition /= vertices.size();
             newFacePoint -> position = newFacePointPosition;
         } else {
-            cout << "ERROR: CAN NOT CALCULATE FACEPOINTS WITH LESS THAN 3 VERTICES."<<endl;
+            cout << "ERROR: CAN NOT CALCULATE FACEPOINTS WITH LESS THAN 0 VERTICES."<<endl;
             exit(0);
         }
         (*it) -> facePoint = newFacePoint;
@@ -180,21 +186,31 @@ void makeFacePoints(vector<Face*> &faceVect, vector<Vertex*> &vertVect){
 void makeEdgePoints(vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect){
     vector<Halfedge*>::iterator it;
     for(it = edgeVect.begin(); it < edgeVect.end(); it++){
-        if((*it) -> sibling -> edgePoint != NULL){
-            (*it) -> edgePoint = (*it) -> sibling -> edgePoint;
+        if((*it) -> isSharp) {
+            if((*it) -> sibling != NULL && (*it) -> sibling -> edgePoint != NULL){
+                (*it) -> edgePoint = (*it) -> sibling -> edgePoint;
+            } else {
+                Vertex * newEdgePoint = new Vertex;
+                (*newEdgePoint).position = ((*it) -> end -> position + (*it) -> start -> position) / 2;
+                (*it) -> edgePoint = newEdgePoint;
+                vertVect.push_back(newEdgePoint);
+            }
         } else {
-            Vertex faceVert1 = *((*it) -> heFace -> facePoint);
-            Vertex faceVert2 = *((*it) -> sibling -> heFace -> facePoint);
-            Vertex edgeVert1 = *((*it) -> end);
-            Vertex edgeVert2 = *((*it) -> sibling -> end);
+            if((*it) -> sibling -> edgePoint != NULL){
+                (*it) -> edgePoint = (*it) -> sibling -> edgePoint;
+            } else {
+                Vertex faceVert1 = *((*it) -> heFace -> facePoint);
+                Vertex faceVert2 = *((*it) -> sibling -> heFace -> facePoint);
+                Vertex edgeVert1 = *((*it) -> end);
+                Vertex edgeVert2 = *((*it) -> sibling -> end);
 
-            Vertex * newEdgePoint = new Vertex;
-            (*newEdgePoint).position = (faceVert1.position + faceVert2.position + edgeVert1.position + edgeVert2.position)/4;
-            (*it) -> edgePoint = newEdgePoint;
+                Vertex * newEdgePoint = new Vertex;
+                (*newEdgePoint).position = (faceVert1.position + faceVert2.position + edgeVert1.position + edgeVert2.position) / 4;
+                (*it) -> edgePoint = newEdgePoint;
 
-            vertVect.push_back(newEdgePoint);
+                vertVect.push_back(newEdgePoint);
+            }   
         }
-        
     }
 }
 
@@ -209,6 +225,12 @@ void makeVertexPoints(vector<Vertex*> &vertVect){
         Halfedge * firstOutEdge;
         firstOutEdge = currVert -> oneOutEdge;
         Halfedge * nextOutEdge = firstOutEdge;
+
+        int sharpEdgeCounter = 0;
+
+        Halfedge * sharpEdgeI;
+        Halfedge * sharpEdgeK;
+
         Vector3f newFacePointAvgPosition = Vector3f(0, 0, 0);
         Vector3f newEdgePointAvgPoistion = Vector3f(0, 0, 0);
         int n = 0;
@@ -216,15 +238,40 @@ void makeVertexPoints(vector<Vertex*> &vertVect){
             newEdgePointAvgPoistion += nextOutEdge -> edgePoint -> position;
             newFacePointAvgPosition += nextOutEdge -> heFace -> facePoint -> position;
             n += 1;
-            nextOutEdge = nextOutEdge -> sibling -> next;
+            if(nextOutEdge -> isSharp) {
+                sharpEdgeCounter += 1;
+                if(sharpEdgeCounter == 1) {
+                    sharpEdgeI = nextOutEdge;
+                } else if(sharpEdgeCounter == 2) {
+                    sharpEdgeK = nextOutEdge;
+                }
+                if(nextOutEdge -> sibling == NULL) {
+                    newEdgePointAvgPoistion += nextOutEdge -> previousBoundary -> edgePoint -> position;
+                    sharpEdgeCounter += 1;
+                    if(sharpEdgeCounter == 1) {
+                        sharpEdgeI = nextOutEdge;
+                    } else if(sharpEdgeCounter == 2) {
+                        sharpEdgeK = nextOutEdge;
+                    }
+                    nextOutEdge = nextOutEdge -> previousBoundary -> next;
+                } else {
+                    nextOutEdge = nextOutEdge -> sibling -> next;
+                }
+            } else {
+                nextOutEdge = nextOutEdge -> sibling -> next;
+            }
         } while ( nextOutEdge != firstOutEdge); // Need to check if we can go back to the first when there are borders;
-        newFacePointAvgPosition /= n;
-        newEdgePointAvgPoistion /= n;
-        edgePointAvg.position = newEdgePointAvgPoistion;
-        facePointAvg.position = newFacePointAvgPosition;
-        // A special case when n == 3.
-        if(n == 3) { n = 4;}
-        currVert->position = ((n - 3)*currVert->position +  2*edgePointAvg.position + facePointAvg.position)/n; 
+        if(sharpEdgeCounter <= 1) {
+            newFacePointAvgPosition /= n;
+            newEdgePointAvgPoistion /= n;
+            edgePointAvg.position = newEdgePointAvgPoistion;
+            facePointAvg.position = newFacePointAvgPosition;
+            currVert->position = ((n - 2) * currVert->position +  edgePointAvg.position + facePointAvg.position) / n;
+        } else if(sharpEdgeCounter == 2) {
+            currVert->position = (sharpEdgeI -> edgePoint -> position + sharpEdgeK -> edgePoint -> position + 6 * currVert -> position) / 8;
+        } else {
+            currVert -> position = currVert -> position; // Nothing happens when sharp edges is more than 3.
+        }
     }
 }
 
@@ -241,7 +288,7 @@ void compileNewMesh(vector<Face*> &faceVect, vector<Face*> &newFaceVect, vector<
         Halfedge * edgeB;
         Halfedge * edgeIn;
         Halfedge * edgeOut;     
-        Face * newFace;   
+        Face * newFace;
         // Split the edges and create "in and out" edges.`
         do{
             edgeA = new Halfedge;
@@ -254,7 +301,24 @@ void compileNewMesh(vector<Face*> &faceVect, vector<Face*> &newFaceVect, vector<
             edgeA -> end = currEdge -> edgePoint;
             edgeB -> start = currEdge -> edgePoint;
             edgeB -> end = currEdge -> end;
-            if(currEdge -> sibling -> firstHalf != NULL) {
+            if(currEdge -> isSharp) {
+                edgeA -> isSharp = true;
+                edgeB -> isSharp = true;
+                // For boundary
+                if(currEdge -> sibling == NULL) {
+                    edgeB -> previousBoundary = edgeA;
+                    edgeA -> nextBoundary = edgeB;
+                    if(currEdge -> previousBoundary -> secondHalf != NULL) {
+                        currEdge -> previousBoundary -> secondHalf -> nextBoundary = edgeA;
+                        edgeA -> previousBoundary = currEdge -> previousBoundary -> secondHalf;
+                    }
+                    if(currEdge -> nextBoundary -> firstHalf != NULL) {
+                        currEdge -> nextBoundary -> firstHalf -> previousBoundary = edgeB;
+                        edgeB -> nextBoundary = currEdge -> nextBoundary -> firstHalf;
+                    }
+                }
+            }
+            if(currEdge -> sibling != NULL && currEdge -> sibling -> firstHalf != NULL) {
                 edgeB -> sibling = currEdge -> sibling -> firstHalf;
                 edgeA -> sibling = currEdge -> sibling -> secondHalf;
 
@@ -337,7 +401,7 @@ void computeNormals(vector<Vertex*> &vertVect){
     vector<Vertex*>::iterator it;
     Halfedge * firstOutEdge;
     Halfedge * nextOutEdge;
-    Vector3f avgNorm;
+    Vector3f avgNorm = Vector3f(0, 0, 0);
     Vertex * currVert;
 
     for(it = vertVect.begin(); it < vertVect.end(); it++){
@@ -346,9 +410,16 @@ void computeNormals(vector<Vertex*> &vertVect){
         firstOutEdge = currVert -> oneOutEdge;
         nextOutEdge = firstOutEdge;
         do {
-            avgNorm += getNormal(nextOutEdge -> sibling);
+            if(nextOutEdge -> sibling == NULL) {
+                //cout<<"It has no sibling!"<<endl;
+                avgNorm += getNormal(nextOutEdge -> previousBoundary);
+                nextOutEdge = nextOutEdge -> previousBoundary -> next;
+            } else {
+                //cout<<"It has sibling!"<<endl;
+                avgNorm += getNormal(nextOutEdge -> sibling);
+                nextOutEdge = nextOutEdge -> sibling -> next;
+            }
             n += 1;
-            nextOutEdge = nextOutEdge -> sibling -> next;
         } while ( nextOutEdge != firstOutEdge); // Need to check if we can go back to the first when there are borders;
         avgNorm /= n;
         currVert->normal = avgNorm;
@@ -364,7 +435,6 @@ void ccSubDivision(){
     mesh.VertVect = glMesh.VertVect;
 
     makeFacePoints(glMesh.FaceVect, glMesh.VertVect);
-
     makeEdgePoints(glMesh.EdgeVect, glMesh.VertVect);
 
     makeVertexPoints(mesh.VertVect);
@@ -571,7 +641,6 @@ void makePyramid(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Ve
     bottomFace.push_back(v4);
     //bottomFace
     makePolygonFace(bottomFace, faceVect, edgeVect);
-    //cout<<faceVect[0];
     //makeRectFace(v3, v2, v5, v4, faceVect, edgeVect);
     //topfrontFace
     makeTriFace(v1, v2, v3, faceVect, edgeVect);
@@ -667,7 +736,123 @@ void makeCube(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Verte
     for( edgeIt1 = edgeVect.begin(); edgeIt1 < edgeVect.end(); edgeIt1 ++){
         for(edgeIt2 = edgeIt1 +1; edgeIt2 < edgeVect.end(); edgeIt2++){
             if(((*edgeIt1)->start == (*edgeIt2)->end) &&((*edgeIt1)->end == (*edgeIt2)->start)){
-                //cout<<"1";
+
+                (*edgeIt1)->sibling = *edgeIt2;
+                (*edgeIt2)->sibling = *edgeIt1;
+
+            }
+        }
+    }
+}
+
+void makeOpenCube(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect){
+    vector<Face*>::iterator faceIt;
+    vector<Halfedge*>::iterator edgeIt;
+    Vertex * tempVert;
+    Halfedge * tempEdge;
+    Face * tempFace;
+
+    //Flush the old mesh
+    while(!faceVect.empty()){
+        tempFace = faceVect.back();
+        faceVect.pop_back();
+        delete tempFace;
+    }
+    while(!edgeVect.empty()){
+        tempEdge = edgeVect.back();
+        edgeVect.pop_back();
+        delete tempEdge;
+    }
+    while(!vertVect.empty()){
+        tempVert = vertVect.back();
+        vertVect.pop_back();
+        delete tempVert;
+    }
+
+    //make new mesh
+    Vertex * v1 = new Vertex;
+    Vertex * v2 = new Vertex;
+    Vertex * v3 = new Vertex;
+    Vertex * v4 = new Vertex;
+    Vertex * v5 = new Vertex;
+    Vertex * v6 = new Vertex;
+    Vertex * v7 = new Vertex;
+    Vertex * v8 = new Vertex;
+
+    //push on all new verts
+    vertVect.push_back(v1);
+    vertVect.push_back(v2);
+    vertVect.push_back(v3);
+    vertVect.push_back(v4);
+    vertVect.push_back(v5);
+    vertVect.push_back(v6);
+    vertVect.push_back(v7);
+    vertVect.push_back(v8);
+ 
+    v1 -> position = Vector3f(1, 1, 1);
+    v2 -> position = Vector3f(1, -1, 1);
+    v3 -> position = Vector3f(-1, -1, 1);
+    v4 -> position = Vector3f(-1, 1, 1);
+    v5 -> position = Vector3f(1, 1, -1);
+    v6 -> position = Vector3f(1, -1, -1);
+    v7 -> position = Vector3f(-1, -1, -1);
+    v8 -> position = Vector3f(-1, 1, -1);
+
+    //without the topFace
+    //makeRectFace(v1, v2, v3, v4, faceVect, edgeVect);
+    //bottomFace
+    makeRectFace(v6, v5, v8, v7, faceVect, edgeVect);
+    //leftFace
+    makeRectFace(v3, v2, v6, v7, faceVect, edgeVect);
+    //rightFace
+    makeRectFace(v1, v4, v8, v5, faceVect, edgeVect);
+    //frontFace
+    makeRectFace(v2, v1, v5, v6, faceVect, edgeVect);
+    //baceFace
+    makeRectFace(v4, v3, v7, v8, faceVect, edgeVect);
+
+    //Boundaries
+
+    vector<Halfedge*>::iterator eIt;
+    Halfedge * e21;
+    Halfedge * e14;
+    Halfedge * e43;
+    Halfedge * e32;
+    for( eIt = edgeVect.begin(); eIt < edgeVect.end(); eIt ++){
+        if((*eIt) -> start == v1 && (*eIt) -> end == v4) {
+            e14 = *eIt;
+        }
+        if((*eIt) -> start == v2 && (*eIt) -> end == v1) {
+            e21 = *eIt;
+        }
+        if((*eIt) -> start == v3 && (*eIt) -> end == v2) {
+            e32 = *eIt;
+        }
+        if((*eIt) -> start == v4 && (*eIt) -> end == v3) {
+            e43 = *eIt;
+        }
+    }
+
+    e21 -> isSharp = true;
+    e14 -> isSharp = true;
+    e43 -> isSharp = true;
+    e32 -> isSharp = true;
+
+    e21 -> previousBoundary = e32;
+    e21 -> nextBoundary = e14;
+    e14 -> previousBoundary = e21;
+    e14 -> nextBoundary = e43;
+    e43 -> previousBoundary = e14;
+    e43 -> nextBoundary = e32;
+    e32 -> previousBoundary = e43;
+    e32 -> nextBoundary = e21;
+
+    vector<Halfedge*>::iterator edgeIt1;
+    vector<Halfedge*>::iterator edgeIt2;
+    for( edgeIt1 = edgeVect.begin(); edgeIt1 < edgeVect.end(); edgeIt1 ++){
+        for(edgeIt2 = edgeIt1 +1; edgeIt2 < edgeVect.end(); edgeIt2++){
+            if(((*edgeIt1)->start == (*edgeIt2)->end) &&((*edgeIt1)->end == (*edgeIt2)->start)){
+
                 (*edgeIt1)->sibling = *edgeIt2;
                 (*edgeIt2)->sibling = *edgeIt1;
 
@@ -691,14 +876,15 @@ void mouse(int button, int state, int x, int y);
 
 void init(int level){
     //makeCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
-    makePyramid(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
-    makeCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
+    //makePyramid(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
+    makeOpenCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //cout<< glMesh.FaceVect.size()<<" "<<glMesh.EdgeVect.size()<<" "<<glMesh.VertVect.size();
     //computeNormals(glMesh.VertVect);
-    ccSubDivision();
-    //for(int i = 0; i < level; i++) {
-    //    ccSubDivision();
-    //}
+    //ccSubDivision();
+    for(int i = 0; i < level; i++) {
+        ccSubDivision();
+    }
+    //ccSubDivision();
 }
 
 void render(void) {
@@ -802,8 +988,8 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     viewport.width = 640;
     viewport.hight = 480;
-    //int level = stoi(argv[1]);
-    //init(level);
+    int level = stoi(argv[1]);
+    init(level);
     glutInitWindowSize(viewport.width, viewport.hight);
     glutInitWindowPosition(100, 100);
     glutCreateWindow(argv[0]);

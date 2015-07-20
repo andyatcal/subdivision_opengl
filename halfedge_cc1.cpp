@@ -220,8 +220,8 @@ void makeVertexPoints(vector<Vertex*> &vertVect){
         edgePointAvg.position = newEdgePointAvgPoistion;
         facePointAvg.position = newFacePointAvgPosition;
         // A special case when n == 3.
-        if(n == 3) { n = 4;}
-        currVert->position = ((n - 3)*currVert->position +  2*edgePointAvg.position + facePointAvg.position)/n; 
+        //if(n == 3) { n = 4;}
+        currVert->position = ((n - 2) * currVert->position +  edgePointAvg.position + facePointAvg.position)/n; 
     }
 }
 
@@ -691,10 +691,10 @@ void init(int level){
     makePyramid(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //cout<< glMesh.FaceVect.size()<<" "<<glMesh.EdgeVect.size()<<" "<<glMesh.VertVect.size();
     //computeNormals(glMesh.VertVect);
-ccSubDivision();
-    //for(int i = 0; i < level; i++) {
-    //    ccSubDivision();
-    //}
+//ccSubDivision();
+    for(int i = 0; i < level; i++) {
+        ccSubDivision();
+    }
 }
 
 void render(void) {
