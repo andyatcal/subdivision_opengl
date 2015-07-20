@@ -249,9 +249,9 @@ void makeVertexPoints(vector<Vertex*> &vertVect){
                     newEdgePointAvgPoistion += nextOutEdge -> previousBoundary -> edgePoint -> position;
                     sharpEdgeCounter += 1;
                     if(sharpEdgeCounter == 1) {
-                        sharpEdgeI = nextOutEdge;
+                        sharpEdgeI = nextOutEdge -> previousBoundary;
                     } else if(sharpEdgeCounter == 2) {
-                        sharpEdgeK = nextOutEdge;
+                        sharpEdgeK = nextOutEdge -> previousBoundary;
                     }
                     nextOutEdge = nextOutEdge -> previousBoundary -> next;
                 } else {
@@ -268,7 +268,7 @@ void makeVertexPoints(vector<Vertex*> &vertVect){
             facePointAvg.position = newFacePointAvgPosition;
             currVert->position = ((n - 2) * currVert->position +  edgePointAvg.position + facePointAvg.position) / n;
         } else if(sharpEdgeCounter == 2) {
-            currVert->position = (sharpEdgeI -> edgePoint -> position + sharpEdgeK -> edgePoint -> position + 6 * currVert -> position) / 8;
+            currVert -> position = (sharpEdgeI -> edgePoint -> position + sharpEdgeK -> edgePoint -> position + 6 * currVert -> position) / 8;
         } else {
             currVert -> position = currVert -> position; // Nothing happens when sharp edges is more than 3.
         }
@@ -891,7 +891,6 @@ void render(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
     gluLookAt(5, 0, 0, 0, 0, 0, 0, 0, 1);   //  eye position, aim point, up direction
-
     vector<Face*>::iterator dispFaceIt;
     Face * tempFace;
     angle += 0.1;
