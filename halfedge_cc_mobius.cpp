@@ -1,5 +1,6 @@
 // Catmull-Clark Subdivision Project
 // With sharp edge feature.
+// With Mobius edge feature.
 // Andy Wang, UC Berkeley July 1st 2015
 
 #include <GLUT/GLUT.h>
