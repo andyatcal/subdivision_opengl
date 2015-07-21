@@ -121,6 +121,9 @@ public:
     bool isSharp;
     Halfedge * nextBoundary;
     Halfedge * previousBoundary;
+
+    //Mobius features
+    Halfedge * mobiusSibling;
 };
 
 Halfedge::Halfedge(){
@@ -133,6 +136,7 @@ Halfedge::Halfedge(){
     isSharp = false; // On the border
     nextBoundary = NULL;
     previousBoundary = NULL;
+    mobiusSibling = NULL;
 }
 
 class Mesh{
@@ -190,6 +194,8 @@ void makeEdgePoints(vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect){
         if((*it) -> isSharp) {
             if((*it) -> sibling != NULL && (*it) -> sibling -> edgePoint != NULL){
                 (*it) -> edgePoint = (*it) -> sibling -> edgePoint;
+            } else if((*it) -> mobiusSibling != NULL && (*it) -> mobiusSibling -> edgePoint != NULL){
+                (*it) -> edgePoint = (*it) -> mobiusSibling -> edgePoint;
             } else {
                 Vertex * newEdgePoint = new Vertex;
                 (*newEdgePoint).position = ((*it) -> end -> position + (*it) -> start -> position) / 2;
@@ -197,18 +203,27 @@ void makeEdgePoints(vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect){
                 vertVect.push_back(newEdgePoint);
             }
         } else {
-            if((*it) -> sibling -> edgePoint != NULL){
+            if((*it) -> sibling != NULL && (*it) -> sibling -> edgePoint != NULL){
                 (*it) -> edgePoint = (*it) -> sibling -> edgePoint;
-            } else {
+            } else if((*it) -> sibling != NULL){
                 Vertex faceVert1 = *((*it) -> heFace -> facePoint);
                 Vertex faceVert2 = *((*it) -> sibling -> heFace -> facePoint);
                 Vertex edgeVert1 = *((*it) -> end);
-                Vertex edgeVert2 = *((*it) -> sibling -> end);
-
+                Vertex edgeVert2 = *((*it) -> start);
                 Vertex * newEdgePoint = new Vertex;
                 (*newEdgePoint).position = (faceVert1.position + faceVert2.position + edgeVert1.position + edgeVert2.position) / 4;
                 (*it) -> edgePoint = newEdgePoint;
-
+                vertVect.push_back(newEdgePoint);
+            } else if((*it) -> mobiusSibling != NULL && (*it) -> mobiusSibling -> edgePoint != NULL) {
+                (*it) -> edgePoint = (*it) -> mobiusSibling -> edgePoint;
+            } else {
+                Vertex faceVert1 = *((*it) -> heFace -> facePoint);
+                Vertex faceVert2 = *((*it) -> mobiusSibling -> heFace -> facePoint);
+                Vertex edgeVert1 = *((*it) -> end);
+                Vertex edgeVert2 = *((*it) -> start);
+                Vertex * newEdgePoint = new Vertex;
+                (*newEdgePoint).position = (faceVert1.position + faceVert2.position + edgeVert1.position + edgeVert2.position) / 4;
+                (*it) -> edgePoint = newEdgePoint;
                 vertVect.push_back(newEdgePoint);
             }   
         }
@@ -477,7 +492,7 @@ void ccSubDivision(){
 
 
 //************************************************************
-//          Let's build a Cube!!
+//          Let's build some Shapes!!
 //************************************************************
 void makeTriFace(Vertex * va, Vertex* vb, Vertex * vc, 
                 vector<Face*> &faceVect, 
@@ -1433,6 +1448,293 @@ void makeSharpOctahedron(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, v
         }
     }
 }
+
+void makeNormalStrip(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect){
+    vector<Face*>::iterator faceIt;
+    vector<Halfedge*>::iterator edgeIt;
+    Vertex * tempVert;
+    Halfedge * tempEdge;
+    Face * tempFace;
+
+    //Flush the old mesh
+    while(!faceVect.empty()){
+        tempFace = faceVect.back();
+        faceVect.pop_back();
+        delete tempFace;
+    }
+    while(!edgeVect.empty()){
+        tempEdge = edgeVect.back();
+        edgeVect.pop_back();
+        delete tempEdge;
+    }
+    while(!vertVect.empty()){
+        tempVert = vertVect.back();
+        vertVect.pop_back();
+        delete tempVert;
+    }
+
+    //make new mesh
+    Vertex * v1 = new Vertex;
+    Vertex * v2 = new Vertex;
+    Vertex * v3 = new Vertex;
+    Vertex * v4 = new Vertex;
+    Vertex * v5 = new Vertex;
+    Vertex * v6 = new Vertex;
+    Vertex * v7 = new Vertex;
+    Vertex * v8 = new Vertex;
+
+    //push on all new verts
+    vertVect.push_back(v1);
+    vertVect.push_back(v2);
+    vertVect.push_back(v3);
+    vertVect.push_back(v4);
+    vertVect.push_back(v5);
+    vertVect.push_back(v6);
+    vertVect.push_back(v7);
+    vertVect.push_back(v8);
+ 
+    v1 -> position = Vector3f(1.5, 1.5, 0);
+    v2 -> position = Vector3f(1.5, -1.5, 0);
+    v3 -> position = Vector3f(-1.5, -1.5, 0);
+    v4 -> position = Vector3f(-1.5, 1.5, 0);
+    v5 -> position = Vector3f(0.5, 0.5, 0);
+    v6 -> position = Vector3f(0.5, -0.5, 0);
+    v7 -> position = Vector3f(-0.5, -0.5, 0);
+    v8 -> position = Vector3f(-0.5, 0.5, 0);
+
+    makeRectFace(v1, v5, v6, v2, faceVect, edgeVect);
+    makeRectFace(v3, v2, v6, v7, faceVect, edgeVect);
+    makeRectFace(v4, v3, v7, v8, faceVect, edgeVect);
+    makeRectFace(v1, v4, v8, v5, faceVect, edgeVect);
+
+    //Boundaries
+    vector<Halfedge*>::iterator eIt;
+    Halfedge * e21;
+    Halfedge * e14;
+    Halfedge * e43;
+    Halfedge * e32;
+
+    Halfedge * e56;
+    Halfedge * e67;
+    Halfedge * e78;
+    Halfedge * e85;
+
+    for( eIt = edgeVect.begin(); eIt < edgeVect.end(); eIt ++){
+        if((*eIt) -> start == v1 && (*eIt) -> end == v4) {
+            e14 = *eIt;
+        }
+        if((*eIt) -> start == v2 && (*eIt) -> end == v1) {
+            e21 = *eIt;
+        }
+        if((*eIt) -> start == v3 && (*eIt) -> end == v2) {
+            e32 = *eIt;
+        }
+        if((*eIt) -> start == v4 && (*eIt) -> end == v3) {
+            e43 = *eIt;
+        }
+        if((*eIt) -> start == v5 && (*eIt) -> end == v6) {
+            e56 = *eIt;
+        }
+        if((*eIt) -> start == v6 && (*eIt) -> end == v7) {
+            e67 = *eIt;
+        }
+        if((*eIt) -> start == v7 && (*eIt) -> end == v8) {
+            e78 = *eIt;
+        }
+        if((*eIt) -> start == v8 && (*eIt) -> end == v5) {
+            e85 = *eIt;
+        }
+    }
+
+    e21 -> isSharp = true;
+    e14 -> isSharp = true;
+    e43 -> isSharp = true;
+    e32 -> isSharp = true;
+
+    e56 -> isSharp = true;
+    e67 -> isSharp = true;
+    e78 -> isSharp = true;
+    e85 -> isSharp = true;
+
+    e21 -> previousBoundary = e32;
+    e21 -> nextBoundary = e14;
+    e14 -> previousBoundary = e21;
+    e14 -> nextBoundary = e43;
+    e43 -> previousBoundary = e14;
+    e43 -> nextBoundary = e32;
+    e32 -> previousBoundary = e43;
+    e32 -> nextBoundary = e21;
+
+    e56 -> previousBoundary = e85;
+    e56 -> nextBoundary = e67;
+    e85 -> previousBoundary = e78;
+    e85 -> nextBoundary = e56;
+    e78 -> previousBoundary = e67;
+    e78 -> nextBoundary = e85;
+    e67 -> previousBoundary = e56;
+    e67 -> nextBoundary = e78;
+
+    vector<Halfedge*>::iterator edgeIt1;
+    vector<Halfedge*>::iterator edgeIt2;
+    for( edgeIt1 = edgeVect.begin(); edgeIt1 < edgeVect.end(); edgeIt1 ++){
+        for(edgeIt2 = edgeIt1 +1; edgeIt2 < edgeVect.end(); edgeIt2++){
+            if(((*edgeIt1)->start == (*edgeIt2)->end) &&((*edgeIt1)->end == (*edgeIt2)->start)){
+
+                (*edgeIt1)->sibling = *edgeIt2;
+                (*edgeIt2)->sibling = *edgeIt1;
+
+            }
+        }
+    }
+}
+
+void makeMobius(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect){
+    vector<Face*>::iterator faceIt;
+    vector<Halfedge*>::iterator edgeIt;
+    Vertex * tempVert;
+    Halfedge * tempEdge;
+    Face * tempFace;
+
+    //Flush the old mesh
+    while(!faceVect.empty()){
+        tempFace = faceVect.back();
+        faceVect.pop_back();
+        delete tempFace;
+    }
+    while(!edgeVect.empty()){
+        tempEdge = edgeVect.back();
+        edgeVect.pop_back();
+        delete tempEdge;
+    }
+    while(!vertVect.empty()){
+        tempVert = vertVect.back();
+        vertVect.pop_back();
+        delete tempVert;
+    }
+
+    //make new mesh
+    Vertex * v1 = new Vertex;
+    Vertex * v2 = new Vertex;
+    Vertex * v3 = new Vertex;
+    Vertex * v4 = new Vertex;
+    Vertex * v5 = new Vertex;
+    Vertex * v6 = new Vertex;
+    Vertex * v7 = new Vertex;
+    Vertex * v8 = new Vertex;
+    Vertex * v9 = new Vertex;
+    Vertex * v10 = new Vertex;
+
+    //push on all new verts
+    vertVect.push_back(v1);
+    vertVect.push_back(v2);
+    vertVect.push_back(v3);
+    vertVect.push_back(v4);
+    vertVect.push_back(v5);
+    vertVect.push_back(v6);
+    vertVect.push_back(v7);
+    vertVect.push_back(v8);
+    vertVect.push_back(v9);
+    vertVect.push_back(v10);
+
+    v1 -> position = Vector3f(1.5, 1.5, 0);
+    v2 -> position = Vector3f(1.5, -1.5, 0);
+    v3 -> position = Vector3f(-1.5, -1.5, 0);
+    v4 -> position = Vector3f(-1.5, 1.5, 0);
+    v5 -> position = Vector3f(0.5, 0.5, 0);
+    v6 -> position = Vector3f(0.5, -0.5, 0);
+    v7 -> position = Vector3f(-0.5, -0.5, 0);
+    v8 -> position = Vector3f(-0.5, 0.5, 0);
+    v9 -> position = Vector3f(1, 0, 0.5);
+    v10 -> position = Vector3f(1, 0, -0.5);
+
+    makeRectFace(v1, v5, v10, v9, faceVect, edgeVect);
+    makeRectFace(v10, v9, v6, v2, faceVect, edgeVect);
+    makeRectFace(v3, v2, v6, v7, faceVect, edgeVect);
+    makeRectFace(v4, v3, v7, v8, faceVect, edgeVect);
+    makeRectFace(v1, v4, v8, v5, faceVect, edgeVect);
+
+/*
+    //Boundaries
+    vector<Halfedge*>::iterator eIt;
+    Halfedge * e21;
+    Halfedge * e14;
+    Halfedge * e43;
+    Halfedge * e32;
+
+    Halfedge * e56;
+    Halfedge * e67;
+    Halfedge * e78;
+    Halfedge * e85;
+
+    for( eIt = edgeVect.begin(); eIt < edgeVect.end(); eIt ++){
+        if((*eIt) -> start == v1 && (*eIt) -> end == v4) {
+            e14 = *eIt;
+        }
+        if((*eIt) -> start == v2 && (*eIt) -> end == v1) {
+            e21 = *eIt;
+        }
+        if((*eIt) -> start == v3 && (*eIt) -> end == v2) {
+            e32 = *eIt;
+        }
+        if((*eIt) -> start == v4 && (*eIt) -> end == v3) {
+            e43 = *eIt;
+        }
+        if((*eIt) -> start == v5 && (*eIt) -> end == v6) {
+            e56 = *eIt;
+        }
+        if((*eIt) -> start == v6 && (*eIt) -> end == v7) {
+            e67 = *eIt;
+        }
+        if((*eIt) -> start == v7 && (*eIt) -> end == v8) {
+            e78 = *eIt;
+        }
+        if((*eIt) -> start == v8 && (*eIt) -> end == v5) {
+            e85 = *eIt;
+        }
+    }
+
+    e21 -> isSharp = true;
+    e14 -> isSharp = true;
+    e43 -> isSharp = true;
+    e32 -> isSharp = true;
+
+    e56 -> isSharp = true;
+    e67 -> isSharp = true;
+    e78 -> isSharp = true;
+    e85 -> isSharp = true;
+
+    e21 -> previousBoundary = e32;
+    e21 -> nextBoundary = e14;
+    e14 -> previousBoundary = e21;
+    e14 -> nextBoundary = e43;
+    e43 -> previousBoundary = e14;
+    e43 -> nextBoundary = e32;
+    e32 -> previousBoundary = e43;
+    e32 -> nextBoundary = e21;
+
+    e56 -> previousBoundary = e85;
+    e56 -> nextBoundary = e67;
+    e85 -> previousBoundary = e78;
+    e85 -> nextBoundary = e56;
+    e78 -> previousBoundary = e67;
+    e78 -> nextBoundary = e85;
+    e67 -> previousBoundary = e56;
+    e67 -> nextBoundary = e78;
+
+    vector<Halfedge*>::iterator edgeIt1;
+    vector<Halfedge*>::iterator edgeIt2;
+    for( edgeIt1 = edgeVect.begin(); edgeIt1 < edgeVect.end(); edgeIt1 ++){
+        for(edgeIt2 = edgeIt1 +1; edgeIt2 < edgeVect.end(); edgeIt2++){
+            if(((*edgeIt1)->start == (*edgeIt2)->end) &&((*edgeIt1)->end == (*edgeIt2)->start)){
+
+                (*edgeIt1)->sibling = *edgeIt2;
+                (*edgeIt2)->sibling = *edgeIt1;
+
+            }
+        }
+    }
+    */
+}
 //************************************************************
 //          OpenGL Display Functions
 //************************************************************
@@ -1449,23 +1751,24 @@ void mouse(int button, int state, int x, int y);
 void init(int level){
     //makeCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //makePyramid(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
-    makeSharpOctahedron(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
+    //makeSharpOctahedron(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //makeOpenCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //makeRing(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //makeSharpCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
+    makeMobius(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //cout<< glMesh.FaceVect.size()<<" "<<glMesh.EdgeVect.size()<<" "<<glMesh.VertVect.size();
     //computeNormals(glMesh.VertVect);
     //ccSubDivision();
-    for(int i = 0; i < level; i++) {
-        ccSubDivision();
-    }
+    //for(int i = 0; i < level; i++) {
+    //    ccSubDivision();
+    //}
     //ccSubDivision();
 }
 
 void render(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
-    gluLookAt(5, 0, 0, 0, 0, 0, 0, 0, 1);   //  eye position, aim point, up direction
+    gluLookAt(5, 5, 5, 0, 0, 0, 0, 0, 1);   //  eye position, aim point, up direction
     vector<Face*>::iterator dispFaceIt;
     Face * tempFace;
     angle += 0.1;
