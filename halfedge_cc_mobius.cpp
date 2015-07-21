@@ -261,7 +261,7 @@ void makeVertexPoints(vector<Vertex*> &vertVect){
                 } else if(sharpEdgeCounter == 2) {
                     sharpEdgeK = nextOutEdge;
                 }
-                if(nextOutEdge -> sibling == NULL) {
+                if(nextOutEdge -> sibling == NULL && nextOutEdge -> mobiusSibling == NULL) {
                     newEdgePointAvgPoistion += nextOutEdge -> previousBoundary -> edgePoint -> position;
                     sharpEdgeCounter += 1;
                     if(sharpEdgeCounter == 1) {
@@ -336,7 +336,7 @@ void compileNewMesh(vector<Face*> &faceVect, vector<Face*> &newFaceVect, vector<
                 edgeA -> isSharp = true;
                 edgeB -> isSharp = true;
                 // For boundary
-                if(currEdge -> sibling == NULL) {
+                if(currEdge -> sibling == NULL && currEdge -> mobiusSibling == NULL) {
                     edgeB -> previousBoundary = edgeA;
                     edgeA -> nextBoundary = edgeB;
                     if(currEdge -> previousBoundary -> secondHalf != NULL) {
@@ -366,9 +366,13 @@ void compileNewMesh(vector<Face*> &faceVect, vector<Face*> &newFaceVect, vector<
             currEdge -> edgePoint -> oneOutEdge = edgeIn;
             currFace.facePoint -> oneOutEdge = edgeOut;
             edgeA -> next = edgeIn;
+            edgeIn -> previous = edgeA;
             edgeIn -> next = previousOut;
+            previousOut -> previous = edgeIn;
             previousOut -> next = previousB;
+            previousB -> previous = previousOut;
             previousB -> next = edgeA;
+            edgeA -> previous = previousB;
             newFace = new Face;
             newFace -> addVertex(edgeA -> start);
             newFace -> addVertex(edgeIn -> start);
@@ -394,10 +398,14 @@ void compileNewMesh(vector<Face*> &faceVect, vector<Face*> &newFaceVect, vector<
 
         //Connect the first and last
         edgeA = currFace.oneSideEdge -> firstHalf;
-        edgeIn = edgeA -> next;
+        edgeA -> next = edgeIn;
+        edgeIn -> previous = edgeA;
         edgeIn -> next = previousOut;
+        previousOut -> previous = edgeIn;
         previousOut -> next = previousB;
+        previousB -> previous = previousOut;
         previousB -> next = edgeA;
+        edgeA -> previous = previousB;
         newFace = new Face;
         newFace -> addVertex(edgeA -> start);
         newFace -> addVertex(edgeIn -> start);
@@ -522,6 +530,10 @@ void makeTriFace(Vertex * va, Vertex* vb, Vertex * vc,
     e1->next = e2;
     e2->next = e3;
     e3->next = e1;
+
+    e2->previous = e1;
+    e3->previous = e2;
+    e1->previous = e3;
     
     e1->heFace = nextFace;
     e2->heFace = nextFace;
@@ -569,7 +581,12 @@ void makeRectFace(Vertex * va, Vertex* vb, Vertex * vc, Vertex * vd,
     e2->next = e3;
     e3->next = e4;
     e4->next = e1;
-    
+
+    e2->previous = e1;
+    e3->previous = e2;
+    e4->previous = e3;
+    e1->previous = e4;
+
     e1->heFace = nextFace;
     e2->heFace = nextFace;
     e3->heFace = nextFace;
@@ -611,8 +628,12 @@ void makePolygonFace(vector<Vertex*> vertices,
         currEdge = *eIt;
         if(eIt == (edges.end() - 1)) {
             currEdge -> next = *(edges.begin());
+            Halfedge * temp = *(edges.begin());
+            temp -> previous = currEdge;
         } else {
             currEdge -> next = *(eIt + 1);
+            Halfedge * temp = *(eIt + 1);
+            temp -> previous = currEdge;
         }
         currEdge -> heFace = nextFace;
         edgeVect.push_back(*eIt);
