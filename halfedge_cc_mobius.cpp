@@ -2204,7 +2204,7 @@ void init(int level){
 void render(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
-    gluLookAt(0.5, 0, 0, 0, 0, 0, 0, 0, 1);   //  eye position, aim point, up direction
+    gluLookAt(0.0001, 0.0001, 0.5, 0, 0, 0, 0, 0, 1);   //  eye position, aim point, up direction
     vector<Face*>::iterator dispFaceIt;
     Face * tempFace;
     angle += 0.1;
