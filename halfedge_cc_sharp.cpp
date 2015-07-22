@@ -65,6 +65,9 @@ public:
     Vector3f position;
     Halfedge * oneOutEdge;
     Vector3f normal;
+
+    Vector3f copy; // This is a copy of position, to serve makeVertexPoint function.
+    void makeCopy();
 };
 
 Vertex::Vertex(){
@@ -80,6 +83,10 @@ Vertex::Vertex(float ix, float iy, float iz) {
 Vertex::Vertex(Vector3f iposition) {
     position = iposition;
     oneOutEdge = NULL;
+}
+
+void Vertex::makeCopy() {
+    copy = position;
 }
 
 class Face{
@@ -219,7 +226,10 @@ void makeVertexPoints(vector<Vertex*> &vertVect){
     Vertex facePointAvg;
     Vertex edgePointAvg;
     Vertex * currVert;
-
+    //make a copy of the original mesh vertex points.
+    for(it = vertVect.begin(); it < vertVect.end(); it++){
+        (*it) -> makeCopy();
+    }
     for(it = vertVect.begin(); it < vertVect.end(); it++){
         currVert = *it;
         Halfedge * firstOutEdge;
@@ -281,7 +291,7 @@ void makeVertexPoints(vector<Vertex*> &vertVect){
             } else {
                 pointK = sharpEdgeK -> end;
             }
-            currVert -> position = (pointI -> position + pointK -> position + 6 * currVert -> position) / 8;
+            currVert -> position = (pointI -> copy + pointK -> copy + 6 * currVert -> copy) / 8;
             //cout<<"this is a crease vertex!"<<currVert -> position<<endl;
         } else {
             currVert -> position = currVert -> position; // Nothing happens when sharp edges is more than 3.
@@ -1113,6 +1123,12 @@ void makeSharpCube(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<
     Halfedge * e87;
     Halfedge * e58;
 
+    Halfedge * e15;
+    Halfedge * e51;
+
+    Halfedge * e37;
+    Halfedge * e73;
+
     for( eIt = edgeVect.begin(); eIt < edgeVect.end(); eIt ++){
         if((*eIt) -> start == v1 && (*eIt) -> end == v4) {
             e14 = *eIt;
@@ -1162,27 +1178,46 @@ void makeSharpCube(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<
         if((*eIt) -> start == v5 && (*eIt) -> end == v8) {
             e58 = *eIt;
         }
+        if((*eIt) -> start == v1 && (*eIt) -> end == v5) {
+            e15 = *eIt;
+        }
+        if((*eIt) -> start == v5 && (*eIt) -> end == v1) {
+            e51 = *eIt;
+        }
+        if((*eIt) -> start == v3 && (*eIt) -> end == v7) {
+            e37 = *eIt;
+        }
+        if((*eIt) -> start == v7 && (*eIt) -> end == v3) {
+            e73 = *eIt;
+        }
     }
 
     e21 -> isSharp = true;
-    e14 -> isSharp = true;
-    e43 -> isSharp = true;
+    //e14 -> isSharp = true;
+    e15 -> isSharp = true;
+    e51 -> isSharp = true;
+    //e43 -> isSharp = true;
     e32 -> isSharp = true;
 
-    e56 -> isSharp = true;
-    e67 -> isSharp = true;
+    //e56 -> isSharp = true;
+    //e67 -> isSharp = true;
     e78 -> isSharp = true;
     e85 -> isSharp = true;
 
     e12 -> isSharp = true;
-    e41 -> isSharp = true;
-    e34 -> isSharp = true;
+
+    //e41 -> isSharp = true;
+
+    //e34 -> isSharp = true;
     e23 -> isSharp = true;
 
-    e65 -> isSharp = true;
-    e76 -> isSharp = true;
+    //e65 -> isSharp = true;
+    //e76 -> isSharp = true;
     e87 -> isSharp = true;
     e58 -> isSharp = true;
+
+    e37 -> isSharp =true;
+    e73 -> isSharp = true;
 
     vector<Halfedge*>::iterator edgeIt1;
     vector<Halfedge*>::iterator edgeIt2;
@@ -1448,10 +1483,10 @@ void mouse(int button, int state, int x, int y);
 void init(int level){
     //makeCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //makePyramid(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
-    makeSharpOctahedron(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
+    //makeSharpOctahedron(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //makeOpenCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //makeRing(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
-    //makeSharpCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
+    makeSharpCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //cout<< glMesh.FaceVect.size()<<" "<<glMesh.EdgeVect.size()<<" "<<glMesh.VertVect.size();
     //computeNormals(glMesh.VertVect);
     //ccSubDivision();
@@ -1464,10 +1499,10 @@ void init(int level){
 void render(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
-    gluLookAt(5, 0, 0, 0, 0, 0, 0, 0, 1);   //  eye position, aim point, up direction
+    gluLookAt(0.001, 0.001, 5, 0, 0, 0, 0, 0, 1);   //  eye position, aim point, up direction
     vector<Face*>::iterator dispFaceIt;
     Face * tempFace;
-    angle += 0.1;
+    //angle += 0.1;
     if (angle > 360) {angle -= 360;}
     glRotatef(angle, 0, 0, 1);
     for(dispFaceIt = glMesh.FaceVect.begin(); dispFaceIt < glMesh.FaceVect.end(); dispFaceIt++){

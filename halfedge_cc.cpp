@@ -869,7 +869,8 @@ int main(int argc, char** argv) {
 
     viewport.width = 640;
     viewport.hight = 480;
-    init(1);
+    int level = stoi(argv[1]);
+    init(level);
     glutInitWindowSize(viewport.width, viewport.hight);
     glutInitWindowPosition(100, 100);
     glutCreateWindow(argv[0]);

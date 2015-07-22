@@ -687,8 +687,8 @@ void keyboard(unsigned char c, int x, int y);
 void mouse(int button, int state, int x, int y);
 
 void init(int level){
-    //makeCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
-    makePyramid(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
+    makeCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
+    //makePyramid(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //cout<< glMesh.FaceVect.size()<<" "<<glMesh.EdgeVect.size()<<" "<<glMesh.VertVect.size();
     //computeNormals(glMesh.VertVect);
 //ccSubDivision();
