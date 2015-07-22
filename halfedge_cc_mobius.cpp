@@ -1929,6 +1929,9 @@ void makeMobius(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Ver
     //Mobius sibling
     eX9_1 -> mobiusSibling = eX9_2;
     eX9_2 -> mobiusSibling = eX9_1;
+}
+
+void makeHild(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect){
 
 }
 //************************************************************
@@ -1952,7 +1955,8 @@ void init(int level){
     //makeOpenCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //makeRing(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //makeSharpCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
-    makeMobius(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
+    //makeMobius(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
+    makeHild(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //cout<< glMesh.FaceVect.size()<<" "<<glMesh.EdgeVect.size()<<" "<<glMesh.VertVect.size();
     //computeNormals(glMesh.VertVect);
     //ccSubDivision();
