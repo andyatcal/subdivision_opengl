@@ -1481,12 +1481,12 @@ void keyboard(unsigned char c, int x, int y);
 void mouse(int button, int state, int x, int y);
 
 void init(int level){
-    //makeCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
+    makeCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //makePyramid(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //makeSharpOctahedron(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //makeOpenCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //makeRing(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
-    makeSharpCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
+    //makeSharpCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //cout<< glMesh.FaceVect.size()<<" "<<glMesh.EdgeVect.size()<<" "<<glMesh.VertVect.size();
     //computeNormals(glMesh.VertVect);
     //ccSubDivision();
@@ -1499,10 +1499,10 @@ void init(int level){
 void render(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
-    gluLookAt(0.001, 0.001, 5, 0, 0, 0, 0, 0, 1);   //  eye position, aim point, up direction
+    gluLookAt(5, 0, 0, 0, 0, 0, 0, 0, 1);   //  eye position, aim point, up direction
     vector<Face*>::iterator dispFaceIt;
     Face * tempFace;
-    //angle += 0.1;
+    angle += 0.1;
     if (angle > 360) {angle -= 360;}
     glRotatef(angle, 0, 0, 1);
     for(dispFaceIt = glMesh.FaceVect.begin(); dispFaceIt < glMesh.FaceVect.end(); dispFaceIt++){
