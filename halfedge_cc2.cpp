@@ -2511,6 +2511,10 @@ void mousePressed(int button, int state, int x, int y) {
     }
 }
 
+void mouseMoved(int x, int y){
+    
+}
+
 //************************************************************
 //          Main Function
 //************************************************************
