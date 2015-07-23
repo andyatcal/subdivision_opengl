@@ -859,20 +859,20 @@ void makeWithSIF(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Ve
         makeBoundary(oneBoundary, edgeVect, vertVect, true);
     }
 }
-//************************************************************
-//          OpenGL Display Functions
-//************************************************************
+
+// Initiate the mesh for OpenGL to render.
 void init(int level);
 
-void render(void);
+void init(int level, string inputSIF);
 
-void reshape(int w, int h);
+void init(int level){
+    //makeCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
+    //cout<<glMesh.FaceVect.size()<<" "<< glMesh.VertVect.size()<<endl;
+    for(int i = 0; i < level; i++) {
+        ccSubDivision();
+    }
 
-void keyboard(unsigned char c, int x, int y);
-
-void mouse(int button, int state, int x, int y);
-
-void initRendering();
+}
 
 void init(int level, string inputSIF){
     makeWithSIF(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect, inputSIF);
@@ -882,6 +882,22 @@ void init(int level, string inputSIF){
     }
 
 }
+//************************************************************
+//          OpenGL Display Functions
+//************************************************************
+void initRendering();
+
+void render(void);
+
+void reshape(int w, int h);
+
+void keyboard(unsigned char c, int x, int y);
+
+void keySpecial(int key, int x, int y);
+
+void mousePressed(int button, int state, int x, int y);
+
+void mouseMoved(int x, int y);
 
 void initRendering(){
 
@@ -1029,7 +1045,7 @@ void keySpecial(int key, int x, int y) {
     glutPostRedisplay();
 }
 
-void mouse(int button, int state, int x, int y) {
+void mousePressed(int button, int state, int x, int y) {
     if (button == GLUT_RIGHT_BUTTON) {
         exit(0);
     }
@@ -1053,11 +1069,14 @@ int main(int argc, char** argv) {
     glutCreateWindow(argv[0]);
     initRendering();
     glutDisplayFunc(render);
+
     // General UI functions
     glutReshapeFunc(reshape);
     glutIdleFunc(myFrameMove); 
     glutKeyboardFunc(keyboard);
     glutSpecialFunc(keySpecial);
+    glutMouseFunc(mousePressed);
+    glutMotionFunc(mouseMoved);
 
     glutMainLoop();
 

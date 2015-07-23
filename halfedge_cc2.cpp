@@ -2354,7 +2354,11 @@ void reshape(int w, int h);
 
 void keyboard(unsigned char c, int x, int y);
 
-void mouse(int button, int state, int x, int y);
+void keySpecial(int key, int x, int y);
+
+void mousePressed(int button, int state, int x, int y);
+
+void mouseMoved(int x, int y);
 
 void initRendering(){
 
@@ -2501,7 +2505,7 @@ void keySpecial(int key, int x, int y) {
     glutPostRedisplay();
 }
 
-void mouse(int button, int state, int x, int y) {
+void mousePressed(int button, int state, int x, int y) {
     if (button == GLUT_RIGHT_BUTTON) {
         exit(0);
     }
@@ -2541,6 +2545,8 @@ int main(int argc, char** argv) {
     glutIdleFunc(myFrameMove); 
     glutKeyboardFunc(keyboard);
     glutSpecialFunc(keySpecial);
+    glutMouseFunc(mousePressed);
+    glutMotionFunc(mouseMoved);
 
     glutMainLoop();
 }
