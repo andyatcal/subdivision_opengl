@@ -2194,6 +2194,8 @@ void makeWithSIF(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Ve
         delete tempVert;
     }
 
+    vector<Verex*> vertices;
+    
 
 }
 //************************************************************
