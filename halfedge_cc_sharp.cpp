@@ -416,8 +416,13 @@ Vector3f getNormal(Halfedge * currEdge){
 
     Vector3f oneEdge = v2 -> position - v1 -> position;
     Vector3f secondEdge = v3 -> position - v2 -> position;
+    oneEdge.normalize();
+    secondEdge.normalize();
 
-    return oneEdge.cross(secondEdge);
+    Vector3f result = oneEdge.cross(secondEdge);
+    result.normalize();
+
+    return result;
 }
 
 //iterate over every vertex in the mesh and compute its normal
@@ -1480,10 +1485,12 @@ void keyboard(unsigned char c, int x, int y);
 
 void mouse(int button, int state, int x, int y);
 
+void initRendering();
+
 void init(int level){
-    makeCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
+    //makeCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //makePyramid(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
-    //makeSharpOctahedron(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
+    makeSharpOctahedron(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //makeOpenCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //makeRing(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //makeSharpCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
@@ -1494,6 +1501,42 @@ void init(int level){
         ccSubDivision();
     }
     //ccSubDivision();
+}
+
+void initRendering(){
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+
+    GLfloat light_ambient0[] = { 0.0, 0.0, 0.0, 1.0 };
+    GLfloat light_diffuse0[] = { 1.0, 1.0, 1.0, 1.0 };
+    GLfloat light_specular0[] = { 1.0, 1.0, 1.0, 1.0 };
+    GLfloat light_position0[] = { 1.0, 1.0, 1.0, 0.0 };
+
+    glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient0);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse0);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular0);
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position0);
+
+    glEnable(GL_LIGHT1);
+
+    GLfloat light_ambient1[] = { 0.0, 0.0, 0.0, 1.0 };
+    GLfloat light_diffuse1[] = { 1.0, 1.0, 1.0, 1.0 };
+    GLfloat light_specular1[] = { 1.0, 1.0, 1.0, 1.0 };
+    GLfloat light_position1[] = { -1.0, -1.0, -1.0, 0.0 };
+
+    glLightfv(GL_LIGHT1, GL_AMBIENT, light_ambient1);
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, light_diffuse1);
+    glLightfv(GL_LIGHT1, GL_SPECULAR, light_specular1);
+    glLightfv(GL_LIGHT1, GL_POSITION, light_position1);
+
+    GLfloat white[] = {0.8f, 0.8f, 0.8f, 1.0f};
+    GLfloat cyan[] = {0.f, .8f, .8f, 1.f};
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, cyan);
+    //glMaterialfv(GL_FRONT, GL_SPECULAR, white);
+    GLfloat shininess[] = {50};
+    glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
 }
 
 void render(void) {
@@ -1601,6 +1644,7 @@ int main(int argc, char** argv) {
     glutInitWindowSize(viewport.width, viewport.hight);
     glutInitWindowPosition(100, 100);
     glutCreateWindow(argv[0]);
+    initRendering();
     glutDisplayFunc(render);
     // General UI functions
     glutReshapeFunc(reshape);

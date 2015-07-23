@@ -276,7 +276,6 @@ void makeVertexPoints(vector<Vertex*> &vertVect){
     for(it = vertVect.begin(); it < vertVect.end(); it++){
         currVert = *it;
         //cout<<"vertexID: "<<currVert -> ID<<endl;
-        //cout<<"here"<<endl;
         Halfedge * firstOutEdge;
         firstOutEdge = currVert -> oneOutEdge;
         Halfedge * nextOutEdge = firstOutEdge;
@@ -333,10 +332,10 @@ void makeVertexPoints(vector<Vertex*> &vertVect){
                         if(mobiusCounter % 2 == 0) {
                             nextOutEdge = nextOutEdge -> mobiusBoundary -> next;
                         } else {
-                            bool ak = nextOutEdge -> mobiusBoundary -> previous == NULL;
-                            cout<<ak<<endl;
+                            //bool ak = nextOutEdge -> mobiusBoundary -> previous == NULL;
+                            //cout<<ak<<endl;
                             nextOutEdge = nextOutEdge -> mobiusBoundary -> previous;
-                            cout<<nextOutEdge -> start -> ID<<endl;
+                            //cout<<nextOutEdge -> start -> ID<<endl;
                         }
                     }
                 } else if(nextOutEdge -> sibling != NULL){ // It has a normal sibling
@@ -545,7 +544,13 @@ Vector3f getNormal(Halfedge * currEdge){
     Vector3f oneEdge = v2 -> position - v1 -> position;
     Vector3f secondEdge = v3 -> position - v2 -> position;
 
-    return oneEdge.cross(secondEdge);
+    oneEdge.normalize();
+    secondEdge.normalize();
+
+    Vector3f result = oneEdge.cross(secondEdge);
+    result.normalize();
+
+    return result;
 }
 
 //iterate over every vertex in the mesh and compute its normal
@@ -556,30 +561,24 @@ void computeNormals(vector<Vertex*> &vertVect){
     Halfedge * nextOutEdge;
     Vector3f avgNorm = Vector3f(0, 0, 0);
     Vertex * currVert;
-    cout<<"size: "<<vertVect.size()<<endl;
 
     for(it = vertVect.begin(); it < vertVect.end(); it++){
         currVert = *it;
-        //cout<<currVert -> ID<<endl;
         int n = 0;
         firstOutEdge = currVert -> oneOutEdge;
         nextOutEdge = firstOutEdge;
-        //cout<<"Hmm?"<<endl;
         do {
             if(nextOutEdge -> sibling == NULL && nextOutEdge -> mobiusSibling == NULL) {
-                //cout<<"It has no sibling!"<<endl;
                 avgNorm += getNormal(nextOutEdge -> previousBoundary);
-                nextOutEdge = nextOutEdge -> previousBoundary -> next;
-                  //cout<<"Hmm?A"<<endl;      
+                nextOutEdge = nextOutEdge -> previousBoundary -> next;   
             } else {
-                //cout<<"It has sibling!"<<endl;
                 avgNorm += getNormal(nextOutEdge -> sibling);
                 nextOutEdge = nextOutEdge -> sibling -> next;
-                        //cout<<"Hmm?B"<<endl;
             }
             n += 1;
-        } while ( nextOutEdge != firstOutEdge); // Need to check if we can go back to the first when there are borders;
+        } while ( nextOutEdge != firstOutEdge);
         avgNorm /= n;
+        avgNorm.normalize();
         currVert->normal = avgNorm;
     }
 }
@@ -601,7 +600,7 @@ void ccSubDivision(){
     compileNewMesh(glMesh.FaceVect, mesh.FaceVect, mesh.EdgeVect);
 /*
     computeNormals(glMesh.VertVect);
-    */
+*/
     while(!glMesh.FaceVect.empty()){
         tempFace = glMesh.FaceVect.back();
         glMesh.FaceVect.pop_back();
@@ -1964,28 +1963,28 @@ void makeHild(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Verte
     }
 
     //add positions to vertices
-    vertices[0] -> position = Vector3f(0.063553, 0.081293, -0.015891);
-    vertices[1] -> position = Vector3f(-0.042251, 0.086460, 0.040491);
-    vertices[2] -> position = Vector3f(0.008171, 0.014334, -0.007264);
-    vertices[3] -> position = Vector3f(-0.078509, -0.066737, -0.013510);
-    vertices[4] -> position = Vector3f(-0.070442, 0.076199, -0.011471);
-    vertices[5] -> position = Vector3f(0.035362, 0.071032, -0.067852);
-    vertices[6] -> position = Vector3f(0.067504, 0.014533, -0.108775);
-    vertices[7] -> position = Vector3f(0.023617, -0.091369, -0.064053);
-    vertices[8] -> position = Vector3f(-0.020207, -0.089228, -0.040699);
-    vertices[9] -> position = Vector3f(-0.034683, -0.081704, 0.006254);
-    vertices[10] -> position = Vector3f(-0.022128, -0.046216, 0.090413);
-    vertices[11] -> position = Vector3f(-0.011330, -0.073205, 0.049299);
-    vertices[12] -> position = Vector3f(0.036174, -0.068707, 0.063224);
-    vertices[13] -> position = Vector3f(0.079998, -0.070847, 0.039870);
-    vertices[14] -> position = Vector3f(0.094474, -0.078372, -0.007083);
-    vertices[15] -> position = Vector3f(0.071121, -0.086871, -0.050128);
-    vertices[16] -> position = Vector3f(0.123886, 0.035054, -0.004852);
-    vertices[17] -> position = Vector3f(0.025805, 0.013473, -0.016661);
-    vertices[18] -> position = Vector3f(0.021769, 0.005164, -0.012830);
-    vertices[19] -> position = Vector3f(0.012952, 0.005595, -0.008132);
-    vertices[20] -> position = Vector3f(0.021024, 0.022213, -0.015792);
-    vertices[21] -> position = Vector3f(0.012207, 0.022643, -0.011094);
+    vertices[0] -> position = Vector3f(0.63553, 0.81293, -0.15891);
+    vertices[1] -> position = Vector3f(-0.42251, 0.86460, 0.40491);
+    vertices[2] -> position = Vector3f(0.08171, 0.14334, -0.07264);
+    vertices[3] -> position = Vector3f(-0.78509, -0.66737, -0.13510);
+    vertices[4] -> position = Vector3f(-0.70442, 0.76199, -0.11471);
+    vertices[5] -> position = Vector3f(0.35362, 0.71032, -0.67852);
+    vertices[6] -> position = Vector3f(0.67504, 0.14533, -1.08775);
+    vertices[7] -> position = Vector3f(0.23617, -0.91369, -0.64053);
+    vertices[8] -> position = Vector3f(-0.20207, -0.89228, -0.40699);
+    vertices[9] -> position = Vector3f(-0.34683, -0.81704, 0.06254);
+    vertices[10] -> position = Vector3f(-0.22128, -0.46216, 0.90413);
+    vertices[11] -> position = Vector3f(-0.11330, -0.73205, 0.49299);
+    vertices[12] -> position = Vector3f(0.36174, -0.68707, 0.63224);
+    vertices[13] -> position = Vector3f(0.79998, -0.70847, 0.39870);
+    vertices[14] -> position = Vector3f(0.94474, -0.78372, -0.07083);
+    vertices[15] -> position = Vector3f(0.71121, -0.86871, -0.50128);
+    vertices[16] -> position = Vector3f(1.23886, 0.35054, -0.04852);
+    vertices[17] -> position = Vector3f(0.25805, 0.13473, -0.16661);
+    vertices[18] -> position = Vector3f(0.21769, 0.05164, -0.12830);
+    vertices[19] -> position = Vector3f(0.12952, 0.05595, -0.08132);
+    vertices[20] -> position = Vector3f(0.21024, 0.22213, -0.15792);
+    vertices[21] -> position = Vector3f(0.12207, 0.22643, -0.11094);
 
     //make faces
     makeTriFace(vertices[0], vertices[20], vertices[17], faceVect, edgeVect);
@@ -2170,6 +2169,33 @@ void makeHild(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Verte
     e14_15 -> previousBoundary = e13_14;
     e14_15 -> nextBoundary = e15_7;
 }
+
+void makeWithSIF(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect, string SIFDoc){
+    vector<Face*>::iterator faceIt;
+    vector<Halfedge*>::iterator edgeIt;
+    Vertex * tempVert;
+    Halfedge * tempEdge;
+    Face * tempFace;
+
+    //Flush the old mesh
+    while(!faceVect.empty()){
+        tempFace = faceVect.back();
+        faceVect.pop_back();
+        delete tempFace;
+    }
+    while(!edgeVect.empty()){
+        tempEdge = edgeVect.back();
+        edgeVect.pop_back();
+        delete tempEdge;
+    }
+    while(!vertVect.empty()){
+        tempVert = vertVect.back();
+        vertVect.pop_back();
+        delete tempVert;
+    }
+
+
+}
 //************************************************************
 //          OpenGL Display Functions
 //************************************************************
@@ -2182,6 +2208,8 @@ void reshape(int w, int h);
 void keyboard(unsigned char c, int x, int y);
 
 void mouse(int button, int state, int x, int y);
+
+void initRendering();
 
 void init(int level){
     //makeCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
@@ -2201,10 +2229,70 @@ void init(int level){
     }
 }
 
+void initRendering(){
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+
+    GLfloat light_ambient0[] = { 0.0, 0.0, 0.0, 10.0 };
+    GLfloat light_diffuse0[] = { 1.0, 1.0, 1.0, 10.0 };
+    GLfloat light_specular0[] = { 1.0, 1.0, 1.0, 10.0 };
+    GLfloat light_position0[] = { 0, 0, 1, 0.0 };
+
+    glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient0);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse0);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular0);
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position0);
+
+    glEnable(GL_LIGHT1);
+
+    GLfloat light_ambient1[] = { 0.0, 0.0, 0.0, 1.0 };
+    GLfloat light_diffuse1[] = { 1.0, 1.0, 1.0, 1.0 };
+    GLfloat light_specular1[] = { 1.0, 1.0, 1.0, 1.0 };
+    GLfloat light_position1[] = { 0, 1, -0.5, 0.0 };
+
+    glLightfv(GL_LIGHT1, GL_AMBIENT, light_ambient1);
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, light_diffuse1);
+    glLightfv(GL_LIGHT1, GL_SPECULAR, light_specular1);
+    glLightfv(GL_LIGHT1, GL_POSITION, light_position1);
+
+    glEnable(GL_LIGHT2);
+
+    GLfloat light_ambient2[] = { 0.0, 0.0, 0.0, 1.0 };
+    GLfloat light_diffuse2[] = { 1.0, 1.0, 1.0, 1.0 };
+    GLfloat light_specular2[] = { 1.0, 1.0, 1.0, 1.0 };
+    GLfloat light_position2[] = { 0.877, -0.5, -0.5, 0.0 };
+
+    glLightfv(GL_LIGHT2, GL_AMBIENT, light_ambient2);
+    glLightfv(GL_LIGHT2, GL_DIFFUSE, light_diffuse2);
+    glLightfv(GL_LIGHT2, GL_SPECULAR, light_specular2);
+    glLightfv(GL_LIGHT2, GL_POSITION, light_position2);
+
+    glEnable(GL_LIGHT3);
+
+    GLfloat light_ambient3[] = { 0.0, 0.0, 0.0, 1.0 };
+    GLfloat light_diffuse3[] = { 1.0, 1.0, 1.0, 1.0 };
+    GLfloat light_specular3[] = { 1.0, 1.0, 1.0, 1.0 };
+    GLfloat light_position3[] = { -0.877, -0.5, -0.5, 0.0 };
+
+    glLightfv(GL_LIGHT3, GL_AMBIENT, light_ambient3);
+    glLightfv(GL_LIGHT3, GL_DIFFUSE, light_diffuse3);
+    glLightfv(GL_LIGHT3, GL_SPECULAR, light_specular3);
+    glLightfv(GL_LIGHT3, GL_POSITION, light_position3);
+
+    GLfloat white[] = {0.8f, 0.8f, 0.8f, 1.0f};
+    GLfloat yello[] = {.8f, .8f, 0.f, 1.f};
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, yello);
+    //glMaterialfv(GL_FRONT, GL_SPECULAR, white);
+    GLfloat shininess[] = {50};
+    glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
+}
+
 void render(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
-    gluLookAt(0.0001, 0.0001, 0.5, 0, 0, 0, 0, 0, 1);   //  eye position, aim point, up direction
+    gluLookAt(2, 2, 2, 0, 0, 0, 0, 0, 1);   //  eye position, aim point, up direction
     vector<Face*>::iterator dispFaceIt;
     Face * tempFace;
     angle += 0.1;
@@ -2299,13 +2387,14 @@ void mouse(int button, int state, int x, int y) {
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-    viewport.width = 640;
-    viewport.hight = 480;
+    viewport.width = 1280;
+    viewport.hight = 720;
     int level = stoi(argv[1]);
     init(level);
     glutInitWindowSize(viewport.width, viewport.hight);
     glutInitWindowPosition(100, 100);
     glutCreateWindow(argv[0]);
+    initRendering();
     glutDisplayFunc(render);
     // General UI functions
     glutReshapeFunc(reshape);

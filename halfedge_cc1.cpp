@@ -324,8 +324,13 @@ Vector3f getNormal(Halfedge * currEdge){
 
     Vector3f oneEdge = v2 -> position - v1 -> position;
     Vector3f secondEdge = v3 -> position - v2 -> position;
+    oneEdge.normalize();
+    secondEdge.normalize();
 
-    return oneEdge.cross(secondEdge);
+    Vector3f result = oneEdge.cross(secondEdge);
+    result.normalize();
+
+    return result;
 }
 
 //iterate over every vertex in the mesh and compute its normal
@@ -388,7 +393,7 @@ void ccSubDivision(){
 
 
 //************************************************************
-//          Let's build a Cube!!
+//          Let's Make Some Geometries!!
 //************************************************************
 void makeTriFace(Vertex * va, Vertex* vb, Vertex * vc, 
                 vector<Face*> &faceVect, 
@@ -686,7 +691,21 @@ void keyboard(unsigned char c, int x, int y);
 
 void mouse(int button, int state, int x, int y);
 
+void initRendering();
+
 void init(int level){
+
+    makeCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
+    //computeNormals(glMesh.VertVect);
+    //makePyramid(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
+    //cout<< glMesh.FaceVect.size()<<" "<<glMesh.EdgeVect.size()<<" "<<glMesh.VertVect.size();
+    //computeNormals(glMesh.VertVect);
+
+    for(int i = 0; i < level; i++) {
+        ccSubDivision();
+    }
+}
+void initRendering(){
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LIGHTING);
@@ -695,21 +714,19 @@ void init(int level){
     GLfloat light_ambient[] = { 0.0, 0.0, 0.0, 1.0 };
     GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
     GLfloat light_specular[] = { 1.0, 1.0, 1.0, 1.0 };
-    GLfloat light_position[] = { 1.0, 1.0, 1.0, 0.0 };
- 
+    GLfloat light_position[] = { 10.0, 10.0, 10.0, 0.0 };
+
     glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
     glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
-    makeCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
-    //makePyramid(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
-    //cout<< glMesh.FaceVect.size()<<" "<<glMesh.EdgeVect.size()<<" "<<glMesh.VertVect.size();
-    //computeNormals(glMesh.VertVect);
-//ccSubDivision();
-    for(int i = 0; i < level; i++) {
-        ccSubDivision();
-    }
+    GLfloat white[] = {0.8f, 0.8f, 0.8f, 1.0f};
+    GLfloat cyan[] = {0.f, .8f, .8f, 1.f};
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, cyan);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, white);
+    GLfloat shininess[] = {50};
+    glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
 }
 
 void render(void) {
@@ -818,6 +835,7 @@ int main(int argc, char** argv) {
     glutInitWindowSize(viewport.width, viewport.hight);
     glutInitWindowPosition(100, 100);
     glutCreateWindow(argv[0]);
+    initRendering();
     glutDisplayFunc(render);
     // General UI functions
     glutReshapeFunc(reshape);
