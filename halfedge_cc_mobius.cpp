@@ -2194,9 +2194,6 @@ void makeWithSIF(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Ve
         delete tempVert;
     }
 
-    vector<Verex*> vertices;
-    
-
 }
 //************************************************************
 //          OpenGL Display Functions
@@ -2389,8 +2386,8 @@ void mouse(int button, int state, int x, int y) {
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-    viewport.width = 1280;
-    viewport.hight = 720;
+    viewport.width = 640;
+    viewport.hight = 480;
     int level = stoi(argv[1]);
     init(level);
     glutInitWindowSize(viewport.width, viewport.hight);
