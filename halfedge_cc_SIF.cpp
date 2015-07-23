@@ -748,7 +748,7 @@ void makeBoundary(vector<Vertex*> &oneBoundary, vector<Halfedge*> &edgeVect, vec
             (*eIt) -> nextBoundary = *(eIt + 1);
         }
     }
-    cout<<boundaryEdges.size()<<endl;
+    //cout<<boundaryEdges.size()<<endl;
 }
 void makeWithSIF(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect, string inputSIF){
     vector<Face*>::iterator faceIt;
@@ -797,7 +797,7 @@ void makeWithSIF(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Ve
             temp = temp.substr(temp.find(" ") + 1);
             float z = stof(temp);
             Vertex * newVert = new Vertex;
-            newVert -> position = Vector3f(x, y, z)*5 - Vector3f(0, 0, 4); // Can be modifed here to zoom in.
+            newVert -> position = Vector3f(x, y, z)*20; // Can be modifed here to zoom in.
             newVert -> ID = vCounter;
             //cout<<newVert -> ID<<"Vertex added"<<endl;
             vertVect.push_back(newVert);
@@ -876,7 +876,7 @@ void initRendering();
 
 void init(int level, string inputSIF){
     makeWithSIF(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect, inputSIF);
-    cout<<glMesh.FaceVect.size()<<" "<< glMesh.VertVect.size()<<endl;
+    //cout<<glMesh.FaceVect.size()<<" "<< glMesh.VertVect.size()<<endl;
     for(int i = 0; i < level; i++) {
         ccSubDivision();
     }
