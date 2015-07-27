@@ -12,6 +12,8 @@
 #include <regex>
 #include <string>
 
+#//include <glm/glm.hpp>
+
 #define PI 3.1415926535897932384626433832795028841971693993751058209
 
 using namespace std;
@@ -2298,6 +2300,12 @@ void makeWithSIF(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Ve
                 (*edgeIt2)->sibling = *edgeIt1;
 
             }
+        }
+    }
+    vector<Halfedge*>::iterator eIt;
+    for( eIt = edgeVect.begin(); eIt < edgeVect.end(); eIt ++) {
+        if((*eIt) -> sibling == NULL) {
+            cout<<"I don't have a sibling! Start from vertex "<<(*eIt) -> start -> ID<<" and I end at vertex "<<(*eIt) -> end -> ID<<endl;
         }
     }
     //Boundaries
