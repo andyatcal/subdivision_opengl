@@ -2286,16 +2286,17 @@ void makeWithSIF(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Ve
             newVert -> ID = vCounter;
             for (vIt = vertVect.begin(); vIt < vertVect.end(); vIt ++) {
                 if((newVert -> position - (*vIt) -> position).norm() < VERYSMALLVALUE ){
-                    cout << "The distance between vertex "<<newVert -> ID<<" and vertex "<<(*vIt) -> ID<<" is: "<<endl;
+                    //cout << "The distance between vertex "<<newVert -> ID<<" and vertex "<<(*vIt) -> ID<<" is: "<<endl;
                     //cout << newVert -> position - (*vIt) -> position<<endl;
                     mergeVertex[newVert -> ID] = (*vIt) -> ID;
                 }
-
+/*
                 if(newVert -> position == (*vIt) -> position){
                     cout<<"I am a duplicate vertex, my ID is "<< newVert -> ID<<endl;
                     cout<<"I am duplicating vertex, ID: "<< (*vIt) -> ID<<endl;
                     mergeVertex[newVert -> ID] = (*vIt) -> ID;
                 }
+*/
             }
             //cout<<newVert -> ID<<"Vertex added"<<endl;
             vertVect.push_back(newVert);
@@ -2390,9 +2391,9 @@ void makeWithSIF(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Ve
                 (*edgeIt2)->sibling = *edgeIt1;
 
             } else if (((*edgeIt1) -> start -> position == (*edgeIt2) -> start -> position) &&((*edgeIt1) -> end -> position == (*edgeIt2) -> end -> position)) {
-                cout<<"Hey, here is a mobius pair!"<<endl;
-                cout<<"One starts from vertex "<<(*edgeIt1) -> start -> ID<<" and it ends at vertex "<<(*edgeIt1) -> end -> ID<<endl;
-                cout<<"Another starts from vertex "<<(*edgeIt2) -> start -> ID<<" and it ends at vertex "<<(*edgeIt2) -> end -> ID<<endl;
+                //cout<<"Hey, here is a mobius pair!"<<endl;
+                //cout<<"One starts from vertex "<<(*edgeIt1) -> start -> ID<<" and it ends at vertex "<<(*edgeIt1) -> end -> ID<<endl;
+                //cout<<"Another starts from vertex "<<(*edgeIt2) -> start -> ID<<" and it ends at vertex "<<(*edgeIt2) -> end -> ID<<endl;
 
                 (*edgeIt1)->mobiusSibling = *edgeIt2;
                 (*edgeIt2)->mobiusSibling = *edgeIt1;
