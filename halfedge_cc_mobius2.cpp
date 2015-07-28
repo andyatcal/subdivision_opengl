@@ -11,6 +11,7 @@
 #include <fstream>
 #include <regex>
 #include <string>
+#include <map>
 
 #//include <glm/glm.hpp>
 
@@ -766,7 +767,7 @@ void makePolygonFace(vector<Vertex*> vertices,
     faceVect.push_back(nextFace);
 }
 
-void makeBoundary(vector<Vertex*> &oneBoundary, vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect, bool isLoop){
+void makeBoundary(vector<Vertex*> &oneBoundary, vector<Halfedge*> &edgeVect){
     vector<Vertex*>::iterator bondIt;
     vector<Halfedge*> boundaryEdges;
     vector<Halfedge*>::iterator eIt;
@@ -779,17 +780,54 @@ void makeBoundary(vector<Vertex*> &oneBoundary, vector<Halfedge*> &edgeVect, vec
             }
         }
     }
+    vector<Halfedge*>::iterator edgeIt1;
+    vector<Halfedge*>::iterator edgeIt2;
+    for( edgeIt1 = boundaryEdges.begin(); edgeIt1 < boundaryEdges.end(); edgeIt1 ++){
+        for(edgeIt2 = edgeIt1 +1; edgeIt2 < boundaryEdges.end(); edgeIt2++){
+            if(((*edgeIt1)->start == (*edgeIt2)->start) &&((*edgeIt1)->end != (*edgeIt2)->end)){
+
+                (*edgeIt1)->mobiusBoundary = *edgeIt2;
+                (*edgeIt2)->mobiusBoundary = *edgeIt1;
+
+            } else if (((*edgeIt1)->end == (*edgeIt2)->end) &&((*edgeIt1)->start != (*edgeIt2)->start)){
+
+                (*edgeIt1)->mobiusBoundary = *edgeIt2;
+                (*edgeIt2)->mobiusBoundary = *edgeIt1;
+
+            }
+        }
+    }
     for(eIt = boundaryEdges.begin(); eIt < boundaryEdges.end(); eIt ++) {
-        (*eIt) -> isSharp = true;
-        if(eIt == boundaryEdges.begin()){
-            (*eIt) -> previousBoundary = *(boundaryEdges.end() - 1);
-            (*eIt) -> nextBoundary = *(eIt + 1);
-        } else if(eIt == boundaryEdges.end() - 1){
-            (*eIt) -> previousBoundary = *(eIt - 1);
-            (*eIt) -> nextBoundary = *(boundaryEdges.begin());
-        } else {
-            (*eIt) -> previousBoundary = *(eIt - 1);
-            (*eIt) -> nextBoundary = *(eIt + 1);
+        if((*eIt) -> mobiusSibling == NULL) {
+            (*eIt) -> isSharp = true;
+            if(eIt == boundaryEdges.begin()){
+                if((*eIt) -> mobiusBoundary == NULL) {
+                    (*eIt) -> previousBoundary = *(boundaryEdges.end() - 1);
+                    (*eIt) -> nextBoundary = *(eIt + 1);
+                } else if ((*eIt) -> start == (*eIt) -> mobiusBoundary -> start){
+                    (*eIt) -> nextBoundary = *(eIt + 1);
+                } else {
+                    (*eIt) -> previousBoundary = *(boundaryEdges.end() - 1);   
+                }
+            } else if(eIt == boundaryEdges.end() - 1){
+                if((*eIt) -> mobiusBoundary == NULL) {
+                    (*eIt) -> previousBoundary = *(eIt - 1);
+                    (*eIt) -> nextBoundary = *(boundaryEdges.begin());
+                } else if ((*eIt) -> start == (*eIt) -> mobiusBoundary -> start){
+                    (*eIt) -> nextBoundary = *(boundaryEdges.begin());
+                } else {
+                    (*eIt) -> previousBoundary = *(eIt - 1);   
+                }
+            } else {
+                if((*eIt) -> mobiusBoundary == NULL) {
+                    (*eIt) -> previousBoundary = *(eIt - 1);
+                    (*eIt) -> nextBoundary = *(eIt + 1);
+                } else if ((*eIt) -> start == (*eIt) -> mobiusBoundary -> start){
+                    (*eIt) -> nextBoundary = *(eIt + 1);
+                } else {
+                    (*eIt) -> previousBoundary = *(eIt - 1);   
+                }
+            }
         }
     }
     //cout<<boundaryEdges.size()<<endl;
@@ -1958,7 +1996,6 @@ void makeMobius(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Ver
             }
         }
     }
-
     //Mobius sibling
     eX9_1 -> mobiusSibling = eX9_2;
     eX9_2 -> mobiusSibling = eX9_1;
@@ -2237,11 +2274,19 @@ void makeWithSIF(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Ve
     regex vRegex(".*\(v .*$\).*");
     regex tRegex(".*\(t .*\).*");
     regex lRegex(".*\(loop .*\).*");
+    regex shRegex(".*\\(shell.*\).*");
+    regex verticesRegex(".*\\(vertices .*\).*");
     int vCounter = 0;
+    int IDplusBecauseOfShells = 0;
     vector<vector<int> > boundaries;
+    map<int, int> mergeVertex;
+    int shellNum = 0;
+    vector<int> numberOfVerticesInShells;
     while(getline(file, nextLine)){
         nextLine.pop_back();
+        cout<<nextLine;
         if(regex_match(nextLine, vRegex)){
+            cout<<"   VMATCH"<<endl;
             string temp;
             temp = nextLine.substr(nextLine.find("\("), nextLine.find("\)") - nextLine.find("\("));
             temp = temp.substr(temp.find(" ") + 1);
@@ -2251,12 +2296,20 @@ void makeWithSIF(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Ve
             temp = temp.substr(temp.find(" ") + 1);
             float z = stof(temp);
             Vertex * newVert = new Vertex;
-            newVert -> position = Vector3f(x, y, z)*10; // Can be modifed here to zoom in.
+            newVert -> position = Vector3f(x, y, z) * 20; // Can be modifed here to zoom in.
+            vector<Vertex*>::iterator vIt;
             newVert -> ID = vCounter;
+            for (vIt = vertVect.begin(); vIt < vertVect.end(); vIt ++) {
+                if(newVert -> position == (*vIt) -> position){
+                    //cout<<"I am a duplicate vertex, my ID is "<< newVert -> ID<<endl;
+                    mergeVertex[newVert -> ID] = (*vIt) -> ID;
+                }
+            }
             //cout<<newVert -> ID<<"Vertex added"<<endl;
             vertVect.push_back(newVert);
             vCounter += 1;
         } else if(regex_match(nextLine, tRegex)){
+            cout<<"   TMATCH"<<endl;
             string temp;
             temp = nextLine.substr(nextLine.find("\("), nextLine.find("\)") - nextLine.find("\("));
             //cout<<temp<<endl;
@@ -2266,12 +2319,36 @@ void makeWithSIF(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Ve
             int b = stoi(temp.substr(0, temp.find(" ")));
             temp = temp.substr(temp.find(" ") + 1);
             int c = stoi(temp);
+            if(shellNum > 0) {
+                vector<int>::iterator vertNumIt;
+                IDplusBecauseOfShells = 0;
+                for(vertNumIt = numberOfVerticesInShells.begin(); vertNumIt < numberOfVerticesInShells.end() - 1; vertNumIt ++) {
+                    IDplusBecauseOfShells += *vertNumIt;
+                }
+            }
+            a += IDplusBecauseOfShells;
+            b += IDplusBecauseOfShells;
+            c += IDplusBecauseOfShells;
+            cout<<"a: "<< a <<" b: "<<b<<" c: "<<c<<endl;
+            auto it = mergeVertex.find(a);
+            if (it != mergeVertex.end()){
+                a = it -> second;
+            }
+            it = mergeVertex.find(b);
+            if (it != mergeVertex.end()) {
+                b = it -> second;
+            }
+            it = mergeVertex.find(c);
+            if (it != mergeVertex.end()){
+                c = it -> second;
+            }
             Vertex * va = vertVect[a];
             Vertex * vb = vertVect[b];
             Vertex * vc = vertVect[c];
             //cout<<va -> ID<<" "<<vb -> ID<<" "<<vc -> ID<<endl;
             makeTriFace(va, vb, vc, faceVect, edgeVect);
         } else if(regex_match(nextLine, lRegex)){
+            cout<<"   LMATCH"<<endl;
             vector<int> oneBoundary;
             string temp;
             int nextVert;
@@ -2284,40 +2361,83 @@ void makeWithSIF(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Ve
                 temp = temp.substr(temp.find(" ") + 1);
             }
             nextVert = stoi(temp);
-            oneBoundary.push_back(nextVert);
+            if(shellNum > 1) {
+                vector<int>::iterator vertNumIt;
+                IDplusBecauseOfShells = 0;
+                for(vertNumIt = numberOfVerticesInShells.begin(); vertNumIt < numberOfVerticesInShells.end() - 1; vertNumIt ++) {
+                    IDplusBecauseOfShells += *vertNumIt;
+                }
+            }
+            cout<<nextVert + IDplusBecauseOfShells<< " ";
+            oneBoundary.push_back(nextVert + IDplusBecauseOfShells);
             boundaries.push_back(oneBoundary);
             //cout<<oneBoundary.size()<<endl;          
+        } else if(regex_match(nextLine, shRegex)) {
+            cout<<"   SHMATCH"<<endl;
+            shellNum += 1;
+        } else if(regex_match(nextLine, verticesRegex)){
+            cout<<"   VERMATCH"<<endl;
+            string temp;
+            temp = nextLine.substr(nextLine.find("\("), nextLine.find("\)") - nextLine.find("\("));
+            temp = temp.substr(temp.find(" ") + 1);
+            int numberOfVerticesInThisShell = stoi(temp);
+            numberOfVerticesInShells.push_back(numberOfVerticesInThisShell);
+        } else {
+            cout<<endl;
         }
     }
     //Siblings
     vector<Halfedge*>::iterator edgeIt1;
     vector<Halfedge*>::iterator edgeIt2;
     for( edgeIt1 = edgeVect.begin(); edgeIt1 < edgeVect.end(); edgeIt1 ++){
-        for(edgeIt2 = edgeIt1 +1; edgeIt2 < edgeVect.end(); edgeIt2++){
-            if(((*edgeIt1)->start == (*edgeIt2)->end) &&((*edgeIt1)->end == (*edgeIt2)->start)){
+        for(edgeIt2 = edgeIt1 + 1; edgeIt2 < edgeVect.end(); edgeIt2++){
+            if(((*edgeIt1)->start == (*edgeIt2)->end) && ((*edgeIt1)->end == (*edgeIt2)->start)){
 
                 (*edgeIt1)->sibling = *edgeIt2;
                 (*edgeIt2)->sibling = *edgeIt1;
 
+            } else if (((*edgeIt1) -> start -> position == (*edgeIt2) -> start -> position) &&((*edgeIt1) -> end -> position == (*edgeIt2) -> end -> position)) {
+                //cout<<"Hey, here is a mobius pair!"<<endl;
+                //cout<<"One starts from vertex "<<(*edgeIt1) -> start -> ID<<" and it ends at vertex "<<(*edgeIt1) -> end -> ID<<endl;
+                //cout<<"Another starts from vertex "<<(*edgeIt2) -> start -> ID<<" and it ends at vertex "<<(*edgeIt2) -> end -> ID<<endl;
+
+                (*edgeIt1)->mobiusSibling = *edgeIt2;
+                (*edgeIt2)->mobiusSibling = *edgeIt1;
+
+                (*edgeIt1) -> start -> onMobiusSibling = true;
+                (*edgeIt1) -> end -> onMobiusSibling = true;
+                (*edgeIt2) -> start -> onMobiusSibling = true;
+                (*edgeIt2) -> end -> onMobiusSibling = true;
+
             }
         }
     }
-    vector<Halfedge*>::iterator eIt;
-    for( eIt = edgeVect.begin(); eIt < edgeVect.end(); eIt ++) {
-        if((*eIt) -> sibling == NULL) {
-            cout<<"I don't have a sibling! Start from vertex "<<(*eIt) -> start -> ID<<" and I end at vertex "<<(*eIt) -> end -> ID<<endl;
-        }
-    }
     //Boundaries
-    vector<vector<int> >::iterator bondIt;
-    for( bondIt = boundaries.begin(); bondIt < boundaries.end(); bondIt ++) {
+    vector<vector<int> >::iterator boundIt;
+    for( boundIt = boundaries.begin(); boundIt < boundaries.end(); boundIt ++) {
         vector<Vertex*> oneBoundary;
-        vector<int>::iterator oneBondIt;
-        for( oneBondIt = (*bondIt).end() - 1; oneBondIt >= (*bondIt).begin(); oneBondIt--){
-            oneBoundary.push_back(vertVect[*oneBondIt]);
+        vector<int>::iterator oneBoundIt;
+        for( oneBoundIt = (*boundIt).end() - 1; oneBoundIt >= (*boundIt).begin(); oneBoundIt--){
+            auto it = mergeVertex.find(*oneBoundIt);
+            if (it != mergeVertex.end()) {
+                oneBoundary.push_back(vertVect[it -> second]);
+                //cout<<"pushed: "<<it -> second<<endl;
+            } else {
+                oneBoundary.push_back(vertVect[*oneBoundIt]);
+                //cout<<"pushed: "<<*oneBoundIt;
+            }
         }
-        makeBoundary(oneBoundary, edgeVect, vertVect, true);
+        makeBoundary(oneBoundary, edgeVect);
     }
+    vector<Vertex*> newVertVect;
+    vector<Vertex*>::iterator vIt;
+    for (vIt = vertVect.begin(); vIt < vertVect.end(); vIt ++) {
+        auto it = mergeVertex.find((*vIt) -> ID);
+        if(it == mergeVertex.end()){
+            newVertVect.push_back((*vIt));
+        }
+    }
+    vertVect = newVertVect;
 }
 
 // Initiate the mesh for OpenGL to render.
@@ -2326,14 +2446,14 @@ void init(int level);
 void init(int level, string inputSIF);
 
 void init(int level){
-    makeCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
+    //makeCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //makePyramid(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //makeSharpOctahedron(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //makeOctahedron(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //makeOpenCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //makeRing(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //makeSharpCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
-    //makeMobius(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
+    makeMobius(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //makeHild(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //cout<< glMesh.FaceVect.size()<<" "<<glMesh.EdgeVect.size()<<" "<<glMesh.VertVect.size();
     //computeNormals(glMesh.VertVect);
