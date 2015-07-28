@@ -818,38 +818,6 @@ void makeBoundaries(vector<vector<Vertex*> > &boundaries, vector<Halfedge*> &edg
             (*eIt) -> isSharp = true;
         }
     }
-            /*
-            if(eIt == boundaryEdges.begin()){
-                if((*eIt) -> mobiusBoundary == NULL) {
-                    (*eIt) -> previousBoundary = *(boundaryEdges.end() - 1);
-                    (*eIt) -> nextBoundary = *(eIt + 1);
-                } else if ((*eIt) -> start == (*eIt) -> mobiusBoundary -> start){
-                    (*eIt) -> nextBoundary = *(eIt + 1);
-                } else {
-                    (*eIt) -> previousBoundary = *(boundaryEdges.end() - 1);   
-                }
-            } else if(eIt == boundaryEdges.end() - 1){
-                if((*eIt) -> mobiusBoundary == NULL) {
-                    (*eIt) -> previousBoundary = *(eIt - 1);
-                    (*eIt) -> nextBoundary = *(boundaryEdges.begin());
-                } else if ((*eIt) -> start == (*eIt) -> mobiusBoundary -> start){
-                    (*eIt) -> nextBoundary = *(boundaryEdges.begin());
-                } else {
-                    (*eIt) -> previousBoundary = *(eIt - 1);   
-                }
-            } else {
-                if((*eIt) -> mobiusBoundary == NULL) {
-                    (*eIt) -> previousBoundary = *(eIt - 1);
-                    (*eIt) -> nextBoundary = *(eIt + 1);
-                } else if ((*eIt) -> start == (*eIt) -> mobiusBoundary -> start){
-                    (*eIt) -> nextBoundary = *(eIt + 1);
-                } else {
-                    (*eIt) -> previousBoundary = *(eIt - 1);   
-                }
-            }
-        }
-    }*/
-    //cout<<boundaryEdges.size()<<endl;
 }
 
 void makePyramid(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect){
