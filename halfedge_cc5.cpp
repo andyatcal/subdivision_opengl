@@ -19,21 +19,12 @@
 #include "mesh.h"
 #include "subdivision.h"
 #include "meshUtils.h"
+#include "viewport.h"
 
 #define PI 3.1415926535897932384626433832795028841971693993751058209
 
 using namespace std;
 using namespace glm;
-
-//************************************************************
-//          Viewport class
-//************************************************************
-class Viewport;
-
-class Viewport {
-    public:
-        int width, hight;
-};
 
 //************************************************************
 //          Global Variables

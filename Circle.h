@@ -1,23 +1,23 @@
-#include <Eigen/Dense>
+#include <glm/glm.hpp>
 
-using namespace Eigen;
+using namespace glm;
 
 class Circle{
 public:
-	Vector3f center;
+	vec3 center;
 	float radius;
-	Vector3f normal;
+	vec3 normal;
 	Circle();
-	Circle(Vector3f center, float radius, Vector3f normal);
+	Circle(vec3 center, float radius, vec3 normal);
 };
 
 Circle::Circle(){
-	center = Vector3f(0, 0, 0);
+	center = vec3(0, 0, 0);
 	radius = 0.0f;
-	normal = Vector3f(0, 0, 0);
+	normal = vec3(0, 0, 0);
 }
 
-Circle::Circle(Vector3f center, float radius, Vector3f normal){
+Circle::Circle(vec3 center, float radius, vec3 normal){
 	this -> center = center;
 	this -> radius = radius;
 	this -> normal = normal;
