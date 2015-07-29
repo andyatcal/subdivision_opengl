@@ -47,7 +47,7 @@ private:
     // @param faceVect: List of faces in the mesh.
     // @param newFaceVect: the new list of faces in the mesh.
     // @param newEdgeVect: the new list of edges in the mesh.
-    void compileNewMesh(vector<Face*> &faceVect, vector<Face*> &newFaceVect,\
+    void compileNewMesh(vector<Face*> &faceVect, vector<Face*> &newFaceVect,
      vector<Halfedge*> &newEdgeVect);
     // compute the normal vector of the vertex at the end of the input half edge.
     vec3 getNormal(Halfedge * currEdge);
@@ -57,7 +57,8 @@ private:
 
 Subdivision::Subdivision(){}
 
-void Subdivision::makeFacePoints(vector<Face*> &faceVect, vector<Vertex*> &vertVect){
+void Subdivision::makeFacePoints(vector<Face*> &faceVect,
+ vector<Vertex*> &vertVect){
     vector<Face*>::iterator it;
     for(it = faceVect.begin(); it < faceVect.end(); it++){
         vector<Vertex*> vertices = (*it) -> vertices;
@@ -83,17 +84,20 @@ void Subdivision::makeFacePoints(vector<Face*> &faceVect, vector<Vertex*> &vertV
     }
 }
 
-void Subdivision::makeEdgePoints(vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect){
+void Subdivision::makeEdgePoints(vector<Halfedge*> &edgeVect,
+ vector<Vertex*> &vertVect){
     vector<Halfedge*>::iterator it;
     for(it = edgeVect.begin(); it < edgeVect.end(); it++){
         if((*it) -> isSharp) {
             if((*it) -> sibling != NULL && (*it) -> sibling -> edgePoint != NULL){
                 (*it) -> edgePoint = (*it) -> sibling -> edgePoint;
-            } else if((*it) -> mobiusSibling != NULL && (*it) -> mobiusSibling -> edgePoint != NULL){
+            } else if((*it) -> mobiusSibling != NULL && (*it) -> mobiusSibling -> edgePoint
+             != NULL){
                 (*it) -> edgePoint = (*it) -> mobiusSibling -> edgePoint;
             } else {
                 Vertex * newEdgePoint = new Vertex;
-                (*newEdgePoint).position = ((*it) -> end -> position + (*it) -> start -> position) / (float)2;
+                (*newEdgePoint).position = ((*it) -> end -> position + (*it) -> start
+                 -> position) / (float)2;
                 //cout<<"sharp edge starting from vertex"<<(*it) -> start -> ID<<endl;
                 //cout<<(*newEdgePoint).position<<endl;
                 (*it) -> edgePoint = newEdgePoint;
@@ -108,7 +112,8 @@ void Subdivision::makeEdgePoints(vector<Halfedge*> &edgeVect, vector<Vertex*> &v
                 Vertex edgeVert1 = *((*it) -> end);
                 Vertex edgeVert2 = *((*it) -> start);
                 Vertex * newEdgePoint = new Vertex;
-                (*newEdgePoint).position = (faceVert1.position + faceVert2.position + edgeVert1.position + edgeVert2.position) / (float)4;
+                (*newEdgePoint).position = (faceVert1.position + faceVert2.position
+                 + edgeVert1.position + edgeVert2.position) / (float)4;
                 //cout<<"normal edge starting from vertex"<<(*it) -> start -> ID<<endl;
                 //cout<<(*newEdgePoint).position<<endl;
                 (*it) -> edgePoint = newEdgePoint;
@@ -121,7 +126,8 @@ void Subdivision::makeEdgePoints(vector<Halfedge*> &edgeVect, vector<Vertex*> &v
                 Vertex edgeVert1 = *((*it) -> end);
                 Vertex edgeVert2 = *((*it) -> start);
                 Vertex * newEdgePoint = new Vertex;
-                (*newEdgePoint).position = (faceVert1.position + faceVert2.position + edgeVert1.position + edgeVert2.position) / (float)4;
+                (*newEdgePoint).position = (faceVert1.position + faceVert2.position + edgeVert1.position
+                 + edgeVert2.position) / (float)4;
                 (*newEdgePoint).onMobiusSibling = true;
                 //cout<<"mobius edge starting from vertex"<<(*it) -> start -> ID<<endl;
                 //cout<<(*newEdgePoint).position<<endl;
@@ -249,7 +255,8 @@ void Subdivision::makeVertexPoints(vector<Vertex*> &vertVect){
             newEdgePointAvgPoistion /= n;
             edgePointAvg.position = newEdgePointAvgPoistion;
             facePointAvg.position = newFacePointAvgPosition;
-            currVert->position = ((float) (n - 2) * currVert->position +  edgePointAvg.position + facePointAvg.position) / (float) n;
+            currVert->position = ((float) (n - 2) * currVert->position + edgePointAvg.position +
+             facePointAvg.position) / (float) n;
             //cout<<"this is a normal vertex!"<<currVert -> position<<endl;            
         } else if(sharpEdgeCounter == 2) {
             Vertex * pointI;
@@ -272,7 +279,8 @@ void Subdivision::makeVertexPoints(vector<Vertex*> &vertVect){
         }
     }
 }
-void Subdivision::compileNewMesh(vector<Face*> &faceVect, vector<Face*> &newFaceVect, vector<Halfedge*> &newEdgeVect){
+void Subdivision::compileNewMesh(vector<Face*> &faceVect, vector<Face*> &newFaceVect,
+ vector<Halfedge*> &newEdgeVect){
     vector<Face*>::iterator it;
     for(it = faceVect.begin(); it < faceVect.end(); it++){
         Face currFace = **it;

@@ -1,4 +1,26 @@
+// 
+// @author Andy Wang, UC Berkeley. Copyright 2015 reserve.
+// Catmull-Clark subdivision project in order to create sculptures like Eva-Hilds.
+// Advised by Prof. Sequin H. Carlos.
+// 
+//
 
+#ifndef __MESHUTILS_H__
+#define __MESHUTILS_H__
+
+#include <glm/glm.hpp>
+
+using namespace glm;
+using namespace std;
+
+// Forward declarations
+class Vertex;
+class Face;
+class Halfedge;
+class Mesh;
+
+//////////////////////////////////////////////////////////////////////
+// Subdivision Class -- Functions to perform the subdivision for a mesh
 
 
 void makeTriFace(Vertex * va, Vertex* vb, Vertex * vc, 
@@ -193,3 +215,5 @@ void makeBoundaries(vector<vector<Vertex*> > &boundaries, vector<Halfedge*> &edg
         }
     }
 }
+
+#endif // __MESHUTILS_H__
