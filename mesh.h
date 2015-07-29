@@ -8,55 +8,29 @@
 #ifndef __MESH_H__
 #define __MESH_H__
 
-#include "vertex.h"
-#include "halfedge.h"
-#include "face.h"
-#include <glm/glm.hpp>
+#include <vector>
 
-using namespace glm;
+using namespace std;
+
+// Forward declarations
+class Vertex;
+class Face;
+class Halfedge;
 
 //////////////////////////////////////////////////////////////////////
-// Vertex Class -- 3D Vertex for Catmull-Clark Subdivision.
-//
-class Vertex{
+// Mesh Class -- A MESH for display or subdivide.
+class Mesh{
 public:
-    // The position of this vertex.
-    vec3 position;
-    // One out-going halfedge of this vertex.
-    Halfedge * oneOutEdge;
-    // The normal of this Vertex.
-    vec3 normal;
-    // An ID to track this Vertex.
-    int ID;
-    // Track if this vertex on a mobius junction.
-    bool onMobiusSibling;
-    // Copy of vertex position, to avoid conficts in makeVertPoints of subdivision.
-    vec3 copy; 
+    // An arraylist of all vertices that construct this mesh.
+    vector<Vertex*> VertVect;
+    // An arraylist of all halfedges that construct this mesh.
+    vector<Halfedge*> EdgeVect;
+    // An arraylist of all faces that construct this mesh.
+    vector<Face*> FaceVect;
     // Constructor.
-    Vertex();
-    // Contructor given initial location of vertex.
-    // @param x, y, z as the initial x, y, z position of this vertex.
-    Vertex(float x, float y, float z);
-    // Set copy to the current position of this vertex.
-    void makeCopy();
+    Mesh();
 };
 
-Vertex::Vertex(){
-    position = vec3(0, 0, 0);
-    oneOutEdge = NULL;
-    ID = 0;
-    onMobiusSibling = false;
-}
+Mesh::Mesh(){}
 
-Vertex::Vertex(float x, float y, float z) {
-    position = vec3(x, y, z);
-    oneOutEdge = NULL;
-    ID = 0;
-    onMobiusSibling = false;
-}
-
-void Vertex::makeCopy() {
-    copy = position;
-}
-
-#endif // __VERTEX_H__
+#endif // __MESH_H__

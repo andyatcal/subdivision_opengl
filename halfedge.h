@@ -8,10 +8,6 @@
 #ifndef __HALFEDGE_H__
 #define __HALFEDGE_H__
 
-#include <glm/glm.hpp>
-
-using namespace glm;
-
 // Forward declarations
 class Vertex;
 class Face;
