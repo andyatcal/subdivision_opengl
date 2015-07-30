@@ -24,10 +24,15 @@ class Mesh;
 class Subdivision{
 public:
     // The mesh to be subdivide;
-    Mesh myMesh;
+    Mesh currMesh;
     // Constructor.
     Subdivision();
-    void ccSubdivision(int level);
+    // Constructor. 
+    // @param mesh: the reference of given mesh.
+    Subdivision(Mesh & mesh);
+    // The integration of subdivision.
+    // @param level: level of Catmull-Clark subdivision.
+    Mesh ccSubdivision(int level);
 private:
     // Construct face points in Catmull-Clark subdivision.
     // Computed values are stored in face.facepoint. Add new Vertices to vertVect.
@@ -57,6 +62,9 @@ private:
 
 Subdivision::Subdivision(){}
 
+Subdivision::Subdivision(Mesh & mesh){
+    currMesh = mesh;
+}
 void Subdivision::makeFacePoints(vector<Face*> &faceVect,
  vector<Vertex*> &vertVect){
     vector<Face*>::iterator it;
@@ -452,32 +460,33 @@ void Subdivision::computeNormals(vector<Vertex*> &vertVect){
     }
 }
 
-void Subdivision::ccSubdivision(int level){
+Mesh Subdivision::ccSubdivision(int level){
     for(int i = 0; i < level; i++) {
         Mesh newMesh;
         Halfedge * tempEdge;
         Face * tempFace;
-        newMesh.VertVect = myMesh.VertVect;
-        makeFacePoints(myMesh.FaceVect, myMesh.VertVect);
-        makeEdgePoints(myMesh.EdgeVect, myMesh.VertVect);
+        newMesh.VertVect = currMesh.VertVect;
+        makeFacePoints(currMesh.FaceVect, currMesh.VertVect);
+        makeEdgePoints(currMesh.EdgeVect, currMesh.VertVect);
         makeVertexPoints(newMesh.VertVect);
-        compileNewMesh(myMesh.FaceVect, newMesh.FaceVect, newMesh.EdgeVect);
+        compileNewMesh(currMesh.FaceVect, newMesh.FaceVect, newMesh.EdgeVect);
     /*
         computeNormals(glMesh.VertVect);
     */
-        while(!myMesh.FaceVect.empty()){
-            tempFace = myMesh.FaceVect.back();
-            myMesh.FaceVect.pop_back();
+        while(!currMesh.FaceVect.empty()){
+            tempFace = currMesh.FaceVect.back();
+            currMesh.FaceVect.pop_back();
             delete tempFace;
         }
-        while(!myMesh.EdgeVect.empty()){
-            tempEdge = myMesh.EdgeVect.back();
-            myMesh.EdgeVect.pop_back();
+        while(!currMesh.EdgeVect.empty()){
+            tempEdge = currMesh.EdgeVect.back();
+            currMesh.EdgeVect.pop_back();
             delete tempEdge;
         }
-        myMesh.FaceVect = newMesh.FaceVect;
-        myMesh.EdgeVect = newMesh.EdgeVect;
+        currMesh.FaceVect = newMesh.FaceVect;
+        currMesh.EdgeVect = newMesh.EdgeVect;
     }
+    return currMesh;
 }
 
 #endif // __SUBDIVISION_H__

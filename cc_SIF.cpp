@@ -249,10 +249,8 @@ void makeWithSIF(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Ve
 void init(int level, string inputSIF){
     makeWithSIF(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect, inputSIF);
     //cout<<glMesh.FaceVect.size()<<" "<< glMesh.VertVect.size()<<endl;
-    Subdivision myCC;
-    myCC.myMesh = glMesh;
-    myCC.ccSubdivision(level);
-    glMesh = myCC.myMesh;
+    Subdivision myCC(glMesh);
+    glMesh = myCC.ccSubdivision(level);
 }
 //************************************************************
 //          OpenGL Display Functions
