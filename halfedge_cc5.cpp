@@ -1614,7 +1614,7 @@ void makeWithSIF(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Ve
                 (*edgeIt1)->sibling = *edgeIt2;
                 (*edgeIt2)->sibling = *edgeIt1;
 
-            } else if (((*edgeIt1) -> start -> position == (*edgeIt2) -> start -> position) &&((*edgeIt1) -> end -> position == (*edgeIt2) -> end -> position)) {
+            } else if (((*edgeIt1) -> start == (*edgeIt2) -> start ) &&((*edgeIt1) -> end  == (*edgeIt2) -> end)) {
                 //cout<<"Hey, here is a mobius pair!"<<endl;
                 //cout<<"One starts from vertex "<<(*edgeIt1) -> start -> ID<<" and it ends at vertex "<<(*edgeIt1) -> end -> ID<<endl;
                 //cout<<"Another starts from vertex "<<(*edgeIt2) -> start -> ID<<" and it ends at vertex "<<(*edgeIt2) -> end -> ID<<endl;
