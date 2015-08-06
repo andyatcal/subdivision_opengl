@@ -77,9 +77,9 @@ void makeSweep(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vert
         vertVect.pop_back();
         delete tempVert;
     }
-    int loop_test = 0;
+    int loop_test = 1;
     vector<vector<Vertex*> > vertices;
-    for(int i = 0; i <= 350; i += 10) {
+    for(int i = 0; i < 360; i += 10) {
         vector<Vertex*> crossSection;
         float angle = i * 1.0 / 180 * PI;
         vec3 zaxis = vec3(0, 0, 1);
@@ -89,10 +89,17 @@ void makeSweep(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vert
         vec3 v3 = vec3(0, -1, -2);
         vec3 v4 = vec3(0, -2, -1);
         vec3 trans = vec3(0 , 3, 0);
+        /*
+        v1 = rotate(v1, angle, xaxis);
+        v2 = rotate(v2, angle, xaxis);
+        v3 = rotate(v3, angle, xaxis);
+        v4 = rotate(v4, angle, xaxis);
+        */
         v1 = rotate(v1, angle/2, xaxis);
         v2 = rotate(v2, angle/2, xaxis);
         v3 = rotate(v3, angle/2, xaxis);
         v4 = rotate(v4, angle/2, xaxis);
+        
         v1 += trans;
         v2 += trans;
         v3 += trans;
@@ -133,6 +140,10 @@ void makeSweep(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vert
         P2 -> position = v2;
         P3 -> position = v3;
         P4 -> position = v4;
+        vertVect.push_back(P1);
+        vertVect.push_back(P2);
+        vertVect.push_back(P3);
+        vertVect.push_back(P4);
         crossSection.push_back(P1);
         crossSection.push_back(P2);
         crossSection.push_back(P3);
@@ -145,38 +156,26 @@ void makeSweep(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vert
             Vertex * v2 = vertices[j + 1][k];
             Vertex * v3 = vertices[j + 1][k + 1];
             Vertex * v4 = vertices[j][k + 1];
-            vertVect.push_back(v1);
-            vertVect.push_back(v2);
-            vertVect.push_back(v3);
-            vertVect.push_back(v4);
             makeRectFace(v1, v2, v3, v4, faceVect, edgeVect);
         }
     }
-    if(loop_test == 1) { //If it is a loop
+    if(loop_test == 1) { //If it is a loop //allignment test
         size_t j = vertices.size() - 1;
-        for(size_t k = 0; k < 3; k -= 1){
+        for(size_t k = 0; k < 3; k += 1){
             Vertex * v1 = vertices[j][k];
-            Vertex * v2 = vertices[0][k + 1];
-            Vertex * v3 = vertices[0][k];
+            Vertex * v2 = vertices[0][k];
+            Vertex * v3 = vertices[0][k + 1];
             Vertex * v4 = vertices[j][k + 1];
-            vertVect.push_back(v1);
-            vertVect.push_back(v2);
-            vertVect.push_back(v3);
-            vertVect.push_back(v4);
             makeRectFace(v1, v2, v3, v4, faceVect, edgeVect);
         }        
     }
-    if(loop_test == 2) { //If it is a loop
+    if(loop_test == 2) { //If it is a mobius loop
         size_t j = vertices.size() - 1;
-        for(size_t k = 4; k > 0; k -= 1){
+        for(size_t k = 3; k > 0; k -= 1){
             Vertex * v1 = vertices[j][k - 1];
-            Vertex * v2 = vertices[0][k];
-            Vertex * v3 = vertices[0][k - 1];
+            Vertex * v2 = vertices[0][k - 1];
+            Vertex * v3 = vertices[0][k];
             Vertex * v4 = vertices[j][k];
-            vertVect.push_back(v1);
-            vertVect.push_back(v2);
-            vertVect.push_back(v3);
-            vertVect.push_back(v4);
             makeRectFace(v1, v2, v3, v4, faceVect, edgeVect);
         }        
     }
