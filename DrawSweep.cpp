@@ -47,7 +47,7 @@ bool lightOn = false;
 //Initial Rotation Angle
 float angle = 0.0; 
 // Define a very small value
-float VERYSMALLVALUE = 0.001;
+float VERYSMALLVALUE = 0.0001;
 // The mesh to subdivide and display.
 Mesh glMesh;
 
@@ -56,7 +56,7 @@ Mesh glMesh;
 //************************************************************
 
 
-void makeSweep(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect) {
+void makeCircleSweep(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect) {
     Vertex * tempVert;
     Halfedge * tempEdge;
     Face * tempFace;
@@ -77,11 +77,16 @@ void makeSweep(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vert
         vertVect.pop_back();
         delete tempVert;
     }
-    int loop_test = 1;
+
+    int loop_test = 0;
+    int l_slices = 36;
+    float total_arc = 360.0;
+    float step = total_arc / l_slices;
     vector<vector<Vertex*> > vertices;
-    for(int i = 0; i < 360; i += 10) {
+
+    for(float i = 0.0; i <= total_arc; i += step) {
         vector<Vertex*> crossSection;
-        float angle = i * 1.0 / 180 * PI;
+        float angle = i / 180 * PI;
         vec3 zaxis = vec3(0, 0, 1);
         vec3 xaxis = vec3(1, 0, 0);
         vec3 v1 = vec3(0, 2, 1);
@@ -89,61 +94,59 @@ void makeSweep(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vert
         vec3 v3 = vec3(0, -1, -2);
         vec3 v4 = vec3(0, -2, -1);
         vec3 trans = vec3(0 , 3, 0);
-        /*
+        /* //360
         v1 = rotate(v1, angle, xaxis);
         v2 = rotate(v2, angle, xaxis);
         v3 = rotate(v3, angle, xaxis);
         v4 = rotate(v4, angle, xaxis);
         */
-        v1 = rotate(v1, angle/2, xaxis);
-        v2 = rotate(v2, angle/2, xaxis);
-        v3 = rotate(v3, angle/2, xaxis);
-        v4 = rotate(v4, angle/2, xaxis);
+        // I will twist m * 180 of this sweep.
+        int m = 11;
+
+        v1 = rotate(v1, m*angle/2, xaxis);
+        v2 = rotate(v2, m*angle/2, xaxis);
+        v3 = rotate(v3, m*angle/2, xaxis);
+        v4 = rotate(v4, m*angle/2, xaxis);
         
         v1 += trans;
         v2 += trans;
         v3 += trans;
         v4 += trans;
+
         v1 = rotate(v1, angle, zaxis);
         v2 = rotate(v2, angle, zaxis);
         v3 = rotate(v3, angle, zaxis);
         v4 = rotate(v4, angle, zaxis);
 
-/*
-        if(i == 30) {
-            cout<<v1[0]<<" "<<v1[1]<<" "<<v1[2]<<endl;
-            cout<<v2[0]<<" "<<v2[1]<<" "<<v2[2]<<endl;
-            cout<<v3[0]<<" "<<v3[1]<<" "<<v3[2]<<endl;
-            cout<<v4[0]<<" "<<v4[1]<<" "<<v4[2]<<endl;
+        if(i == total_arc) {
+            if(distance(v1, vertices[0][0] -> position) < VERYSMALLVALUE
+             && distance(v4, vertices[0][3] -> position) < VERYSMALLVALUE) {
+                loop_test = 1;
+                cout<<"This is a normal loop."<<endl;
+                break;
+            } else if(distance(v1, vertices[0][3] -> position) < VERYSMALLVALUE
+             && distance(v4, vertices[0][0] -> position) < VERYSMALLVALUE) {
+                cout<<"This is a moibus loop."<<endl;
+                loop_test = 2;
+                break;
+            }
         }
 
-        float x1 = 5 * cos(i * 1.0 / 180 * PI);
-        float x2 = 4 * cos(i * 1.0 / 180 * PI);
-        float y1 = 5 * sin(i * 1.0 / 180 * PI);
-        float y2 = 4 * sin(i * 1.0 / 180 * PI);
-        float x3 = 2 * cos(i * 1.0 / 180 * PI);
-        float x4 = 1 * cos(i * 1.0 / 180 * PI);
-        float y3 = 2 * sin(i * 1.0 / 180 * PI);
-        float y4 = 1 * sin(i * 1.0 / 180 * PI);
-        */
         Vertex * P1 = new Vertex;
         Vertex * P2 = new Vertex;
         Vertex * P3 = new Vertex;
         Vertex * P4 = new Vertex;
-        /*
-        P1 -> position = vec3(x1, y1, 1);
-        P2 -> position = vec3(x2, y2, 2);
-        P3 -> position = vec3(x3, y3, -2);
-        P4 -> position = vec3(x4, y4, -1);
-        */
+
         P1 -> position = v1;
         P2 -> position = v2;
         P3 -> position = v3;
         P4 -> position = v4;
+
         vertVect.push_back(P1);
         vertVect.push_back(P2);
         vertVect.push_back(P3);
         vertVect.push_back(P4);
+
         crossSection.push_back(P1);
         crossSection.push_back(P2);
         crossSection.push_back(P3);
@@ -171,11 +174,11 @@ void makeSweep(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vert
     }
     if(loop_test == 2) { //If it is a mobius loop
         size_t j = vertices.size() - 1;
-        for(size_t k = 3; k > 0; k -= 1){
-            Vertex * v1 = vertices[j][k - 1];
-            Vertex * v2 = vertices[0][k - 1];
+        for(size_t k = 0; k < 3; k += 1){
+            Vertex * v1 = vertices[j][3 - k - 1];
+            Vertex * v2 = vertices[j][3 - k];
             Vertex * v3 = vertices[0][k];
-            Vertex * v4 = vertices[j][k];
+            Vertex * v4 = vertices[0][k + 1];
             makeRectFace(v1, v2, v3, v4, faceVect, edgeVect);
         }        
     }
@@ -245,7 +248,7 @@ void makeSweep(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vert
 // Initiate the mesh for OpenGL to render
 
 void init(int level){
-    makeSweep(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
+    makeCircleSweep(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //cout<<glMesh.FaceVect.size()<<" "<< glMesh.VertVect.size()<<endl;
     Subdivision myCC(glMesh);
     glMesh = myCC.ccSubdivision(level);
