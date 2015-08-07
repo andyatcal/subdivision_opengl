@@ -46,6 +46,8 @@ float angle = 0.0;
 float VERYSMALLVALUE = 0.001;
 // The mesh to subdivide and display.
 Mesh glMesh;
+// Another mesh to subdived and display.
+Mesh glMesh1;
 
 //************************************************************
 //          Let's build some Shapes!!
@@ -1667,6 +1669,7 @@ void init(int level, string inputSIF);
 
 void init(int level){
     makeCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
+    makeCube(glMesh1.FaceVect, glMesh1.EdgeVect, glMesh1.VertVect);
     //makePyramid(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //makeSharpOctahedron(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
     //makeOctahedron(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
@@ -1678,19 +1681,18 @@ void init(int level){
     //cout<< glMesh.FaceVect.size()<<" "<<glMesh.EdgeVect.size()<<" "<<glMesh.VertVect.size();
     //computeNormals(glMesh.VertVect);
     //ccSubDivision();
-    Subdivision myCC;
-    myCC.myMesh = glMesh;
-    myCC.ccSubdivision(level);
-    glMesh = myCC.myMesh;
+    Subdivision myCC(glMesh);
+    glMesh = myCC.ccSubdivision(level);
+
+    Subdivision myCC1(glMesh1);
+    glMesh1 = myCC1.ccSubdivision(1);
 }
 
 void init(int level, string inputSIF){
     makeWithSIF(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect, inputSIF);
     //cout<<glMesh.FaceVect.size()<<" "<< glMesh.VertVect.size()<<endl;
-    Subdivision myCC;
-    myCC.myMesh = glMesh;
-    myCC.ccSubdivision(level);
-    glMesh = myCC.myMesh;
+    Subdivision myCC(glMesh);
+    glMesh = myCC.ccSubdivision(level);
 }
 //************************************************************
 //          OpenGL Display Functions
@@ -1779,6 +1781,26 @@ void render(void) {
     if (angle > 360) {angle -= 360;}
     glRotatef(angle, 0, 0, 1);
     for(dispFaceIt = glMesh.FaceVect.begin(); dispFaceIt < glMesh.FaceVect.end(); dispFaceIt++){
+        tempFace = *dispFaceIt;
+        Vertex * tempv;
+        vector<Vertex*>::iterator vIt;
+        vector<Vertex*> vertices = tempFace -> vertices;
+        glBegin(GL_POLYGON);
+        for(vIt = vertices.begin(); vIt < vertices.end(); vIt++) {
+            tempv = *vIt;
+            float normx = tempv -> position[0];
+            float normy = tempv -> position[1];
+            float normz = tempv -> position[2];
+            glNormal3f(normx, normy, normz);
+            float x = tempv -> position[0];
+            float y = tempv -> position[1];
+            float z = tempv -> position[2];
+            //cout<<"x: "<<x<<" y: "<<y<<" z: "<<z<<endl;
+            glVertex3f(x, y, z);
+        }
+        glEnd();
+    }
+    for(dispFaceIt = glMesh1.FaceVect.begin(); dispFaceIt < glMesh1.FaceVect.end(); dispFaceIt++){
         tempFace = *dispFaceIt;
         Vertex * tempv;
         vector<Vertex*>::iterator vIt;
