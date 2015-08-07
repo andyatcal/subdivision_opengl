@@ -22,6 +22,8 @@ class Mesh;
 //////////////////////////////////////////////////////////////////////
 // Subdivision Class -- Functions to perform the subdivision for a mesh
 
+// Flush mesh. Make the vertVect, edgeVect, faceVect of a mesh empty.
+// @param mesh : the mesh to flush.
 void flushMesh(Mesh &mesh) {
     vector<Face*> faceVect = mesh.faceVect;
     vector<Halfedge*> edgeVect = mesh.edgeVect;
@@ -46,6 +48,10 @@ void flushMesh(Mesh &mesh) {
     }
 }
 
+// Make a triangle face with three vertex.
+// @param va, vb, vc: three points to construct the face.
+// @param faceVect: reference to the faceVect of the mesh.
+// @param edgeVect: reference to the edgeVect of the mesh.
 void makeTriFace(Vertex * va, Vertex* vb, Vertex * vc, 
                 vector<Face*> &faceVect, 
                 vector<Halfedge*> &edgeVect) {
@@ -91,6 +97,10 @@ void makeTriFace(Vertex * va, Vertex* vb, Vertex * vc,
     edgeVect.push_back(e3);
 }
 
+// Make a rectangle face with four vertex.
+// @param va, vb, vc, vd: four points to construct the face.
+// @param faceVect: reference to the faceVect of the mesh.
+// @param edgeVect: reference to the edgeVect of the mesh.
 void makeRectFace(Vertex * va, Vertex* vb, Vertex * vc, Vertex * vd, 
                 vector<Face*> &faceVect, 
                 vector<Halfedge*> &edgeVect) {
@@ -145,6 +155,10 @@ void makeRectFace(Vertex * va, Vertex* vb, Vertex * vc, Vertex * vd,
     edgeVect.push_back(e4);
 }
 
+// Make a polygon face with n vertex.
+// @param vertices: a list of points to construct the face.
+// @param faceVect: reference to the faceVect of the mesh.
+// @param edgeVect: reference to the edgeVect of the mesh.
 void makePolygonFace(vector<Vertex*> vertices, 
                 vector<Face*> &faceVect, 
                 vector<Halfedge*> &edgeVect) {
@@ -186,6 +200,8 @@ void makePolygonFace(vector<Vertex*> vertices,
     faceVect.push_back(nextFace);
 }
 
+// Build connnections after making the faces.
+// @param mesh: reference to the mesh that the connections located in.
 void buildConnections(Mesh &mesh) {
     vector<Halfedge*> &edgeVect = mesh.edgeVect;
     vector<Halfedge*>::iterator edgeIt1;
@@ -193,12 +209,14 @@ void buildConnections(Mesh &mesh) {
     vector<Halfedge*>::iterator eIt;
     for( edgeIt1 = edgeVect.begin(); edgeIt1 < edgeVect.end(); edgeIt1 ++){
         for(edgeIt2 = edgeIt1 + 1; edgeIt2 < edgeVect.end(); edgeIt2++){
-            if(((*edgeIt1)->start == (*edgeIt2)->end) && ((*edgeIt1)->end == (*edgeIt2)->start)){
+            if(((*edgeIt1)->start == (*edgeIt2)->end) && ((*edgeIt1)->end
+             == (*edgeIt2)->start)){
 
                 (*edgeIt1)->sibling = *edgeIt2;
                 (*edgeIt2)->sibling = *edgeIt1;
 
-            } else if (((*edgeIt1) -> start == (*edgeIt2) -> start) &&((*edgeIt1) -> end == (*edgeIt2) -> end)) {
+            } else if (((*edgeIt1) -> start == (*edgeIt2) -> start)
+             &&((*edgeIt1) -> end == (*edgeIt2) -> end)) {
 
                 (*edgeIt1)->mobiusSibling = *edgeIt2;
                 (*edgeIt2)->mobiusSibling = *edgeIt1;
@@ -217,14 +235,17 @@ void buildConnections(Mesh &mesh) {
             boundaryEdges.push_back(*eIt);
         }
     }
-    for( edgeIt1 = boundaryEdges.begin(); edgeIt1 < boundaryEdges.end(); edgeIt1 ++){
+    for( edgeIt1 = boundaryEdges.begin(); edgeIt1 < boundaryEdges.end();
+     edgeIt1 ++){
         for(edgeIt2 = edgeIt1 +1; edgeIt2 < boundaryEdges.end(); edgeIt2++){
-            if(((*edgeIt1)->start == (*edgeIt2)->start) &&((*edgeIt1)->end != (*edgeIt2)->end)){
+            if(((*edgeIt1)->start == (*edgeIt2)->start) &&((*edgeIt1)->end
+             != (*edgeIt2)->end)){
 
                 (*edgeIt1)->mobiusBoundary = *edgeIt2;
                 (*edgeIt2)->mobiusBoundary = *edgeIt1;
 
-            } else if (((*edgeIt1)->end == (*edgeIt2)->end) &&((*edgeIt1)->start != (*edgeIt2)->start)){
+            } else if (((*edgeIt1)->end == (*edgeIt2)->end) &&((*edgeIt1)->start
+             != (*edgeIt2)->start)){
 
                 (*edgeIt1)->mobiusBoundary = *edgeIt2;
                 (*edgeIt2)->mobiusBoundary = *edgeIt1;
@@ -247,19 +268,27 @@ void buildConnections(Mesh &mesh) {
     }
 }
 
-void makeBoundaries(vector<vector<Vertex*> > &boundaries, vector<Halfedge*> &edgeVect) {
+// Make the boundaries given the vertices on the boundaries.
+// @param boundaries: lists of vertices on all boundaries.
+// @param edgeVect: reference to the edgeVect of the mesh.
+void makeBoundaries(vector<vector<Vertex*> > &boundaries,
+ vector<Halfedge*> &edgeVect) {
     vector<vector<Vertex*> >::iterator allBoundsIt;
     vector<Vertex*> oneBoundary;
     vector<Halfedge*> boundaryEdges;
     vector<Halfedge*>::iterator eIt;
-    for(allBoundsIt = boundaries.begin(); allBoundsIt < boundaries.end(); allBoundsIt++) {
+    for(allBoundsIt = boundaries.begin(); allBoundsIt < boundaries.end();
+     allBoundsIt++) {
         oneBoundary = *allBoundsIt;
         vector<Vertex*>::iterator boundIt;
-        for(boundIt = oneBoundary.begin(); boundIt < oneBoundary.end(); boundIt ++) {
+        for(boundIt = oneBoundary.begin(); boundIt < oneBoundary.end();
+         boundIt ++) {
             for(eIt = edgeVect.begin(); eIt < edgeVect.end(); eIt++) {
-                if(boundIt != oneBoundary.end() - 1 && (*eIt) -> start == (*boundIt) && (*eIt) -> end == *(boundIt + 1)){
+                if(boundIt != oneBoundary.end() - 1 && (*eIt) -> start ==
+                 (*boundIt) && (*eIt) -> end == *(boundIt + 1)){
                     boundaryEdges.push_back(*eIt);
-                } else if(boundIt == oneBoundary.end() - 1 && (*eIt) -> start == (*boundIt) && (*eIt) -> end == *(oneBoundary.begin())){
+                } else if(boundIt == oneBoundary.end() - 1 && (*eIt) -> start ==
+                 (*boundIt) && (*eIt) -> end == *(oneBoundary.begin())){
                     boundaryEdges.push_back(*eIt);
                 }
             }
@@ -267,14 +296,17 @@ void makeBoundaries(vector<vector<Vertex*> > &boundaries, vector<Halfedge*> &edg
     }
     vector<Halfedge*>::iterator edgeIt1;
     vector<Halfedge*>::iterator edgeIt2;
-    for( edgeIt1 = boundaryEdges.begin(); edgeIt1 < boundaryEdges.end(); edgeIt1 ++){
+    for( edgeIt1 = boundaryEdges.begin(); edgeIt1 < boundaryEdges.end();
+     edgeIt1 ++){
         for(edgeIt2 = edgeIt1 +1; edgeIt2 < boundaryEdges.end(); edgeIt2++){
-            if(((*edgeIt1)->start == (*edgeIt2)->start) &&((*edgeIt1)->end != (*edgeIt2)->end)){
+            if(((*edgeIt1)->start == (*edgeIt2)->start) &&((*edgeIt1)->end
+             != (*edgeIt2)->end)){
 
                 (*edgeIt1)->mobiusBoundary = *edgeIt2;
                 (*edgeIt2)->mobiusBoundary = *edgeIt1;
 
-            } else if (((*edgeIt1)->end == (*edgeIt2)->end) &&((*edgeIt1)->start != (*edgeIt2)->start)){
+            } else if (((*edgeIt1)->end == (*edgeIt2)->end) &&((*edgeIt1)->start
+             != (*edgeIt2)->start)){
 
                 (*edgeIt1)->mobiusBoundary = *edgeIt2;
                 (*edgeIt2)->mobiusBoundary = *edgeIt1;
