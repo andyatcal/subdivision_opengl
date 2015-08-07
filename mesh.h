@@ -22,11 +22,11 @@ class Halfedge;
 class Mesh{
 public:
     // An arraylist of all vertices that construct this mesh.
-    vector<Vertex*> VertVect;
+    vector<Vertex*> vertVect;
     // An arraylist of all halfedges that construct this mesh.
-    vector<Halfedge*> EdgeVect;
+    vector<Halfedge*> edgeVect;
     // An arraylist of all faces that construct this mesh.
-    vector<Face*> FaceVect;
+    vector<Face*> faceVect;
     // Constructor.
     Mesh();
 };

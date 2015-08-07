@@ -53,29 +53,15 @@ Mesh glMesh;
 //          Let's build some Shapes!!
 //************************************************************
 
-void makeWithSIF(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect, string inputSIF){
+void makeWithSIF(Mesh &mesh, string inputSIF){
     vector<Face*>::iterator faceIt;
     vector<Halfedge*>::iterator edgeIt;
-    Vertex * tempVert;
-    Halfedge * tempEdge;
-    Face * tempFace;
-
     //Flush the old mesh
-    while(!faceVect.empty()){
-        tempFace = faceVect.back();
-        faceVect.pop_back();
-        delete tempFace;
-    }
-    while(!edgeVect.empty()){
-        tempEdge = edgeVect.back();
-        edgeVect.pop_back();
-        delete tempEdge;
-    }
-    while(!vertVect.empty()){
-        tempVert = vertVect.back();
-        vertVect.pop_back();
-        delete tempVert;
-    }
+    flushMesh(mesh);
+
+    vector<Face*> &faceVect = mesh.faceVect;
+    vector<Halfedge*> &edgeVect = mesh.edgeVect;
+    vector<Vertex*> &vertVect = mesh.vertVect;
 
     ifstream file(inputSIF);
     if (!file.good()) {
@@ -249,7 +235,7 @@ void makeWithSIF(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Ve
 // Initiate the mesh for OpenGL to render
 
 void init(int level, string inputSIF){
-    makeWithSIF(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect, inputSIF);
+    makeWithSIF(glMesh, inputSIF);
     //cout<<glMesh.FaceVect.size()<<" "<< glMesh.VertVect.size()<<endl;
     Subdivision myCC(glMesh);
     glMesh = myCC.ccSubdivision(level);
@@ -340,7 +326,7 @@ void render(void) {
     angle += 0.1;
     if (angle > 360) {angle -= 360;}
     glRotatef(angle, 0, 0, 1);
-    for(dispFaceIt = glMesh.FaceVect.begin(); dispFaceIt < glMesh.FaceVect.end(); dispFaceIt++){
+    for(dispFaceIt = glMesh.faceVect.begin(); dispFaceIt < glMesh.faceVect.end(); dispFaceIt++){
         tempFace = *dispFaceIt;
         Vertex * tempv;
         vector<Vertex*>::iterator vIt;

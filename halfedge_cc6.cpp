@@ -53,29 +53,13 @@ Mesh glMesh1;
 //          Let's build some Shapes!!
 //************************************************************
 
-void makePyramid(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect){
+void makePyramid(Mesh &mesh){
     vector<Face*>::iterator faceIt;
     vector<Halfedge*>::iterator edgeIt;
-    Vertex * tempVert;
-    Halfedge * tempEdge;
-    Face * tempFace;
-
-    //Flush the old mesh
-    while(!faceVect.empty()){
-        tempFace = faceVect.back();
-        faceVect.pop_back();
-        delete tempFace;
-    }
-    while(!edgeVect.empty()){
-        tempEdge = edgeVect.back();
-        edgeVect.pop_back();
-        delete tempEdge;
-    }
-    while(!vertVect.empty()){
-        tempVert = vertVect.back();
-        vertVect.pop_back();
-        delete tempVert;
-    }
+    flushMesh(mesh);
+    vector<Face*> &faceVect = mesh.faceVect;
+    vector<Halfedge*> &edgeVect = mesh.edgeVect;
+    vector<Vertex*> &vertVect = mesh.vertVect;
 
     //make new mesh
     Vertex * v1 = new Vertex;
@@ -114,43 +98,16 @@ void makePyramid(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Ve
     //toprightFace
     makeTriFace(v1, v5, v2, faceVect, edgeVect);
 
-    vector<Halfedge*>::iterator edgeIt1;
-    vector<Halfedge*>::iterator edgeIt2;
-    for( edgeIt1 = edgeVect.begin(); edgeIt1 < edgeVect.end(); edgeIt1 ++){
-        for(edgeIt2 = edgeIt1 +1; edgeIt2 < edgeVect.end(); edgeIt2++){
-            if(((*edgeIt1)->start == (*edgeIt2)->end) &&((*edgeIt1)->end == (*edgeIt2)->start)){
-
-                (*edgeIt1)->sibling = *edgeIt2;
-                (*edgeIt2)->sibling = *edgeIt1;
-
-            }
-        }
-    }
+    buildConnections(mesh);
 }
 
-void makeCube(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect){
+void makeCube(Mesh &mesh){
     vector<Face*>::iterator faceIt;
     vector<Halfedge*>::iterator edgeIt;
-    Vertex * tempVert;
-    Halfedge * tempEdge;
-    Face * tempFace;
-
-    //Flush the old mesh
-    while(!faceVect.empty()){
-        tempFace = faceVect.back();
-        faceVect.pop_back();
-        delete tempFace;
-    }
-    while(!edgeVect.empty()){
-        tempEdge = edgeVect.back();
-        edgeVect.pop_back();
-        delete tempEdge;
-    }
-    while(!vertVect.empty()){
-        tempVert = vertVect.back();
-        vertVect.pop_back();
-        delete tempVert;
-    }
+    flushMesh(mesh);
+    vector<Face*> &faceVect = mesh.faceVect;
+    vector<Halfedge*> &edgeVect = mesh.edgeVect;
+    vector<Vertex*> &vertVect = mesh.vertVect;
 
     //make new mesh
     Vertex * v1 = new Vertex;
@@ -201,43 +158,16 @@ void makeCube(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Verte
     //baceFace
     makeRectFace(v4, v3, v7, v8, faceVect, edgeVect);
 
-    vector<Halfedge*>::iterator edgeIt1;
-    vector<Halfedge*>::iterator edgeIt2;
-    for( edgeIt1 = edgeVect.begin(); edgeIt1 < edgeVect.end(); edgeIt1 ++){
-        for(edgeIt2 = edgeIt1 +1; edgeIt2 < edgeVect.end(); edgeIt2++){
-            if(((*edgeIt1)->start == (*edgeIt2)->end) &&((*edgeIt1)->end == (*edgeIt2)->start)){
-
-                (*edgeIt1)->sibling = *edgeIt2;
-                (*edgeIt2)->sibling = *edgeIt1;
-
-            }
-        }
-    }
+    buildConnections(mesh);
 }
 
-void makeOpenCube(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect){
+void makeOpenCube(Mesh &mesh){
     vector<Face*>::iterator faceIt;
     vector<Halfedge*>::iterator edgeIt;
-    Vertex * tempVert;
-    Halfedge * tempEdge;
-    Face * tempFace;
-
-    //Flush the old mesh
-    while(!faceVect.empty()){
-        tempFace = faceVect.back();
-        faceVect.pop_back();
-        delete tempFace;
-    }
-    while(!edgeVect.empty()){
-        tempEdge = edgeVect.back();
-        edgeVect.pop_back();
-        delete tempEdge;
-    }
-    while(!vertVect.empty()){
-        tempVert = vertVect.back();
-        vertVect.pop_back();
-        delete tempVert;
-    }
+    flushMesh(mesh);
+    vector<Face*> &faceVect = mesh.faceVect;
+    vector<Halfedge*> &edgeVect = mesh.edgeVect;
+    vector<Vertex*> &vertVect = mesh.vertVect;
 
     //make new mesh
     Vertex * v1 = new Vertex;
@@ -282,78 +212,16 @@ void makeOpenCube(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<V
     makeRectFace(v4, v3, v7, v8, faceVect, edgeVect);
 
     //Boundaries
-
-    vector<Halfedge*>::iterator eIt;
-    Halfedge * e21;
-    Halfedge * e14;
-    Halfedge * e43;
-    Halfedge * e32;
-    for( eIt = edgeVect.begin(); eIt < edgeVect.end(); eIt ++){
-        if((*eIt) -> start == v1 && (*eIt) -> end == v4) {
-            e14 = *eIt;
-        }
-        if((*eIt) -> start == v2 && (*eIt) -> end == v1) {
-            e21 = *eIt;
-        }
-        if((*eIt) -> start == v3 && (*eIt) -> end == v2) {
-            e32 = *eIt;
-        }
-        if((*eIt) -> start == v4 && (*eIt) -> end == v3) {
-            e43 = *eIt;
-        }
-    }
-
-    e21 -> isSharp = true;
-    e14 -> isSharp = true;
-    e43 -> isSharp = true;
-    e32 -> isSharp = true;
-
-    e21 -> previousBoundary = e32;
-    e21 -> nextBoundary = e14;
-    e14 -> previousBoundary = e21;
-    e14 -> nextBoundary = e43;
-    e43 -> previousBoundary = e14;
-    e43 -> nextBoundary = e32;
-    e32 -> previousBoundary = e43;
-    e32 -> nextBoundary = e21;
-
-    vector<Halfedge*>::iterator edgeIt1;
-    vector<Halfedge*>::iterator edgeIt2;
-    for( edgeIt1 = edgeVect.begin(); edgeIt1 < edgeVect.end(); edgeIt1 ++){
-        for(edgeIt2 = edgeIt1 +1; edgeIt2 < edgeVect.end(); edgeIt2++){
-            if(((*edgeIt1)->start == (*edgeIt2)->end) &&((*edgeIt1)->end == (*edgeIt2)->start)){
-
-                (*edgeIt1)->sibling = *edgeIt2;
-                (*edgeIt2)->sibling = *edgeIt1;
-
-            }
-        }
-    }
+    buildConnections(mesh);
 }
 
-void makeRing(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect){
+void makeRing(Mesh &mesh){
     vector<Face*>::iterator faceIt;
     vector<Halfedge*>::iterator edgeIt;
-    Vertex * tempVert;
-    Halfedge * tempEdge;
-    Face * tempFace;
-
-    //Flush the old mesh
-    while(!faceVect.empty()){
-        tempFace = faceVect.back();
-        faceVect.pop_back();
-        delete tempFace;
-    }
-    while(!edgeVect.empty()){
-        tempEdge = edgeVect.back();
-        edgeVect.pop_back();
-        delete tempEdge;
-    }
-    while(!vertVect.empty()){
-        tempVert = vertVect.back();
-        vertVect.pop_back();
-        delete tempVert;
-    }
+    flushMesh(mesh);
+    vector<Face*> &faceVect = mesh.faceVect;
+    vector<Halfedge*> &edgeVect = mesh.edgeVect;
+    vector<Vertex*> &vertVect = mesh.vertVect;
 
     //make new mesh
     Vertex * v1 = new Vertex;
@@ -397,111 +265,16 @@ void makeRing(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Verte
     //baceFace
     makeRectFace(v4, v3, v7, v8, faceVect, edgeVect);
 
-    //Boundaries
-
-    vector<Halfedge*>::iterator eIt;
-    Halfedge * e21;
-    Halfedge * e14;
-    Halfedge * e43;
-    Halfedge * e32;
-
-    Halfedge * e56;
-    Halfedge * e67;
-    Halfedge * e78;
-    Halfedge * e85;
-
-    for( eIt = edgeVect.begin(); eIt < edgeVect.end(); eIt ++){
-        if((*eIt) -> start == v1 && (*eIt) -> end == v4) {
-            e14 = *eIt;
-        }
-        if((*eIt) -> start == v2 && (*eIt) -> end == v1) {
-            e21 = *eIt;
-        }
-        if((*eIt) -> start == v3 && (*eIt) -> end == v2) {
-            e32 = *eIt;
-        }
-        if((*eIt) -> start == v4 && (*eIt) -> end == v3) {
-            e43 = *eIt;
-        }
-        if((*eIt) -> start == v5 && (*eIt) -> end == v6) {
-            e56 = *eIt;
-        }
-        if((*eIt) -> start == v6 && (*eIt) -> end == v7) {
-            e67 = *eIt;
-        }
-        if((*eIt) -> start == v7 && (*eIt) -> end == v8) {
-            e78 = *eIt;
-        }
-        if((*eIt) -> start == v8 && (*eIt) -> end == v5) {
-            e85 = *eIt;
-        }
-    }
-
-    e21 -> isSharp = true;
-    e14 -> isSharp = true;
-    e43 -> isSharp = true;
-    e32 -> isSharp = true;
-
-    e56 -> isSharp = true;
-    e67 -> isSharp = true;
-    e78 -> isSharp = true;
-    e85 -> isSharp = true;
-
-    e21 -> previousBoundary = e32;
-    e21 -> nextBoundary = e14;
-    e14 -> previousBoundary = e21;
-    e14 -> nextBoundary = e43;
-    e43 -> previousBoundary = e14;
-    e43 -> nextBoundary = e32;
-    e32 -> previousBoundary = e43;
-    e32 -> nextBoundary = e21;
-
-    e56 -> previousBoundary = e85;
-    e56 -> nextBoundary = e67;
-    e85 -> previousBoundary = e78;
-    e85 -> nextBoundary = e56;
-    e78 -> previousBoundary = e67;
-    e78 -> nextBoundary = e85;
-    e67 -> previousBoundary = e56;
-    e67 -> nextBoundary = e78;
-
-    vector<Halfedge*>::iterator edgeIt1;
-    vector<Halfedge*>::iterator edgeIt2;
-    for( edgeIt1 = edgeVect.begin(); edgeIt1 < edgeVect.end(); edgeIt1 ++){
-        for(edgeIt2 = edgeIt1 +1; edgeIt2 < edgeVect.end(); edgeIt2++){
-            if(((*edgeIt1)->start == (*edgeIt2)->end) &&((*edgeIt1)->end == (*edgeIt2)->start)){
-
-                (*edgeIt1)->sibling = *edgeIt2;
-                (*edgeIt2)->sibling = *edgeIt1;
-
-            }
-        }
-    }
+    buildConnections(mesh);
 }
 
-void makeSharpCube(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect){
+void makeSharpCube(Mesh &mesh){
     vector<Face*>::iterator faceIt;
     vector<Halfedge*>::iterator edgeIt;
-    Vertex * tempVert;
-    Halfedge * tempEdge;
-    Face * tempFace;
-
-    //Flush the old mesh
-    while(!faceVect.empty()){
-        tempFace = faceVect.back();
-        faceVect.pop_back();
-        delete tempFace;
-    }
-    while(!edgeVect.empty()){
-        tempEdge = edgeVect.back();
-        edgeVect.pop_back();
-        delete tempEdge;
-    }
-    while(!vertVect.empty()){
-        tempVert = vertVect.back();
-        vertVect.pop_back();
-        delete tempVert;
-    }
+    flushMesh(mesh);
+    vector<Face*> &faceVect = mesh.faceVect;
+    vector<Halfedge*> &edgeVect = mesh.edgeVect;
+    vector<Vertex*> &vertVect = mesh.vertVect;
 
     //make new mesh
     Vertex * v1 = new Vertex;
@@ -544,138 +317,17 @@ void makeSharpCube(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<
     makeRectFace(v2, v1, v5, v6, faceVect, edgeVect);
     //baceFace
     makeRectFace(v4, v3, v7, v8, faceVect, edgeVect);
-
-    //Boundaries
-
-    vector<Halfedge*>::iterator eIt;
-    Halfedge * e21;
-    Halfedge * e14;
-    Halfedge * e43;
-    Halfedge * e32;
-
-    Halfedge * e56;
-    Halfedge * e67;
-    Halfedge * e78;
-    Halfedge * e85;
-
-    Halfedge * e12;
-    Halfedge * e41;
-    Halfedge * e34;
-    Halfedge * e23;
-
-    Halfedge * e65;
-    Halfedge * e76;
-    Halfedge * e87;
-    Halfedge * e58;
-
-    for( eIt = edgeVect.begin(); eIt < edgeVect.end(); eIt ++){
-        if((*eIt) -> start == v1 && (*eIt) -> end == v4) {
-            e14 = *eIt;
-        }
-        if((*eIt) -> start == v2 && (*eIt) -> end == v1) {
-            e21 = *eIt;
-        }
-        if((*eIt) -> start == v3 && (*eIt) -> end == v2) {
-            e32 = *eIt;
-        }
-        if((*eIt) -> start == v4 && (*eIt) -> end == v3) {
-            e43 = *eIt;
-        }
-        if((*eIt) -> start == v5 && (*eIt) -> end == v6) {
-            e56 = *eIt;
-        }
-        if((*eIt) -> start == v6 && (*eIt) -> end == v7) {
-            e67 = *eIt;
-        }
-        if((*eIt) -> start == v7 && (*eIt) -> end == v8) {
-            e78 = *eIt;
-        }
-        if((*eIt) -> start == v8 && (*eIt) -> end == v5) {
-            e85 = *eIt;
-        }
-        if((*eIt) -> start == v4 && (*eIt) -> end == v1) {
-            e41 = *eIt;
-        }
-        if((*eIt) -> start == v1 && (*eIt) -> end == v2) {
-            e12 = *eIt;
-        }
-        if((*eIt) -> start == v2 && (*eIt) -> end == v3) {
-            e23 = *eIt;
-        }
-        if((*eIt) -> start == v3 && (*eIt) -> end == v4) {
-            e34 = *eIt;
-        }
-        if((*eIt) -> start == v6 && (*eIt) -> end == v5) {
-            e65 = *eIt;
-        }
-        if((*eIt) -> start == v7 && (*eIt) -> end == v6) {
-            e76 = *eIt;
-        }
-        if((*eIt) -> start == v8 && (*eIt) -> end == v7) {
-            e87 = *eIt;
-        }
-        if((*eIt) -> start == v5 && (*eIt) -> end == v8) {
-            e58 = *eIt;
-        }
-    }
-
-    e21 -> isSharp = true;
-    e14 -> isSharp = true;
-    e43 -> isSharp = true;
-    e32 -> isSharp = true;
-
-    e56 -> isSharp = true;
-    e67 -> isSharp = true;
-    e78 -> isSharp = true;
-    e85 -> isSharp = true;
-
-    e12 -> isSharp = true;
-    e41 -> isSharp = true;
-    e34 -> isSharp = true;
-    e23 -> isSharp = true;
-
-    e65 -> isSharp = true;
-    e76 -> isSharp = true;
-    e87 -> isSharp = true;
-    e58 -> isSharp = true;
-
-    vector<Halfedge*>::iterator edgeIt1;
-    vector<Halfedge*>::iterator edgeIt2;
-    for( edgeIt1 = edgeVect.begin(); edgeIt1 < edgeVect.end(); edgeIt1 ++){
-        for(edgeIt2 = edgeIt1 +1; edgeIt2 < edgeVect.end(); edgeIt2++){
-            if(((*edgeIt1)->start == (*edgeIt2)->end) &&((*edgeIt1)->end == (*edgeIt2)->start)){
-
-                (*edgeIt1)->sibling = *edgeIt2;
-                (*edgeIt2)->sibling = *edgeIt1;
-
-            }
-        }
-    }
+    
+    buildConnections(mesh);
 }
 
-void makeOctahedron(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect){
+void makeOctahedron(Mesh &mesh){
     vector<Face*>::iterator faceIt;
     vector<Halfedge*>::iterator edgeIt;
-    Vertex * tempVert;
-    Halfedge * tempEdge;
-    Face * tempFace;
-
-    //Flush the old mesh
-    while(!faceVect.empty()){
-        tempFace = faceVect.back();
-        faceVect.pop_back();
-        delete tempFace;
-    }
-    while(!edgeVect.empty()){
-        tempEdge = edgeVect.back();
-        edgeVect.pop_back();
-        delete tempEdge;
-    }
-    while(!vertVect.empty()){
-        tempVert = vertVect.back();
-        vertVect.pop_back();
-        delete tempVert;
-    }
+    flushMesh(mesh);
+    vector<Face*> &faceVect = mesh.faceVect;
+    vector<Halfedge*> &edgeVect = mesh.edgeVect;
+    vector<Vertex*> &vertVect = mesh.vertVect;
 
     //make new mesh
     Vertex * v1 = new Vertex;
@@ -710,44 +362,16 @@ void makeOctahedron(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector
     makeTriFace(v6, v5, v4, faceVect, edgeVect);
     makeTriFace(v6, v2, v5, faceVect, edgeVect);
 
-    vector<Halfedge*>::iterator edgeIt1;
-    vector<Halfedge*>::iterator edgeIt2;
-    for( edgeIt1 = edgeVect.begin(); edgeIt1 < edgeVect.end(); edgeIt1 ++){
-        for(edgeIt2 = edgeIt1 +1; edgeIt2 < edgeVect.end(); edgeIt2++){
-            if(((*edgeIt1)->start == (*edgeIt2)->end) &&((*edgeIt1)->end == (*edgeIt2)->start)){
-
-                (*edgeIt1)->sibling = *edgeIt2;
-                (*edgeIt2)->sibling = *edgeIt1;
-
-            }
-        }
-    }
+    buildConnections(mesh);
 }
 
-void makeSharpOctahedron(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect){
+void makeSharpOctahedron(Mesh &mesh){
     vector<Face*>::iterator faceIt;
     vector<Halfedge*>::iterator edgeIt;
-    Vertex * tempVert;
-    Halfedge * tempEdge;
-    Face * tempFace;
-
-    //Flush the old mesh
-    while(!faceVect.empty()){
-        tempFace = faceVect.back();
-        faceVect.pop_back();
-        delete tempFace;
-    }
-    while(!edgeVect.empty()){
-        tempEdge = edgeVect.back();
-        edgeVect.pop_back();
-        delete tempEdge;
-    }
-    while(!vertVect.empty()){
-        tempVert = vertVect.back();
-        vertVect.pop_back();
-        delete tempVert;
-    }
-
+    flushMesh(mesh);
+    vector<Face*> &faceVect = mesh.faceVect;
+    vector<Halfedge*> &edgeVect = mesh.edgeVect;
+    vector<Vertex*> &vertVect = mesh.vertVect;
     //make new mesh
     Vertex * v1 = new Vertex;
     Vertex * v2 = new Vertex;
@@ -781,136 +405,19 @@ void makeSharpOctahedron(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, v
     makeTriFace(v6, v5, v4, faceVect, edgeVect);
     makeTriFace(v6, v2, v5, faceVect, edgeVect);
 
-    vector<Halfedge*>::iterator eIt;
-    Halfedge * e23;
-    Halfedge * e34;
-    Halfedge * e45;
-    Halfedge * e52;
-
-    Halfedge * e32;
-    Halfedge * e43;
-    Halfedge * e54;
-    Halfedge * e25;
-
-    Halfedge * e13;
-    Halfedge * e36;
-    Halfedge * e65;
-    Halfedge * e51;
-
-    Halfedge * e31;
-    Halfedge * e63;
-    Halfedge * e56;
-    Halfedge * e15;
-
-    for( eIt = edgeVect.begin(); eIt < edgeVect.end(); eIt ++){
-        if((*eIt) -> start == v2 && (*eIt) -> end == v3) {
-            e23 = *eIt;
-        }
-        if((*eIt) -> start == v3 && (*eIt) -> end == v4) {
-            e34 = *eIt;
-        }
-        if((*eIt) -> start == v4 && (*eIt) -> end == v5) {
-            e45 = *eIt;
-        }
-        if((*eIt) -> start == v5 && (*eIt) -> end == v2) {
-            e52 = *eIt;
-        }
-        if((*eIt) -> start == v3 && (*eIt) -> end == v2) {
-            e32 = *eIt;
-        }
-        if((*eIt) -> start == v4 && (*eIt) -> end == v3) {
-            e43 = *eIt;
-        }
-        if((*eIt) -> start == v5 && (*eIt) -> end == v4) {
-            e54 = *eIt;
-        }
-        if((*eIt) -> start == v2 && (*eIt) -> end == v5) {
-            e25 = *eIt;
-        }
-
-        if((*eIt) -> start == v1 && (*eIt) -> end == v3) {
-            e13 = *eIt;
-        }
-        if((*eIt) -> start == v3 && (*eIt) -> end == v6) {
-            e36 = *eIt;
-        }
-        if((*eIt) -> start == v6 && (*eIt) -> end == v5) {
-            e65 = *eIt;
-        }
-        if((*eIt) -> start == v5 && (*eIt) -> end == v1) {
-            e51 = *eIt;
-        }
-        if((*eIt) -> start == v3 && (*eIt) -> end == v1) {
-            e31 = *eIt;
-        }
-        if((*eIt) -> start == v6 && (*eIt) -> end == v3) {
-            e63 = *eIt;
-        }
-        if((*eIt) -> start == v5 && (*eIt) -> end == v6) {
-            e56 = *eIt;
-        }
-        if((*eIt) -> start == v1 && (*eIt) -> end == v5) {
-            e15 = *eIt;
-        }
-    }
-
-    e23 -> isSharp = true;
-    e34 -> isSharp = true;
-    e45 -> isSharp = true;
-    e52 -> isSharp = true;
-
-    e32 -> isSharp = true;
-    e43 -> isSharp = true;
-    e54 -> isSharp = true;
-    e25 -> isSharp = true;
-
-    e13 -> isSharp = true;
-    e36 -> isSharp = true;
-    e65 -> isSharp = true;
-    e51 -> isSharp = true;
-
-    e31 -> isSharp = true;
-    e63 -> isSharp = true;
-    e56 -> isSharp = true;
-    e15 -> isSharp = true;
-
-    vector<Halfedge*>::iterator edgeIt1;
-    vector<Halfedge*>::iterator edgeIt2;
-    for( edgeIt1 = edgeVect.begin(); edgeIt1 < edgeVect.end(); edgeIt1 ++){
-        for(edgeIt2 = edgeIt1 +1; edgeIt2 < edgeVect.end(); edgeIt2++){
-            if(((*edgeIt1)->start == (*edgeIt2)->end) &&((*edgeIt1)->end == (*edgeIt2)->start)){
-
-                (*edgeIt1)->sibling = *edgeIt2;
-                (*edgeIt2)->sibling = *edgeIt1;
-
-            }
-        }
-    }
+    buildConnections(mesh);
 }
 
-void makeNormalStrip(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect){
+void makeNormalStrip(Mesh &mesh){
     vector<Face*>::iterator faceIt;
     vector<Halfedge*>::iterator edgeIt;
     Vertex * tempVert;
     Halfedge * tempEdge;
     Face * tempFace;
-
-    //Flush the old mesh
-    while(!faceVect.empty()){
-        tempFace = faceVect.back();
-        faceVect.pop_back();
-        delete tempFace;
-    }
-    while(!edgeVect.empty()){
-        tempEdge = edgeVect.back();
-        edgeVect.pop_back();
-        delete tempEdge;
-    }
-    while(!vertVect.empty()){
-        tempVert = vertVect.back();
-        vertVect.pop_back();
-        delete tempVert;
-    }
+    flushMesh(mesh);
+    vector<Face*> &faceVect = mesh.faceVect;
+    vector<Halfedge*> &edgeVect = mesh.edgeVect;
+    vector<Vertex*> &vertVect = mesh.vertVect;
 
     //make new mesh
     Vertex * v1 = new Vertex;
@@ -946,110 +453,16 @@ void makeNormalStrip(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vecto
     makeRectFace(v4, v3, v7, v8, faceVect, edgeVect);
     makeRectFace(v1, v4, v8, v5, faceVect, edgeVect);
 
-    //Boundaries
-    vector<Halfedge*>::iterator eIt;
-    Halfedge * e21;
-    Halfedge * e14;
-    Halfedge * e43;
-    Halfedge * e32;
-
-    Halfedge * e56;
-    Halfedge * e67;
-    Halfedge * e78;
-    Halfedge * e85;
-
-    for( eIt = edgeVect.begin(); eIt < edgeVect.end(); eIt ++){
-        if((*eIt) -> start == v1 && (*eIt) -> end == v4) {
-            e14 = *eIt;
-        }
-        if((*eIt) -> start == v2 && (*eIt) -> end == v1) {
-            e21 = *eIt;
-        }
-        if((*eIt) -> start == v3 && (*eIt) -> end == v2) {
-            e32 = *eIt;
-        }
-        if((*eIt) -> start == v4 && (*eIt) -> end == v3) {
-            e43 = *eIt;
-        }
-        if((*eIt) -> start == v5 && (*eIt) -> end == v6) {
-            e56 = *eIt;
-        }
-        if((*eIt) -> start == v6 && (*eIt) -> end == v7) {
-            e67 = *eIt;
-        }
-        if((*eIt) -> start == v7 && (*eIt) -> end == v8) {
-            e78 = *eIt;
-        }
-        if((*eIt) -> start == v8 && (*eIt) -> end == v5) {
-            e85 = *eIt;
-        }
-    }
-
-    e21 -> isSharp = true;
-    e14 -> isSharp = true;
-    e43 -> isSharp = true;
-    e32 -> isSharp = true;
-
-    e56 -> isSharp = true;
-    e67 -> isSharp = true;
-    e78 -> isSharp = true;
-    e85 -> isSharp = true;
-
-    e21 -> previousBoundary = e32;
-    e21 -> nextBoundary = e14;
-    e14 -> previousBoundary = e21;
-    e14 -> nextBoundary = e43;
-    e43 -> previousBoundary = e14;
-    e43 -> nextBoundary = e32;
-    e32 -> previousBoundary = e43;
-    e32 -> nextBoundary = e21;
-
-    e56 -> previousBoundary = e85;
-    e56 -> nextBoundary = e67;
-    e85 -> previousBoundary = e78;
-    e85 -> nextBoundary = e56;
-    e78 -> previousBoundary = e67;
-    e78 -> nextBoundary = e85;
-    e67 -> previousBoundary = e56;
-    e67 -> nextBoundary = e78;
-
-    vector<Halfedge*>::iterator edgeIt1;
-    vector<Halfedge*>::iterator edgeIt2;
-    for( edgeIt1 = edgeVect.begin(); edgeIt1 < edgeVect.end(); edgeIt1 ++){
-        for(edgeIt2 = edgeIt1 +1; edgeIt2 < edgeVect.end(); edgeIt2++){
-            if(((*edgeIt1)->start == (*edgeIt2)->end) &&((*edgeIt1)->end == (*edgeIt2)->start)){
-
-                (*edgeIt1)->sibling = *edgeIt2;
-                (*edgeIt2)->sibling = *edgeIt1;
-
-            }
-        }
-    }
+    buildConnections(mesh);
 }
 
-void makeMobius(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect){
+void makeMobius(Mesh &mesh){
     vector<Face*>::iterator faceIt;
     vector<Halfedge*>::iterator edgeIt;
-    Vertex * tempVert;
-    Halfedge * tempEdge;
-    Face * tempFace;
-
-    //Flush the old mesh
-    while(!faceVect.empty()){
-        tempFace = faceVect.back();
-        faceVect.pop_back();
-        delete tempFace;
-    }
-    while(!edgeVect.empty()){
-        tempEdge = edgeVect.back();
-        edgeVect.pop_back();
-        delete tempEdge;
-    }
-    while(!vertVect.empty()){
-        tempVert = vertVect.back();
-        vertVect.pop_back();
-        delete tempVert;
-    }
+    flushMesh(mesh);
+    vector<Face*> &faceVect = mesh.faceVect;
+    vector<Halfedge*> &edgeVect = mesh.edgeVect;
+    vector<Vertex*> &vertVect = mesh.vertVect;
 
     //make new mesh
     Vertex * v1 = new Vertex;
@@ -1106,145 +519,16 @@ void makeMobius(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Ver
     makeRectFace(v4, v3, v7, v8, faceVect, edgeVect);
     makeRectFace(v1, v4, v8, v5, faceVect, edgeVect);
 
-    //Boundaries
-    vector<Halfedge*>::iterator eIt;
-
-    Halfedge * e14;
-    Halfedge * e43;
-    Halfedge * e32;
-
-    //Special case at Mobius edge
-    Halfedge * e2X;
-    Halfedge * e5X;
-
-    Halfedge * e85;
-    Halfedge * e78;
-    Halfedge * e67;
-
-    //Special case at Mobius edge
-    Halfedge * e96;
-    Halfedge * e91;
-
-    //Mobius edge
-    Halfedge * eX9_1;
-    Halfedge * eX9_2;
-
-    bool oneMobiusAdded = false;
-
-    for( eIt = edgeVect.begin(); eIt < edgeVect.end(); eIt ++){
-        if((*eIt) -> start == v1 && (*eIt) -> end == v4) {
-            e14 = *eIt;
-        }
-        if((*eIt) -> start == v2 && (*eIt) -> end == vX) {
-            e2X = *eIt;
-        }
-        if((*eIt) -> start == v3 && (*eIt) -> end == v2) {
-            e32 = *eIt;
-        }
-        if((*eIt) -> start == v4 && (*eIt) -> end == v3) {
-            e43 = *eIt;
-        }
-        if((*eIt) -> start == v5 && (*eIt) -> end == vX) {
-            e5X = *eIt;
-        }
-        if((*eIt) -> start == v6 && (*eIt) -> end == v7) {
-            e67 = *eIt;
-        }
-        if((*eIt) -> start == v7 && (*eIt) -> end == v8) {
-            e78 = *eIt;
-        }
-        if((*eIt) -> start == v8 && (*eIt) -> end == v5) {
-            e85 = *eIt;
-        }
-        if((*eIt) -> start == v9 && (*eIt) -> end == v1) {
-            e91 = *eIt;
-        }
-        if((*eIt) -> start == v9 && (*eIt) -> end == v6) {
-            e96 = *eIt;
-        }
-        if((*eIt) -> start == vX && (*eIt) -> end == v9 && !oneMobiusAdded) {
-            eX9_1 = *eIt;
-            oneMobiusAdded = true;
-        } else if((*eIt) -> start == vX && (*eIt) -> end == v9) {
-            eX9_2 = *eIt;
-        }
-    }
-
-    e14 -> isSharp = true;
-    e43 -> isSharp = true;
-    e32 -> isSharp = true;
-    e2X -> isSharp = true;
-    e5X -> isSharp = true;
-
-    e67 -> isSharp = true;
-    e78 -> isSharp = true;
-    e85 -> isSharp = true;
-    e96 -> isSharp = true;
-    e91 -> isSharp = true;
-
-
-    e2X -> previousBoundary = e32;
-    e14 -> previousBoundary = e91;
-    e14 -> nextBoundary = e43;
-    e43 -> previousBoundary = e14;
-    e43 -> nextBoundary = e32;
-    e32 -> previousBoundary = e43;
-    e32 -> nextBoundary = e2X;
-    e5X -> previousBoundary = e85;
-    e85 -> previousBoundary = e78;
-    e85 -> nextBoundary = e5X;
-    e78 -> previousBoundary = e67;
-    e78 -> nextBoundary = e85;
-    e67 -> previousBoundary = e96;
-    e67 -> nextBoundary = e78;
-    e96 -> nextBoundary = e67;
-
-    e2X -> mobiusBoundary = e5X;
-    e5X -> mobiusBoundary = e2X;
-    e96 -> mobiusBoundary = e91;
-    e91 -> mobiusBoundary = e96;
-
-    vector<Halfedge*>::iterator edgeIt1;
-    vector<Halfedge*>::iterator edgeIt2;
-    for( edgeIt1 = edgeVect.begin(); edgeIt1 < edgeVect.end(); edgeIt1 ++){
-        for(edgeIt2 = edgeIt1 +1; edgeIt2 < edgeVect.end(); edgeIt2++){
-            if(((*edgeIt1)->start == (*edgeIt2)->end) &&((*edgeIt1)->end == (*edgeIt2)->start)){
-
-                (*edgeIt1)->sibling = *edgeIt2;
-                (*edgeIt2)->sibling = *edgeIt1;
-
-            }
-        }
-    }
-    //Mobius sibling
-    eX9_1 -> mobiusSibling = eX9_2;
-    eX9_2 -> mobiusSibling = eX9_1;
+    buildConnections(mesh);
 }
 
-void makeHild(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect){
+void makeHild(Mesh &mesh){
     vector<Face*>::iterator faceIt;
     vector<Halfedge*>::iterator edgeIt;
-    Vertex * tempVert;
-    Halfedge * tempEdge;
-    Face * tempFace;
-
-    //Flush the old mesh
-    while(!faceVect.empty()){
-        tempFace = faceVect.back();
-        faceVect.pop_back();
-        delete tempFace;
-    }
-    while(!edgeVect.empty()){
-        tempEdge = edgeVect.back();
-        edgeVect.pop_back();
-        delete tempEdge;
-    }
-    while(!vertVect.empty()){
-        tempVert = vertVect.back();
-        vertVect.pop_back();
-        delete tempVert;
-    }
-
+    flushMesh(mesh);
+    vector<Face*> &faceVect = mesh.faceVect;
+    vector<Halfedge*> &edgeVect = mesh.edgeVect;
+    vector<Vertex*> &vertVect = mesh.vertVect;
     //make new mesh
     Vertex * vertices[22];
     for(int i = 0; i < 22; i += 1) {
@@ -1311,179 +595,16 @@ void makeHild(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Verte
     makeTriFace(vertices[15], vertices[6], vertices[16], faceVect, edgeVect);
     makeTriFace(vertices[15], vertices[16], vertices[14], faceVect, edgeVect);
 
-    vector<Halfedge*>::iterator edgeIt1;
-    vector<Halfedge*>::iterator edgeIt2;
-    for( edgeIt1 = edgeVect.begin(); edgeIt1 < edgeVect.end(); edgeIt1 ++){
-        for(edgeIt2 = edgeIt1 +1; edgeIt2 < edgeVect.end(); edgeIt2++){
-            if(((*edgeIt1)->start == (*edgeIt2)->end) &&((*edgeIt1)->end == (*edgeIt2)->start)){
-
-                (*edgeIt1)->sibling = *edgeIt2;
-                (*edgeIt2)->sibling = *edgeIt1;
-
-            }
-        }
-    }
-
-    Halfedge * e16_0;
-    Halfedge * e0_1;
-    Halfedge * e1_10;
-    Halfedge * e10_3;
-    Halfedge * e3_4;
-    Halfedge * e4_5;
-    Halfedge * e5_6;
-    Halfedge * e6_16;
-
-    Halfedge * e15_7;
-    Halfedge * e7_8;
-    Halfedge * e8_9;
-    Halfedge * e9_11;
-    Halfedge * e11_12;
-    Halfedge * e12_13;
-    Halfedge * e13_14;
-    Halfedge * e14_15;
-
-    //make Boundaries
-    vector<Halfedge*>::iterator eIt;
-    for( eIt = edgeVect.begin(); eIt < edgeVect.end(); eIt ++){
-        if((*eIt) -> start == vertices[16] && (*eIt) -> end == vertices[0]) {
-            e16_0 = *eIt;
-            e16_0 -> isSharp = true;
-        }
-        if((*eIt) -> start == vertices[0] && (*eIt) -> end == vertices[1]) {
-            e0_1 = *eIt;
-            e0_1 -> isSharp = true;
-        }
-        if((*eIt) -> start == vertices[1] && (*eIt) -> end == vertices[10]) {
-            e1_10 = *eIt;
-            e1_10 -> isSharp = true;
-        }
-        if((*eIt) -> start == vertices[10] && (*eIt) -> end == vertices[3]) {
-            e10_3 = *eIt;
-            e10_3 -> isSharp = true;
-        }
-        if((*eIt) -> start == vertices[3] && (*eIt) -> end == vertices[4]) {
-            e3_4 = *eIt;
-            e3_4 -> isSharp = true;
-        }
-        if((*eIt) -> start == vertices[4] && (*eIt) -> end == vertices[5]) {
-            e4_5 = *eIt;
-            e4_5 -> isSharp = true;
-        }
-        if((*eIt) -> start == vertices[5] && (*eIt) -> end == vertices[6]) {
-            e5_6 = *eIt;
-            e5_6 -> isSharp = true;
-        }
-        if((*eIt) -> start == vertices[6] && (*eIt) -> end == vertices[16]) {
-            e6_16 = *eIt;
-            e6_16 -> isSharp = true;
-        }
-        if((*eIt) -> start == vertices[15] && (*eIt) -> end == vertices[7]) {
-            e15_7 = *eIt;
-            e15_7 -> isSharp = true;
-        }
-        if((*eIt) -> start == vertices[7] && (*eIt) -> end == vertices[8]) {
-            e7_8 = *eIt;
-            e7_8 -> isSharp = true;
-        }
-        if((*eIt) -> start == vertices[8] && (*eIt) -> end == vertices[9]) {
-            e8_9 = *eIt;
-            e8_9 -> isSharp = true;
-        }
-        if((*eIt) -> start == vertices[9] && (*eIt) -> end == vertices[11]) {
-            e9_11 = *eIt;
-            e9_11 -> isSharp = true;
-        }
-        if((*eIt) -> start == vertices[11] && (*eIt) -> end == vertices[12]) {
-            e11_12 = *eIt;
-            e11_12 -> isSharp = true;
-        }
-        if((*eIt) -> start == vertices[12] && (*eIt) -> end == vertices[13]) {
-            e12_13 = *eIt;
-            e12_13 -> isSharp = true;
-        }
-        if((*eIt) -> start == vertices[13] && (*eIt) -> end == vertices[14]) {
-            e13_14 = *eIt;
-            e13_14 -> isSharp = true;
-        }
-        if((*eIt) -> start == vertices[14] && (*eIt) -> end == vertices[15]) {
-            e14_15 = *eIt;
-            e14_15 -> isSharp = true;
-        }
-    }
-
-    //make boundaries
-    e16_0 -> previousBoundary = e6_16;
-    e16_0 -> nextBoundary = e0_1;
-
-    e0_1 -> previousBoundary = e16_0;
-    e0_1 -> nextBoundary = e1_10;
-
-    e1_10 -> previousBoundary = e0_1;
-    e1_10 -> nextBoundary = e10_3;
-
-    e10_3 -> previousBoundary = e1_10;
-    e10_3 -> nextBoundary = e3_4;
-
-    e3_4 -> previousBoundary = e10_3;
-    e3_4 -> nextBoundary = e4_5;
-
-    e4_5 -> previousBoundary = e3_4;
-    e4_5 -> nextBoundary = e5_6;
-
-    e5_6 -> previousBoundary = e4_5;
-    e5_6 -> nextBoundary = e6_16;
-
-    e6_16 -> previousBoundary = e5_6;
-    e6_16 -> nextBoundary = e16_0;
-
-    e15_7 -> previousBoundary = e14_15;
-    e15_7 -> nextBoundary = e7_8;
-
-    e7_8 -> previousBoundary = e15_7;
-    e7_8 -> nextBoundary = e8_9;
-
-    e8_9 -> previousBoundary = e7_8;
-    e8_9 -> nextBoundary = e9_11;
-
-    e9_11 -> previousBoundary = e8_9;
-    e9_11 -> nextBoundary = e11_12;
-
-    e11_12 -> previousBoundary = e9_11;
-    e11_12 -> nextBoundary = e12_13;
-
-    e12_13 -> previousBoundary = e11_12;
-    e12_13 -> nextBoundary = e13_14;
-
-    e13_14 -> previousBoundary = e12_13;
-    e13_14 -> nextBoundary = e14_15;
-
-    e14_15 -> previousBoundary = e13_14;
-    e14_15 -> nextBoundary = e15_7;
+    buildConnections(mesh);
 }
 
-void makeWithSIF(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect, string inputSIF){
+void makeWithSIF(Mesh &mesh, string inputSIF){
     vector<Face*>::iterator faceIt;
     vector<Halfedge*>::iterator edgeIt;
-    Vertex * tempVert;
-    Halfedge * tempEdge;
-    Face * tempFace;
-
-    //Flush the old mesh
-    while(!faceVect.empty()){
-        tempFace = faceVect.back();
-        faceVect.pop_back();
-        delete tempFace;
-    }
-    while(!edgeVect.empty()){
-        tempEdge = edgeVect.back();
-        edgeVect.pop_back();
-        delete tempEdge;
-    }
-    while(!vertVect.empty()){
-        tempVert = vertVect.back();
-        vertVect.pop_back();
-        delete tempVert;
-    }
+    flushMesh(mesh);
+    vector<Face*> &faceVect = mesh.faceVect;
+    vector<Halfedge*> &edgeVect = mesh.edgeVect;
+    vector<Vertex*> &vertVect = mesh.vertVect;
 
     ifstream file(inputSIF);
     if (!file.good()) {
@@ -1668,25 +789,25 @@ void init(int level);
 void init(int level, string inputSIF);
 
 void init(int level){
-    makeCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
-    makeCube(glMesh1.FaceVect, glMesh1.EdgeVect, glMesh1.VertVect);
-    //makePyramid(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
-    //makeSharpOctahedron(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
-    //makeOctahedron(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
-    //makeOpenCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
-    //makeRing(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
-    //makeSharpCube(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
-    //makeMobius(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
-    //makeHild(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect);
-    //cout<< glMesh.FaceVect.size()<<" "<<glMesh.EdgeVect.size()<<" "<<glMesh.VertVect.size();
-    //computeNormals(glMesh.VertVect);
+    //makeCube(glMesh);
+    //makeCube(glMesh);
+    //makePyramid(glMesh);
+    makeSharpOctahedron(glMesh);
+    //makeOctahedron(glMesh);
+    //makeOpenCube(glMesh);
+    //makeRing(glMesh);
+    //makeSharpCube(glMesh);
+    //makeMobius(glMesh);
+    //makeHild(glMesh);
+    //cout<< glMesh.faceVect.size()<<" "<<glMesh.edgeVect.size()<<" "<<glMesh.vertVect.size();
+    //computeNormals(glMesh.vertVect);
     //ccSubDivision();
     Subdivision myCC(glMesh);
     glMesh = myCC.ccSubdivision(level);
 }
 
 void init(int level, string inputSIF){
-    makeWithSIF(glMesh.FaceVect, glMesh.EdgeVect, glMesh.VertVect, inputSIF);
+    makeWithSIF(glMesh, inputSIF);
     //cout<<glMesh.FaceVect.size()<<" "<< glMesh.VertVect.size()<<endl;
     Subdivision myCC(glMesh);
     glMesh = myCC.ccSubdivision(level);
@@ -1779,7 +900,7 @@ void render(void) {
     angle += 0.1;
     if (angle > 360) {angle -= 360;}
     glRotatef(angle, 0, 0, 1);
-    for(dispFaceIt = glMesh.FaceVect.begin(); dispFaceIt < glMesh.FaceVect.end(); dispFaceIt++){
+    for(dispFaceIt = glMesh.faceVect.begin(); dispFaceIt < glMesh.faceVect.end(); dispFaceIt++){
         tempFace = *dispFaceIt;
         Vertex * tempv;
         vector<Vertex*>::iterator vIt;
