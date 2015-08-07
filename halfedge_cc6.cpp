@@ -54,8 +54,6 @@ Mesh glMesh1;
 //************************************************************
 
 void makePyramid(Mesh &mesh){
-    vector<Face*>::iterator faceIt;
-    vector<Halfedge*>::iterator edgeIt;
     flushMesh(mesh);
     vector<Face*> &faceVect = mesh.faceVect;
     vector<Halfedge*> &edgeVect = mesh.edgeVect;
@@ -102,8 +100,6 @@ void makePyramid(Mesh &mesh){
 }
 
 void makeCube(Mesh &mesh){
-    vector<Face*>::iterator faceIt;
-    vector<Halfedge*>::iterator edgeIt;
     flushMesh(mesh);
     vector<Face*> &faceVect = mesh.faceVect;
     vector<Halfedge*> &edgeVect = mesh.edgeVect;
@@ -162,8 +158,6 @@ void makeCube(Mesh &mesh){
 }
 
 void makeOpenCube(Mesh &mesh){
-    vector<Face*>::iterator faceIt;
-    vector<Halfedge*>::iterator edgeIt;
     flushMesh(mesh);
     vector<Face*> &faceVect = mesh.faceVect;
     vector<Halfedge*> &edgeVect = mesh.edgeVect;
@@ -216,8 +210,6 @@ void makeOpenCube(Mesh &mesh){
 }
 
 void makeRing(Mesh &mesh){
-    vector<Face*>::iterator faceIt;
-    vector<Halfedge*>::iterator edgeIt;
     flushMesh(mesh);
     vector<Face*> &faceVect = mesh.faceVect;
     vector<Halfedge*> &edgeVect = mesh.edgeVect;
@@ -269,8 +261,6 @@ void makeRing(Mesh &mesh){
 }
 
 void makeSharpCube(Mesh &mesh){
-    vector<Face*>::iterator faceIt;
-    vector<Halfedge*>::iterator edgeIt;
     flushMesh(mesh);
     vector<Face*> &faceVect = mesh.faceVect;
     vector<Halfedge*> &edgeVect = mesh.edgeVect;
@@ -322,8 +312,6 @@ void makeSharpCube(Mesh &mesh){
 }
 
 void makeOctahedron(Mesh &mesh){
-    vector<Face*>::iterator faceIt;
-    vector<Halfedge*>::iterator edgeIt;
     flushMesh(mesh);
     vector<Face*> &faceVect = mesh.faceVect;
     vector<Halfedge*> &edgeVect = mesh.edgeVect;
@@ -409,11 +397,6 @@ void makeSharpOctahedron(Mesh &mesh){
 }
 
 void makeNormalStrip(Mesh &mesh){
-    vector<Face*>::iterator faceIt;
-    vector<Halfedge*>::iterator edgeIt;
-    Vertex * tempVert;
-    Halfedge * tempEdge;
-    Face * tempFace;
     flushMesh(mesh);
     vector<Face*> &faceVect = mesh.faceVect;
     vector<Halfedge*> &edgeVect = mesh.edgeVect;
@@ -457,8 +440,6 @@ void makeNormalStrip(Mesh &mesh){
 }
 
 void makeMobius(Mesh &mesh){
-    vector<Face*>::iterator faceIt;
-    vector<Halfedge*>::iterator edgeIt;
     flushMesh(mesh);
     vector<Face*> &faceVect = mesh.faceVect;
     vector<Halfedge*> &edgeVect = mesh.edgeVect;
@@ -510,9 +491,6 @@ void makeMobius(Mesh &mesh){
     v9 -> ID = 9;
     vX -> ID = 10;
 
-    v9 -> onMobiusSibling = true;
-    vX -> onMobiusSibling = true;
-
     makeRectFace(v1, v5, vX, v9, faceVect, edgeVect);
     makeRectFace(vX, v9, v6, v2, faceVect, edgeVect);
     makeRectFace(v3, v2, v6, v7, faceVect, edgeVect);
@@ -523,8 +501,6 @@ void makeMobius(Mesh &mesh){
 }
 
 void makeHild(Mesh &mesh){
-    vector<Face*>::iterator faceIt;
-    vector<Halfedge*>::iterator edgeIt;
     flushMesh(mesh);
     vector<Face*> &faceVect = mesh.faceVect;
     vector<Halfedge*> &edgeVect = mesh.edgeVect;
@@ -792,12 +768,12 @@ void init(int level){
     //makeCube(glMesh);
     //makeCube(glMesh);
     //makePyramid(glMesh);
-    makeSharpOctahedron(glMesh);
+    //makeSharpOctahedron(glMesh);
     //makeOctahedron(glMesh);
     //makeOpenCube(glMesh);
     //makeRing(glMesh);
     //makeSharpCube(glMesh);
-    //makeMobius(glMesh);
+    makeMobius(glMesh);
     //makeHild(glMesh);
     //cout<< glMesh.faceVect.size()<<" "<<glMesh.edgeVect.size()<<" "<<glMesh.vertVect.size();
     //computeNormals(glMesh.vertVect);
