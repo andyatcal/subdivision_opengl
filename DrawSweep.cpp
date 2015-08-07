@@ -5,7 +5,6 @@
 // 
 //
 
-
 #include <GLUT/GLUT.h>
 #include <math.h>
 #include <vector>
@@ -94,12 +93,7 @@ void makeCircleSweep(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vecto
         vec3 v3 = vec3(0, -1, -2);
         vec3 v4 = vec3(0, -2, -1);
         vec3 trans = vec3(0 , 3, 0);
-        /* //360
-        v1 = rotate(v1, angle, xaxis);
-        v2 = rotate(v2, angle, xaxis);
-        v3 = rotate(v3, angle, xaxis);
-        v4 = rotate(v4, angle, xaxis);
-        */
+
         // I will twist m * 180 of this sweep.
         int m = 11;
 
@@ -194,9 +188,6 @@ void makeCircleSweep(vector<Face*> &faceVect, vector<Halfedge*> &edgeVect, vecto
                 (*edgeIt2)->sibling = *edgeIt1;
 
             } else if (((*edgeIt1) -> start == (*edgeIt2) -> start) &&((*edgeIt1) -> end == (*edgeIt2) -> end)) {
-                //cout<<"Hey, here is a mobius pair!"<<endl;
-                //cout<<"One starts from vertex "<<(*edgeIt1) -> start -> ID<<" and it ends at vertex "<<(*edgeIt1) -> end -> ID<<endl;
-                //cout<<"Another starts from vertex "<<(*edgeIt2) -> start -> ID<<" and it ends at vertex "<<(*edgeIt2) -> end -> ID<<endl;
 
                 (*edgeIt1)->mobiusSibling = *edgeIt2;
                 (*edgeIt2)->mobiusSibling = *edgeIt1;

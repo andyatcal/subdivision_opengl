@@ -71,20 +71,22 @@ void makeSquare(Mesh &mesh) {
     vertVect.push_back(v3);
     vertVect.push_back(v4);
  
-    v1 -> position = vec3(1, 1, 1);
-    v2 -> position = vec3(1, -1, 1);
-    v3 -> position = vec3(-1, -1, 1);
-    v4 -> position = vec3(-1, 1, 1);
+    v1 -> position = vec3(1, 1, 0);
+    v2 -> position = vec3(1, -1, 0);
+    v3 -> position = vec3(-1, -1, 0);
+    v4 -> position = vec3(-1, 1, 0);
 
     v1 -> ID = 1;
     v2 -> ID = 2;
     v3 -> ID = 3;
     v4 -> ID = 4;
+
+    makeRectFace(v1, v2, v3, v4, faceVect, edgeVect);
+    buildConnections(mesh);
+
 }
 // Initiate the mesh for OpenGL to render.
 void init(int level);
-
-void init(int level, string inputSIF);
 
 void init(int level){
     makeSquare(glMesh);
@@ -164,7 +166,7 @@ void initRendering(){
     GLfloat white[] = {0.8f, 0.8f, 0.8f, 1.0f};
     GLfloat yellow[] = {.8f, .8f, 0.f, 1.f};
     GLfloat purple[] = {.8f, 0.f, .8f, 1.f};
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, yellow);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, purple);
     glMaterialfv(GL_BACK, GL_DIFFUSE, purple);
     //glMaterialfv(GL_FRONT, GL_SPECULAR, white);
     GLfloat shininess[] = {50};
@@ -174,7 +176,7 @@ void initRendering(){
 void render(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
-    gluLookAt(5, 0, 0, 0, 0, 0, 0, 0, 1);   //  eye position, aim point, up direction
+    gluLookAt(5, 5, 5, 0, 0, 0, 0, 0, 1);   //  eye position, aim point, up direction
     vector<Face*>::iterator dispFaceIt;
     Face * tempFace;
     angle += 0.1;
@@ -279,16 +281,12 @@ int main(int argc, char** argv) {
     //Process the command line arguments
     int level;
     string inputSIF;
-    if(argc == 1 || argc > 3){
-        cout<<"USAGE: ./NAME_OF_PROGRAM LEVEL_OF_SUBDIVISION INPUT_SIF_FILE.";
+    if(argc == 1 || argc > 2){
+        cout<<"USAGE: ./NAME_OF_PROGRAM LEVEL_OF_SUBDIVISION.";
         exit(1);
     } else if(argc == 2){
         level = stoi(argv[1]);
         init(level);
-    } else if(argc == 3){
-        level = stoi(argv[1]);
-        inputSIF = argv[2];
-        init(level, inputSIF);
     }
     glutInitWindowSize(viewport.width, viewport.hight);
     glutInitWindowPosition(100, 100);
