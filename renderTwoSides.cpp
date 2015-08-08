@@ -112,7 +112,7 @@ void mousePressed(int button, int state, int x, int y);
 void mouseMoved(int x, int y);
 
 void initRendering(){
-
+    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
@@ -167,7 +167,7 @@ void initRendering(){
     GLfloat yellow[] = {.8f, .8f, 0.f, 1.f};
     GLfloat purple[] = {.8f, 0.f, .8f, 1.f};
     glMaterialfv(GL_FRONT, GL_DIFFUSE, purple);
-    glMaterialfv(GL_BACK, GL_DIFFUSE, purple);
+    glMaterialfv(GL_BACK, GL_DIFFUSE, yellow);
     //glMaterialfv(GL_FRONT, GL_SPECULAR, white);
     GLfloat shininess[] = {50};
     glMaterialfv(GL_FRONT, GL_SHININESS, shininess);

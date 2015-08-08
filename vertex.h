@@ -31,7 +31,11 @@ public:
     // Track if this vertex on a mobius junction.
     bool onMobiusSibling;
     // Copy of vertex position, to avoid conficts in makeVertPoints of subdivision.
-    vec3 copy; 
+    vec3 copy;
+    // The positive offset for this vertex.
+    vec3 posOffset;
+    // The negative offset for this vertex.
+    vec3 negOffset;
     // Constructor.
     Vertex();
     // Contructor given initial location of vertex.

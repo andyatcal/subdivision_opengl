@@ -332,4 +332,47 @@ void makeBoundaries(vector<vector<Vertex*> > &boundaries,
     }
 }
 
+// Get the vertex normal at the end of a halfedge. 
+// @param currEdge: pointing to one of the 
+vec3 getNormal(Halfedge * currEdge){
+    Vertex * v1 = currEdge -> start;
+    Vertex * v2 = currEdge -> end;
+    Vertex * v3 = currEdge -> next -> end;
+
+    vec3 oneEdge = v2 -> position - v1 -> position;
+    vec3 secondEdge = v3 -> position - v2 -> position;
+
+    vec3 result = cross(normalize(oneEdge), normalize(secondEdge));
+
+    return normalize(result);
+}
+
+//iterate over every vertex in the mesh and compute its normal
+void computeNormals(vector<Vertex*> &vertVect){
+
+    vector<Vertex*>::iterator it;
+    Halfedge * firstOutEdge;
+    Halfedge * nextOutEdge;
+    vec3 avgNorm = vec3(0, 0, 0);
+    Vertex * currVert;
+
+    for(it = vertVect.begin(); it < vertVect.end(); it++){
+        currVert = *it;
+        int n = 0;
+        firstOutEdge = currVert -> oneOutEdge;
+        nextOutEdge = firstOutEdge;
+        do {
+            if(nextOutEdge -> sibling == NULL && nextOutEdge -> mobiusSibling == NULL) {
+                avgNorm += getNormal(nextOutEdge -> previousBoundary);
+                nextOutEdge = nextOutEdge -> previousBoundary -> next;   
+            } else {
+                avgNorm += getNormal(nextOutEdge -> sibling);
+                nextOutEdge = nextOutEdge -> sibling -> next;
+            }
+            n += 1;
+        } while ( nextOutEdge != firstOutEdge);
+        avgNorm /= n;
+        currVert->normal = normalize(avgNorm);
+    }
+}
 #endif // __MESHUTILS_H__
