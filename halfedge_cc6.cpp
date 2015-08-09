@@ -20,6 +20,7 @@
 #include "subdivision.h"
 #include "meshUtils.h"
 #include "viewport.h"
+#include "offset.h"
 
 #define PI 3.1415926535897932384626433832795028841971693993751058209
 
@@ -47,7 +48,17 @@ float VERYSMALLVALUE = 0.001;
 // The mesh to subdivide and display.
 Mesh glMesh;
 // Another mesh to subdived and display.
-Mesh glMesh1;
+Mesh glPosMesh;
+Mesh glNegMesh;
+
+// Colors
+GLfloat WHITE[] = {0.8f, 0.8f, 0.8f, 1.0f};
+GLfloat RED[] = {0.8f, 0.0f, 0.0f, 1.0f};
+GLfloat GREEN[] = {0.0f, 0.8f, 0.0f, 1.0f};
+GLfloat BLUE[] = {0.0f, 0.0f, 0.8f, 1.0f};
+GLfloat YELLOW[] = {.8f, .8f, 0.f, 1.f};
+GLfloat PURPLE[] = {.8f, 0.f, .8f, 1.f};
+GLfloat CYAN[] = {.0f, .8f, 0.8f, 1.f};
 
 //************************************************************
 //          Let's build some Shapes!!
@@ -755,29 +766,30 @@ void init(int level, string inputSIF);
 
 void init(int level){
     //makeCube(glMesh);
-    makeCube(glMesh);
     //makePyramid(glMesh);
     //makeSharpOctahedron(glMesh);
     //makeOctahedron(glMesh);
-    //makeOpenCube(glMesh);
+    makeOpenCube(glMesh);
     //makeRing(glMesh);
     //makeSharpCube(glMesh);
     //makeMobius(glMesh);
     //makeHild(glMesh);
     //cout<< glMesh.faceVect.size()<<" "<<glMesh.edgeVect.size()<<" "<<glMesh.vertVect.size();
-    //computeNormals(glMesh.vertVect);
     //ccSubDivision();
     Subdivision myCC(glMesh);
     glMesh = myCC.ccSubdivision(level);
-    computeNormals(glMesh.vertVect);
+    computeNormals(glMesh);
+    Offset offset(glMesh, 0.2);
+    glPosMesh = offset.posOffsetMesh;
+    glNegMesh = offset.negOffsetMesh;
 }
 
 void init(int level, string inputSIF){
     makeWithSIF(glMesh, inputSIF);
-    cout<<glMesh.faceVect.size()<<" "<< glMesh.vertVect.size()<<endl;
+    //cout<<glMesh.faceVect.size()<<" "<< glMesh.vertVect.size()<<endl;
     Subdivision myCC(glMesh);
     glMesh = myCC.ccSubdivision(level);
-    computeNormals(glMesh.vertVect);
+    computeNormals(glMesh);
 }
 //************************************************************
 //          OpenGL Display Functions
@@ -815,7 +827,7 @@ void initRendering(){
     glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular0);
     glLightfv(GL_LIGHT0, GL_POSITION, light_position0);
 
-    //glEnable(GL_LIGHT1);
+    glEnable(GL_LIGHT1);
 
     GLfloat light_ambient1[] = { 0.0, 0.0, 0.0, 1.0 };
     GLfloat light_diffuse1[] = { 1.0, 1.0, 1.0, 1.0 };
@@ -827,7 +839,7 @@ void initRendering(){
     glLightfv(GL_LIGHT1, GL_SPECULAR, light_specular1);
     glLightfv(GL_LIGHT1, GL_POSITION, light_position1);
 
-    //glEnable(GL_LIGHT2);
+    glEnable(GL_LIGHT2);
 
     GLfloat light_ambient2[] = { 0.0, 0.0, 0.0, 1.0 };
     GLfloat light_diffuse2[] = { 1.0, 1.0, 1.0, 1.0 };
@@ -839,7 +851,7 @@ void initRendering(){
     glLightfv(GL_LIGHT2, GL_SPECULAR, light_specular2);
     glLightfv(GL_LIGHT2, GL_POSITION, light_position2);
 
-    //glEnable(GL_LIGHT3);
+    glEnable(GL_LIGHT3);
 
     GLfloat light_ambient3[] = { 0.0, 0.0, 0.0, 1.0 };
     GLfloat light_diffuse3[] = { 1.0, 1.0, 1.0, 1.0 };
@@ -851,11 +863,8 @@ void initRendering(){
     glLightfv(GL_LIGHT3, GL_SPECULAR, light_specular3);
     glLightfv(GL_LIGHT3, GL_POSITION, light_position3);
 
-    GLfloat white[] = {0.8f, 0.8f, 0.8f, 1.0f};
-    GLfloat yellow[] = {.8f, .8f, 0.f, 1.f};
-    GLfloat purple[] = {.8f, 0.f, .8f, 1.f};
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, yellow);
-    glMaterialfv(GL_BACK, GL_DIFFUSE, purple);
+    //glMaterialfv(GL_FRONT, GL_DIFFUSE, yellow);
+    //glMaterialfv(GL_BACK, GL_DIFFUSE, purple);
     //glMaterialfv(GL_FRONT, GL_SPECULAR, white);
     GLfloat shininess[] = {50};
     glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
@@ -864,36 +873,17 @@ void initRendering(){
 void render(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
-    gluLookAt(7, 0, 0, 0, 0, 0, 0, 0, 1);   //  eye position, aim point, up direction
-    vector<Face*>::iterator dispFaceIt;
-    Face * tempFace;
+    gluLookAt(5, 5, 5, 0, 0, 0, 0, 0, 1);   //  eye position, aim point, up direction
+
     angle += 0.1;
     if (angle > 360) {angle -= 360;}
     glRotatef(angle, 0, 0, 1);
-    cout<<endl<<endl;
-    for(dispFaceIt = glMesh.faceVect.begin(); dispFaceIt < glMesh.faceVect.end(); dispFaceIt++){
-        cout<<"A new Face Begin HERE!"<<endl;
-        tempFace = *dispFaceIt;
-        Vertex * tempv;
-        vector<Vertex*>::iterator vIt;
-        vector<Vertex*> vertices = tempFace -> vertices;
-        glBegin(GL_POLYGON);
-        for(vIt = vertices.begin(); vIt < vertices.end(); vIt++) {
-            cout<<"Vert ID: "<<  (*vIt) -> ID<<endl;
-            tempv = *vIt;
-            float normx = tempv -> normal[0];
-            float normy = tempv -> normal[1];
-            float normz = tempv -> normal[2];
-            cout<<"normx: "<<normx<<" normy: "<<normy<<" normz: "<<normz<<endl;
-            glNormal3f(normx, normy, normz);
-            float x = tempv -> position[0];
-            float y = tempv -> position[1];
-            float z = tempv -> position[2];
-            cout<<"x: "<<x<<" y: "<<y<<" z: "<<z<<endl;
-            glVertex3f(x, y, z);
-        }
-        glEnd();
-    }
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, BLUE);
+    drawMesh(glMesh);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, CYAN);
+    drawMesh(glPosMesh);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, GREEN);
+    drawMesh(glNegMesh);
     glutSwapBuffers();
 }
 

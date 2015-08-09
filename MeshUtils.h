@@ -167,6 +167,7 @@ void makePolygonFace(vector<Vertex*> vertices,
     vector<Vertex*>::iterator vIt;
     Vertex * currVert;
     Halfedge * currEdge;
+
     for(vIt = vertices.begin(); vIt < vertices.end(); vIt++) {
         currVert = *vIt;
         Halfedge * tempEdge = new Halfedge;
@@ -388,6 +389,34 @@ void computeNormals(vector<Vertex*> &vertVect){
         } while ( nextOutEdge != firstOutEdge);
         avgNorm /= n;
         currVert->normal = normalize(avgNorm);
+    }
+}
+
+void drawMesh(Mesh & mesh) {
+    Face * tempFace;
+    vector<Face*>::iterator dispFaceIt;
+    for(dispFaceIt = mesh.faceVect.begin(); dispFaceIt < mesh.faceVect.end(); dispFaceIt++){
+        //cout<<"A new Face Begin HERE!"<<endl;
+        tempFace = *dispFaceIt;
+        Vertex * tempv;
+        vector<Vertex*>::iterator vIt;
+        vector<Vertex*> vertices = tempFace -> vertices;
+        glBegin(GL_POLYGON);
+        for(vIt = vertices.begin(); vIt < vertices.end(); vIt++) {
+            //cout<<"Vert ID: "<<  (*vIt) -> ID<<endl;
+            tempv = *vIt;
+            float normx = tempv -> normal[0];
+            float normy = tempv -> normal[1];
+            float normz = tempv -> normal[2];
+            //cout<<"normx: "<<normx<<" normy: "<<normy<<" normz: "<<normz<<endl;
+            glNormal3f(normx, normy, normz);
+            float x = tempv -> position[0];
+            float y = tempv -> position[1];
+            float z = tempv -> position[2];
+            //cout<<"x: "<<x<<" y: "<<y<<" z: "<<z<<endl;
+            glVertex3f(x, y, z);
+        }
+        glEnd();
     }
 }
 #endif // __MESHUTILS_H__
