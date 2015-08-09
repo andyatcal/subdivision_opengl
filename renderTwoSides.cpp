@@ -116,7 +116,7 @@ void mousePressed(int button, int state, int x, int y);
 void mouseMoved(int x, int y);
 
 void initRendering(){
-    //glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
@@ -180,12 +180,12 @@ void initRendering(){
 void render(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
-    gluLookAt(5, 0, 5, 0, 0, 0, 0, 0, 1);   //  eye position, aim point, up direction
+    gluLookAt(5, 0, 0, 0, 0, 0, 0, 0, 1);   //  eye position, aim point, up direction
     vector<Face*>::iterator dispFaceIt;
     Face * tempFace;
     angle += 0.1;
     if (angle > 360) {angle -= 360;}
-    glRotatef(angle, 0, 0, 1);
+    glRotatef(angle, 0, 1, 0);
     for(dispFaceIt = glMesh.faceVect.begin(); dispFaceIt < glMesh.faceVect.end(); dispFaceIt++){
         tempFace = *dispFaceIt;
         Vertex * tempv;
@@ -195,15 +195,15 @@ void render(void) {
         for(vIt = vertices.begin(); vIt < vertices.end(); vIt++) {
             tempv = *vIt;
             cout<<(*vIt) -> ID;
-            float normx = tempv -> position[0];
-            float normy = tempv -> position[1];
-            float normz = tempv -> position[2];
+            float normx = tempv -> normal[0];
+            float normy = tempv -> normal[1];
+            float normz = tempv -> normal[2];
             cout<<"normx: "<<normx<<" normy: "<<normy<<" normz: "<<normz<<endl;
             glNormal3f(normx, normy, normz);
             float x = tempv -> position[0];
             float y = tempv -> position[1];
             float z = tempv -> position[2];
-            //cout<<"x: "<<x<<" y: "<<y<<" z: "<<z<<endl;
+            cout<<"x: "<<x<<" y: "<<y<<" z: "<<z<<endl;
             glVertex3f(x, y, z);
         }
         glEnd();
