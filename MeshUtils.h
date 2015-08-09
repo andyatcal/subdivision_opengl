@@ -335,7 +335,7 @@ void makeBoundaries(vector<vector<Vertex*> > &boundaries,
 
 // Get the vertex normal at the end of a halfedge. 
 // @param currEdge: pointer of the edge, which the vertex on the end of.
-vec3 getNormalEndOfEdge(Halfedge * currEdge){
+vec3 getEndOfEdgeNormal(Halfedge * currEdge){
     Vertex * v1 = currEdge -> start;
     Vertex * v2 = currEdge -> end;
     Vertex * v3 = currEdge -> next -> end;
@@ -343,60 +343,64 @@ vec3 getNormalEndOfEdge(Halfedge * currEdge){
     vec3 oneEdge = v2 -> position - v1 -> position;
     vec3 secondEdge = v3 -> position - v2 -> position;
 
-    vec3 result = cross(normalize(oneEdge), normalize(secondEdge));
+    vec3 result = cross(oneEdge, secondEdge);
 
     return normalize(result);
 }
 
-vec3 getNormalStartOfEdge(Halfedge * currEdge){
-    Vertex * v1 = currEdge -> previous -> start;
-    Vertex * v2 = currEdge -> start;
-    Vertex * v3 = currEdge -> end;
-
-    vec3 oneEdge = v2 -> position - v1 -> position;
-    vec3 secondEdge = v3 -> position - v2 -> position;
-
-    vec3 result = cross(normalize(oneEdge), normalize(secondEdge));
-
-    return normalize(result);
+// Get the surface normal at the end of a halfedge. 
+// @param currEdge: pointer of the edge, which the vertex on the end of.
+vec3 getFaceNormal(Face * currFace){
+    Halfedge * firstEdge = currFace -> oneSideEdge;
+    Halfedge * currEdge;
+    currEdge = firstEdge;
+    vec3 avgNorm(0, 0, 0);
+    do {
+        avgNorm += getEndOfEdgeNormal(currEdge);
+        currEdge = currEdge -> next;
+    } while (currEdge != firstEdge);
+    return normalize(avgNorm);
 }
 
-//iterate over every vertex in the mesh and compute its normal
-// @param vertVect: the vector of vertex to compute normals.
-void computeNormals(vector<Vertex*> &vertVect){
-
-    vector<Vertex*>::iterator it;
+// Get the surface normal at the end of a halfedge. 
+// @param currEdge: pointer of the edge, which the vertex on the end of.
+void getVertexNormal(Vertex * currVert){
     Halfedge * firstOutEdge;
     Halfedge * nextOutEdge;
-    Vertex * currVert;
+    firstOutEdge = currVert -> oneOutEdge;
+    nextOutEdge = firstOutEdge;
+    vec3 avgNorm(0, 0, 0);
+    do {
+        avgNorm += getFaceNormal(nextOutEdge -> heFace);
+        if(nextOutEdge -> sibling == NULL && nextOutEdge -> mobiusSibling == NULL) {
+            nextOutEdge = nextOutEdge -> previousBoundary -> next;   
+        } else {
+            // This Part need to be fixed. Andy
+            nextOutEdge = nextOutEdge -> sibling -> next;
+        }
+    } while ( nextOutEdge != firstOutEdge);
+    currVert -> normal = normalize(avgNorm);
+}
 
-    for(it = vertVect.begin(); it < vertVect.end(); it++){
-        currVert = *it;
-        int n = 0;
-        vec3 avgNorm = vec3(0, 0, 0);
-        firstOutEdge = currVert -> oneOutEdge;
-        nextOutEdge = firstOutEdge;
-        do {
-            if(nextOutEdge -> sibling == NULL && nextOutEdge -> mobiusSibling == NULL) {
-                avgNorm += getNormalEndOfEdge(nextOutEdge -> previousBoundary);
-                nextOutEdge = nextOutEdge -> previousBoundary -> next;   
-            } else {
-                // This Part need to be fixed. Andy
-                avgNorm += getNormalEndOfEdge(nextOutEdge -> sibling);
-                nextOutEdge = nextOutEdge -> sibling -> next;
-            }
-            n += 1;
-        } while ( nextOutEdge != firstOutEdge);
-        avgNorm /= n;
-        currVert->normal = normalize(avgNorm);
+// Iterate over every vertex in the mesh and compute its normal
+// @param vertVect: the vector of vertex to compute normals.
+void computeNormals(Mesh & mesh){
+    vector<Vertex*> vertVect = mesh.vertVect;
+    vector<Vertex*>::iterator vIt;
+    Vertex * currVert;
+    for(vIt = vertVect.begin(); vIt < vertVect.end(); vIt++){
+        getVertexNormal(*vIt);
     }
 }
 
+// Draw a mesh in OpenGL with GL_POLYGON
+// @param mesh: reference to the mesh to draw.
 void drawMesh(Mesh & mesh) {
     Face * tempFace;
     vector<Face*>::iterator dispFaceIt;
+    cout<<endl;
     for(dispFaceIt = mesh.faceVect.begin(); dispFaceIt < mesh.faceVect.end(); dispFaceIt++){
-        //cout<<"A new Face Begin HERE!"<<endl;
+        cout<<"A new Face Begin HERE!"<<endl;
         tempFace = *dispFaceIt;
         Vertex * tempv;
         vector<Vertex*>::iterator vIt;
@@ -408,12 +412,12 @@ void drawMesh(Mesh & mesh) {
             float normx = tempv -> normal[0];
             float normy = tempv -> normal[1];
             float normz = tempv -> normal[2];
-            //cout<<"normx: "<<normx<<" normy: "<<normy<<" normz: "<<normz<<endl;
+            cout<<"normx: "<<normx<<" normy: "<<normy<<" normz: "<<normz<<endl;
             glNormal3f(normx, normy, normz);
             float x = tempv -> position[0];
             float y = tempv -> position[1];
             float z = tempv -> position[2];
-            //cout<<"x: "<<x<<" y: "<<y<<" z: "<<z<<endl;
+            cout<<"x: "<<x<<" y: "<<y<<" z: "<<z<<endl;
             glVertex3f(x, y, z);
         }
         glEnd();

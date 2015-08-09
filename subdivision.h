@@ -423,6 +423,7 @@ Mesh Subdivision::ccSubdivision(int level){
         makeEdgePoints(currMesh.edgeVect, currMesh.vertVect);
         makeVertexPoints(newMesh.vertVect);
         compileNewMesh(currMesh.faceVect, newMesh.faceVect, newMesh.edgeVect);
+        computeNormals(currMesh);
         while(!currMesh.faceVect.empty()){
             tempFace = currMesh.faceVect.back();
             currMesh.faceVect.pop_back();

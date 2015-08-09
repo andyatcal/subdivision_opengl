@@ -17,8 +17,8 @@
 #include "halfedge.h"
 #include "face.h"
 #include "mesh.h"
-#include "subdivision.h"
 #include "meshUtils.h"
+#include "subdivision.h"
 #include "viewport.h"
 #include "offset.h"
 
@@ -880,10 +880,12 @@ void render(void) {
     glRotatef(angle, 0, 0, 1);
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, BLUE);
     drawMesh(glMesh);
+    /*
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, CYAN);
     drawMesh(glPosMesh);
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, GREEN);
     drawMesh(glNegMesh);
+    */
     glutSwapBuffers();
 }
 

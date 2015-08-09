@@ -66,8 +66,8 @@ Offset::Offset(Mesh & mesh, float val) {
     }
     buildConnections(posOffsetMesh);
     buildConnections(negOffsetMesh);
-    computeNormals(posOffsetMesh.vertVect);
-    computeNormals(negOffsetMesh.vertVect);
+    computeNormals(posOffsetMesh);
+    computeNormals(negOffsetMesh);
 }
 
 void Offset::resetOffsetVal(float val) {
