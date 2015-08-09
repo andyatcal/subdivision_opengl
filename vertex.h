@@ -32,10 +32,10 @@ public:
     bool onMobiusSibling;
     // Copy of vertex position, to avoid conficts in makeVertPoints of subdivision.
     vec3 copy;
-    // The positive offset for this vertex.
-    vec3 posOffset;
-    // The negative offset for this vertex.
-    vec3 negOffset;
+    // Pointer to the positive offset for this vertex.
+    Vertex * posOffset;
+    // Pointer to the negative offset for this vertex.
+    Vertex * negOffset;
     // Constructor.
     Vertex();
     // Contructor given initial location of vertex.
@@ -50,6 +50,7 @@ Vertex::Vertex(){
     oneOutEdge = NULL;
     ID = 0;
     onMobiusSibling = false;
+    posOffset = negOffset = NULL;
 }
 
 Vertex::Vertex(float x, float y, float z) {
@@ -57,6 +58,7 @@ Vertex::Vertex(float x, float y, float z) {
     oneOutEdge = NULL;
     ID = 0;
     onMobiusSibling = false;
+    posOffset = negOffset = NULL;
 }
 
 void Vertex::makeCopy() {

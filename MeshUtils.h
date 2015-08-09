@@ -367,21 +367,21 @@ void computeNormals(vector<Vertex*> &vertVect){
     vector<Vertex*>::iterator it;
     Halfedge * firstOutEdge;
     Halfedge * nextOutEdge;
-    vec3 avgNorm = vec3(0, 0, 0);
     Vertex * currVert;
 
     for(it = vertVect.begin(); it < vertVect.end(); it++){
         currVert = *it;
         int n = 0;
+        vec3 avgNorm = vec3(0, 0, 0);
         firstOutEdge = currVert -> oneOutEdge;
         nextOutEdge = firstOutEdge;
         do {
             if(nextOutEdge -> sibling == NULL && nextOutEdge -> mobiusSibling == NULL) {
-                avgNorm += getNormalStartOfEdge(nextOutEdge -> previousBoundary);
+                avgNorm += getNormalEndOfEdge(nextOutEdge -> previousBoundary);
                 nextOutEdge = nextOutEdge -> previousBoundary -> next;   
             } else {
                 // This Part need to be fixed. Andy
-                avgNorm += getNormalStartOfEdge(nextOutEdge -> sibling);
+                avgNorm += getNormalEndOfEdge(nextOutEdge -> sibling);
                 nextOutEdge = nextOutEdge -> sibling -> next;
             }
             n += 1;

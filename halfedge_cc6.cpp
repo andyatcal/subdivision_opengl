@@ -774,9 +774,10 @@ void init(int level){
 
 void init(int level, string inputSIF){
     makeWithSIF(glMesh, inputSIF);
-    //cout<<glMesh.FaceVect.size()<<" "<< glMesh.VertVect.size()<<endl;
+    cout<<glMesh.faceVect.size()<<" "<< glMesh.vertVect.size()<<endl;
     Subdivision myCC(glMesh);
     glMesh = myCC.ccSubdivision(level);
+    computeNormals(glMesh.vertVect);
 }
 //************************************************************
 //          OpenGL Display Functions
@@ -863,19 +864,22 @@ void initRendering(){
 void render(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
-    gluLookAt(5, 0, 0, 0, 0, 0, 0, 0, 1);   //  eye position, aim point, up direction
+    gluLookAt(7, 0, 0, 0, 0, 0, 0, 0, 1);   //  eye position, aim point, up direction
     vector<Face*>::iterator dispFaceIt;
     Face * tempFace;
     angle += 0.1;
     if (angle > 360) {angle -= 360;}
     glRotatef(angle, 0, 0, 1);
+    cout<<endl<<endl;
     for(dispFaceIt = glMesh.faceVect.begin(); dispFaceIt < glMesh.faceVect.end(); dispFaceIt++){
+        cout<<"A new Face Begin HERE!"<<endl;
         tempFace = *dispFaceIt;
         Vertex * tempv;
         vector<Vertex*>::iterator vIt;
         vector<Vertex*> vertices = tempFace -> vertices;
         glBegin(GL_POLYGON);
         for(vIt = vertices.begin(); vIt < vertices.end(); vIt++) {
+            cout<<"Vert ID: "<<  (*vIt) -> ID<<endl;
             tempv = *vIt;
             float normx = tempv -> normal[0];
             float normy = tempv -> normal[1];
