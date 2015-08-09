@@ -695,14 +695,6 @@ void makeWithSIF(Mesh &mesh, string inputSIF){
             numberOfVerticesInShells.push_back(numberOfVerticesInThisShell);
         }
     }
-    /*
-    vector<Halfedge*>::iterator eIt;
-    for( eIt = edgeVect.begin(); eIt < edgeVect.end(); eIt ++) {
-        if((*eIt) -> sibling == NULL) {
-            cout<<"I don't have a sibling! Start from vertex "<<(*eIt) -> start -> ID<<" and I end at vertex "<<(*eIt) -> end -> ID<<endl;
-        }
-    }
-    */
     //Siblings
     vector<Halfedge*>::iterator edgeIt1;
     vector<Halfedge*>::iterator edgeIt2;
@@ -714,9 +706,6 @@ void makeWithSIF(Mesh &mesh, string inputSIF){
                 (*edgeIt2)->sibling = *edgeIt1;
 
             } else if (((*edgeIt1) -> start == (*edgeIt2) -> start ) &&((*edgeIt1) -> end  == (*edgeIt2) -> end)) {
-                //cout<<"Hey, here is a mobius pair!"<<endl;
-                //cout<<"One starts from vertex "<<(*edgeIt1) -> start -> ID<<" and it ends at vertex "<<(*edgeIt1) -> end -> ID<<endl;
-                //cout<<"Another starts from vertex "<<(*edgeIt2) -> start -> ID<<" and it ends at vertex "<<(*edgeIt2) -> end -> ID<<endl;
 
                 (*edgeIt1)->mobiusSibling = *edgeIt2;
                 (*edgeIt2)->mobiusSibling = *edgeIt1;
@@ -766,20 +755,21 @@ void init(int level, string inputSIF);
 
 void init(int level){
     //makeCube(glMesh);
-    //makeCube(glMesh);
+    makeCube(glMesh);
     //makePyramid(glMesh);
     //makeSharpOctahedron(glMesh);
     //makeOctahedron(glMesh);
     //makeOpenCube(glMesh);
     //makeRing(glMesh);
     //makeSharpCube(glMesh);
-    makeMobius(glMesh);
+    //makeMobius(glMesh);
     //makeHild(glMesh);
     //cout<< glMesh.faceVect.size()<<" "<<glMesh.edgeVect.size()<<" "<<glMesh.vertVect.size();
     //computeNormals(glMesh.vertVect);
     //ccSubDivision();
     Subdivision myCC(glMesh);
     glMesh = myCC.ccSubdivision(level);
+    computeNormals(glMesh.vertVect);
 }
 
 void init(int level, string inputSIF){
@@ -807,6 +797,9 @@ void mouseMoved(int x, int y);
 
 void initRendering(){
 
+    // Two sided pr ones side;
+    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
@@ -814,14 +807,14 @@ void initRendering(){
     GLfloat light_ambient0[] = { 0.0, 0.0, 0.0, 10.0 };
     GLfloat light_diffuse0[] = { 1.0, 1.0, 1.0, 10.0 };
     GLfloat light_specular0[] = { 1.0, 1.0, 1.0, 10.0 };
-    GLfloat light_position0[] = { 0, 0, 1, 0.0 };
+    GLfloat light_position0[] = { 0, 0, 100, 0.0 };
 
     glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient0);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse0);
     glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular0);
     glLightfv(GL_LIGHT0, GL_POSITION, light_position0);
 
-    glEnable(GL_LIGHT1);
+    //glEnable(GL_LIGHT1);
 
     GLfloat light_ambient1[] = { 0.0, 0.0, 0.0, 1.0 };
     GLfloat light_diffuse1[] = { 1.0, 1.0, 1.0, 1.0 };
@@ -833,7 +826,7 @@ void initRendering(){
     glLightfv(GL_LIGHT1, GL_SPECULAR, light_specular1);
     glLightfv(GL_LIGHT1, GL_POSITION, light_position1);
 
-    glEnable(GL_LIGHT2);
+    //glEnable(GL_LIGHT2);
 
     GLfloat light_ambient2[] = { 0.0, 0.0, 0.0, 1.0 };
     GLfloat light_diffuse2[] = { 1.0, 1.0, 1.0, 1.0 };
@@ -845,7 +838,7 @@ void initRendering(){
     glLightfv(GL_LIGHT2, GL_SPECULAR, light_specular2);
     glLightfv(GL_LIGHT2, GL_POSITION, light_position2);
 
-    glEnable(GL_LIGHT3);
+    //glEnable(GL_LIGHT3);
 
     GLfloat light_ambient3[] = { 0.0, 0.0, 0.0, 1.0 };
     GLfloat light_diffuse3[] = { 1.0, 1.0, 1.0, 1.0 };
@@ -884,14 +877,15 @@ void render(void) {
         glBegin(GL_POLYGON);
         for(vIt = vertices.begin(); vIt < vertices.end(); vIt++) {
             tempv = *vIt;
-            float normx = tempv -> position[0];
-            float normy = tempv -> position[1];
-            float normz = tempv -> position[2];
+            float normx = tempv -> normal[0];
+            float normy = tempv -> normal[1];
+            float normz = tempv -> normal[2];
+            cout<<"normx: "<<normx<<" normy: "<<normy<<" normz: "<<normz<<endl;
             glNormal3f(normx, normy, normz);
             float x = tempv -> position[0];
             float y = tempv -> position[1];
             float z = tempv -> position[2];
-            //cout<<"x: "<<x<<" y: "<<y<<" z: "<<z<<endl;
+            cout<<"x: "<<x<<" y: "<<y<<" z: "<<z<<endl;
             glVertex3f(x, y, z);
         }
         glEnd();

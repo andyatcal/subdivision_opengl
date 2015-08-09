@@ -334,10 +334,23 @@ void makeBoundaries(vector<vector<Vertex*> > &boundaries,
 
 // Get the vertex normal at the end of a halfedge. 
 // @param currEdge: pointer of the edge, which the vertex on the end of.
-vec3 getNormal(Halfedge * currEdge){
+vec3 getNormalEndOfEdge(Halfedge * currEdge){
     Vertex * v1 = currEdge -> start;
     Vertex * v2 = currEdge -> end;
     Vertex * v3 = currEdge -> next -> end;
+
+    vec3 oneEdge = v2 -> position - v1 -> position;
+    vec3 secondEdge = v3 -> position - v2 -> position;
+
+    vec3 result = cross(normalize(oneEdge), normalize(secondEdge));
+
+    return normalize(result);
+}
+
+vec3 getNormalStartOfEdge(Halfedge * currEdge){
+    Vertex * v1 = currEdge -> previous -> start;
+    Vertex * v2 = currEdge -> start;
+    Vertex * v3 = currEdge -> end;
 
     vec3 oneEdge = v2 -> position - v1 -> position;
     vec3 secondEdge = v3 -> position - v2 -> position;
@@ -364,11 +377,11 @@ void computeNormals(vector<Vertex*> &vertVect){
         nextOutEdge = firstOutEdge;
         do {
             if(nextOutEdge -> sibling == NULL && nextOutEdge -> mobiusSibling == NULL) {
-                avgNorm += getNormal(nextOutEdge -> previousBoundary);
+                avgNorm += getNormalStartOfEdge(nextOutEdge -> previousBoundary);
                 nextOutEdge = nextOutEdge -> previousBoundary -> next;   
             } else {
                 // This Part need to be fixed. Andy
-                avgNorm += getNormal(nextOutEdge -> sibling);
+                avgNorm += getNormalStartOfEdge(nextOutEdge -> sibling);
                 nextOutEdge = nextOutEdge -> sibling -> next;
             }
             n += 1;
