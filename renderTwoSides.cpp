@@ -85,14 +85,18 @@ void makeSquare(Mesh &mesh) {
     buildConnections(mesh);
 
 }
+/*
+Mesh offset() {
+}
+*/
 // Initiate the mesh for OpenGL to render.
 void init(int level);
 
 void init(int level){
     makeSquare(glMesh);
-
     Subdivision myCC(glMesh);
     glMesh = myCC.ccSubdivision(level);
+    computeNormals(glMesh.vertVect);
 }
 //************************************************************
 //          OpenGL Display Functions
@@ -112,7 +116,7 @@ void mousePressed(int button, int state, int x, int y);
 void mouseMoved(int x, int y);
 
 void initRendering(){
-    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+    //glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
@@ -120,14 +124,14 @@ void initRendering(){
     GLfloat light_ambient0[] = { 0.0, 0.0, 0.0, 10.0 };
     GLfloat light_diffuse0[] = { 1.0, 1.0, 1.0, 10.0 };
     GLfloat light_specular0[] = { 1.0, 1.0, 1.0, 10.0 };
-    GLfloat light_position0[] = { 0, 0, 1, 0.0 };
+    GLfloat light_position0[] = { 0, 0, 1.0, 0.0 };
 
     glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient0);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse0);
     glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular0);
     glLightfv(GL_LIGHT0, GL_POSITION, light_position0);
 
-    glEnable(GL_LIGHT1);
+    //glEnable(GL_LIGHT1);
 
     GLfloat light_ambient1[] = { 0.0, 0.0, 0.0, 1.0 };
     GLfloat light_diffuse1[] = { 1.0, 1.0, 1.0, 1.0 };
@@ -139,7 +143,7 @@ void initRendering(){
     glLightfv(GL_LIGHT1, GL_SPECULAR, light_specular1);
     glLightfv(GL_LIGHT1, GL_POSITION, light_position1);
 
-    glEnable(GL_LIGHT2);
+    //glEnable(GL_LIGHT2);
 
     GLfloat light_ambient2[] = { 0.0, 0.0, 0.0, 1.0 };
     GLfloat light_diffuse2[] = { 1.0, 1.0, 1.0, 1.0 };
@@ -151,7 +155,7 @@ void initRendering(){
     glLightfv(GL_LIGHT2, GL_SPECULAR, light_specular2);
     glLightfv(GL_LIGHT2, GL_POSITION, light_position2);
 
-    glEnable(GL_LIGHT3);
+    //glEnable(GL_LIGHT3);
 
     GLfloat light_ambient3[] = { 0.0, 0.0, 0.0, 1.0 };
     GLfloat light_diffuse3[] = { 1.0, 1.0, 1.0, 1.0 };
@@ -176,7 +180,7 @@ void initRendering(){
 void render(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
-    gluLookAt(5, 5, 5, 0, 0, 0, 0, 0, 1);   //  eye position, aim point, up direction
+    gluLookAt(5, 0, 5, 0, 0, 0, 0, 0, 1);   //  eye position, aim point, up direction
     vector<Face*>::iterator dispFaceIt;
     Face * tempFace;
     angle += 0.1;
@@ -190,9 +194,11 @@ void render(void) {
         glBegin(GL_POLYGON);
         for(vIt = vertices.begin(); vIt < vertices.end(); vIt++) {
             tempv = *vIt;
+            cout<<(*vIt) -> ID;
             float normx = tempv -> position[0];
             float normy = tempv -> position[1];
             float normz = tempv -> position[2];
+            cout<<"normx: "<<normx<<" normy: "<<normy<<" normz: "<<normz<<endl;
             glNormal3f(normx, normy, normz);
             float x = tempv -> position[0];
             float y = tempv -> position[1];
@@ -264,9 +270,11 @@ void mousePressed(int button, int state, int x, int y) {
     }
 }
 
+
 void mouseMoved(int x, int y){
     
 }
+
 
 //************************************************************
 //          Main Function

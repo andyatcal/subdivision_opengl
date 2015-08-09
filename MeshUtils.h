@@ -333,7 +333,7 @@ void makeBoundaries(vector<vector<Vertex*> > &boundaries,
 }
 
 // Get the vertex normal at the end of a halfedge. 
-// @param currEdge: pointing to one of the 
+// @param currEdge: pointer of the edge, which the vertex on the end of.
 vec3 getNormal(Halfedge * currEdge){
     Vertex * v1 = currEdge -> start;
     Vertex * v2 = currEdge -> end;
@@ -348,6 +348,7 @@ vec3 getNormal(Halfedge * currEdge){
 }
 
 //iterate over every vertex in the mesh and compute its normal
+// @param vertVect: the vector of vertex to compute normals.
 void computeNormals(vector<Vertex*> &vertVect){
 
     vector<Vertex*>::iterator it;
@@ -366,6 +367,7 @@ void computeNormals(vector<Vertex*> &vertVect){
                 avgNorm += getNormal(nextOutEdge -> previousBoundary);
                 nextOutEdge = nextOutEdge -> previousBoundary -> next;   
             } else {
+                // This Part need to be fixed. Andy
                 avgNorm += getNormal(nextOutEdge -> sibling);
                 nextOutEdge = nextOutEdge -> sibling -> next;
             }
