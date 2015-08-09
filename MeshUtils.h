@@ -370,13 +370,39 @@ void getVertexNormal(Vertex * currVert){
     firstOutEdge = currVert -> oneOutEdge;
     nextOutEdge = firstOutEdge;
     vec3 avgNorm(0, 0, 0);
+    int mobiusCounter = 0;
     do {
-        avgNorm += getFaceNormal(nextOutEdge -> heFace);
-        if(nextOutEdge -> sibling == NULL && nextOutEdge -> mobiusSibling == NULL) {
-            nextOutEdge = nextOutEdge -> previousBoundary -> next;   
+        if(mobiusCounter % 2 == 0) {
+            avgNorm += getFaceNormal(nextOutEdge -> heFace);
         } else {
-            // This Part need to be fixed. Andy
-            nextOutEdge = nextOutEdge -> sibling -> next;
+            avgNorm -= getFaceNormal(nextOutEdge -> heFace);
+        }
+        if(nextOutEdge -> sibling != NULL) {
+            if(mobiusCounter % 2 == 0) {
+                nextOutEdge = nextOutEdge -> sibling -> next;
+            } else {
+                nextOutEdge = nextOutEdge -> sibling -> previous;
+            }
+        } else if(nextOutEdge -> mobiusSibling != NULL) {
+            mobiusCounter += 1;
+            if(mobiusCounter % 2 == 0) {
+                nextOutEdge = nextOutEdge -> mobiusSibling -> next;
+            } else {
+                nextOutEdge = nextOutEdge -> mobiusSibling -> previous;
+            }
+        } else if(!(currVert -> onMobiusSibling)) {
+            if(mobiusCounter % 2 == 0) {
+                nextOutEdge = nextOutEdge -> previousBoundary -> next;
+            } else {
+                nextOutEdge = nextOutEdge -> previousBoundary -> previous;
+            }
+        } else {
+            mobiusCounter += 1;
+            if(mobiusCounter % 2 == 0) {
+                nextOutEdge = nextOutEdge -> mobiusBoundary -> next;
+            } else {
+                nextOutEdge = nextOutEdge -> mobiusBoundary -> previous;
+            }
         }
     } while ( nextOutEdge != firstOutEdge);
     currVert -> normal = normalize(avgNorm);
@@ -398,9 +424,9 @@ void computeNormals(Mesh & mesh){
 void drawMesh(Mesh & mesh) {
     Face * tempFace;
     vector<Face*>::iterator dispFaceIt;
-    cout<<endl;
+    //cout<<endl;
     for(dispFaceIt = mesh.faceVect.begin(); dispFaceIt < mesh.faceVect.end(); dispFaceIt++){
-        cout<<"A new Face Begin HERE!"<<endl;
+        //cout<<"A new Face Begin HERE!"<<endl;
         tempFace = *dispFaceIt;
         Vertex * tempv;
         vector<Vertex*>::iterator vIt;
@@ -412,12 +438,12 @@ void drawMesh(Mesh & mesh) {
             float normx = tempv -> normal[0];
             float normy = tempv -> normal[1];
             float normz = tempv -> normal[2];
-            cout<<"normx: "<<normx<<" normy: "<<normy<<" normz: "<<normz<<endl;
+            //cout<<"normx: "<<normx<<" normy: "<<normy<<" normz: "<<normz<<endl;
             glNormal3f(normx, normy, normz);
             float x = tempv -> position[0];
             float y = tempv -> position[1];
             float z = tempv -> position[2];
-            cout<<"x: "<<x<<" y: "<<y<<" z: "<<z<<endl;
+            //cout<<"x: "<<x<<" y: "<<y<<" z: "<<z<<endl;
             glVertex3f(x, y, z);
         }
         glEnd();

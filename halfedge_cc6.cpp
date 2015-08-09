@@ -759,6 +759,196 @@ void makeWithSIF(Mesh &mesh, string inputSIF){
     vertVect = newVertVect;
 }
 
+void makeWithQuadSIF(Mesh &mesh, string inputSIF){
+    vector<Face*>::iterator faceIt;
+    vector<Halfedge*>::iterator edgeIt;
+    //Flush the old mesh
+    flushMesh(mesh);
+
+    vector<Face*> &faceVect = mesh.faceVect;
+    vector<Halfedge*> &edgeVect = mesh.edgeVect;
+    vector<Vertex*> &vertVect = mesh.vertVect;
+
+    ifstream file(inputSIF);
+    if (!file.good()) {
+        exit(1); // exit if file not found
+    }
+    string nextLine;
+    regex anyR(".*(.*).*");
+    regex vRegex(".*\(v .*$\).*");
+    regex tRegex(".*\(t .*\).*");
+    regex lRegex(".*\(loop .*\).*");
+    regex shRegex(".*\\(shell.*\).*");
+    regex verticesRegex(".*\\(vertices .*\).*");
+    int vCounter = 0;
+    int IDplusBecauseOfShells = 0;
+    vector<vector<int> > boundaries;
+    map<int, int> mergeVertex;
+    int shellNum = 0;
+    vector<int> numberOfVerticesInShells;
+    int tCounter = 0;
+    Vertex * va;
+    Vertex * vb;
+    Vertex * vc;
+    Vertex * vd;
+    while(getline(file, nextLine)){
+        nextLine.pop_back();
+        if(regex_match(nextLine, vRegex)){
+            string temp;
+            temp = nextLine.substr(nextLine.find("\("), nextLine.find("\)") - nextLine.find("\("));
+            temp = temp.substr(temp.find(" ") + 1);
+            float x = stof(temp.substr(0, temp.find(" ")));
+            temp = temp.substr(temp.find(" ") + 1);
+            float y = stof(temp.substr(0, temp.find(" ")));
+            temp = temp.substr(temp.find(" ") + 1);
+            float z = stof(temp);
+            Vertex * newVert = new Vertex;
+            newVert -> position = vec3(x, y, z) * 16.0f; // Can be modifed here to zoom in.
+            vector<Vertex*>::iterator vIt;
+            newVert -> ID = vCounter;
+            for (vIt = vertVect.begin(); vIt < vertVect.end(); vIt ++) {
+                if(distance(newVert -> position, (*vIt) -> position) < VERYSMALLVALUE ){
+                    //cout << "The distance between vertex "<<newVert -> ID<<" and vertex "<<(*vIt) -> ID<<" is: "<<endl;
+                    //cout << newVert -> position - (*vIt) -> position<<endl;
+                    mergeVertex[newVert -> ID] = (*vIt) -> ID;
+                }
+            }
+            //cout<<newVert -> ID<<"Vertex added"<<endl;
+            vertVect.push_back(newVert);
+            vCounter += 1;
+        } else if(regex_match(nextLine, tRegex)){
+            string temp;
+            temp = nextLine.substr(nextLine.find("\("), nextLine.find("\)") - nextLine.find("\("));
+            //cout<<temp<<endl;
+            temp = temp.substr(temp.find(" ") + 1);
+            int a = stoi(temp.substr(0, temp.find(" ")));
+            temp = temp.substr(temp.find(" ") + 1);
+            int b = stoi(temp.substr(0, temp.find(" ")));
+            temp = temp.substr(temp.find(" ") + 1);
+            int c = stoi(temp);
+            if(shellNum > 0) {
+                vector<int>::iterator vertNumIt;
+                IDplusBecauseOfShells = 0;
+                for(vertNumIt = numberOfVerticesInShells.begin(); vertNumIt < numberOfVerticesInShells.end() - 1; vertNumIt ++) {
+                    IDplusBecauseOfShells += *vertNumIt;
+                }
+            }
+            a += IDplusBecauseOfShells;
+            b += IDplusBecauseOfShells;
+            c += IDplusBecauseOfShells;
+            //cout<<"a: "<< a <<" b: "<<b<<" c: "<<c<<endl;
+            auto it = mergeVertex.find(a);
+            if (it != mergeVertex.end()){
+                a = it -> second;
+            }
+            it = mergeVertex.find(b);
+            if (it != mergeVertex.end()) {
+                b = it -> second;
+            }
+            it = mergeVertex.find(c);
+            if (it != mergeVertex.end()){
+                c = it -> second;
+            }
+            //cout<<"tCounter: "<<tCounter<<endl;
+            if(tCounter % 2 == 0) {
+                va = vertVect[a];
+                vb = vertVect[b];
+                vc = vertVect[c];
+                //cout<<va -> ID<<" "<<vb -> ID<<" "<<vc -> ID<<endl;
+            } else {
+                vd = vertVect[c];
+                cout<<vd -> ID<<endl;
+                makeRectFace(va, vb, vc, vd, faceVect, edgeVect);
+            }
+            tCounter += 1;
+        } else if(regex_match(nextLine, lRegex)){
+            vector<int> oneBoundary;
+            string temp;
+            int nextVert;
+            if(shellNum > 1) {
+                vector<int>::iterator vertNumIt;
+                IDplusBecauseOfShells = 0;
+                for(vertNumIt = numberOfVerticesInShells.begin(); vertNumIt < numberOfVerticesInShells.end(); vertNumIt ++) {
+                    IDplusBecauseOfShells += *vertNumIt;
+                }
+            }
+            temp = nextLine.substr(nextLine.find("\("), nextLine.find("\)") - nextLine.find("\("));
+            //cout<<temp<<endl;
+            temp = temp.substr(temp.find(" ") + 1);
+            while(temp.find(" ") != string::npos){
+                nextVert = stoi(temp.substr(0, temp.find(" ")));
+                oneBoundary.push_back(nextVert + IDplusBecauseOfShells);
+                temp = temp.substr(temp.find(" ") + 1);
+            }
+            nextVert = stoi(temp);
+            oneBoundary.push_back(nextVert + IDplusBecauseOfShells);
+            boundaries.push_back(oneBoundary);
+            //cout<<oneBoundary.size()<<endl;          
+        } else if(regex_match(nextLine, shRegex)) {
+            shellNum += 1;
+        } else if(regex_match(nextLine, verticesRegex)){
+            string temp;
+            temp = nextLine.substr(nextLine.find("\("), nextLine.find("\)") - nextLine.find("\("));
+            temp = temp.substr(temp.find(" ") + 1);
+            int numberOfVerticesInThisShell = stoi(temp);
+            numberOfVerticesInShells.push_back(numberOfVerticesInThisShell);
+        }
+    }
+    //Siblings
+    vector<Halfedge*>::iterator edgeIt1;
+    vector<Halfedge*>::iterator edgeIt2;
+    for( edgeIt1 = edgeVect.begin(); edgeIt1 < edgeVect.end(); edgeIt1 ++){
+        for(edgeIt2 = edgeIt1 + 1; edgeIt2 < edgeVect.end(); edgeIt2++){
+            if(((*edgeIt1)->start == (*edgeIt2)->end) && ((*edgeIt1)->end == (*edgeIt2)->start)){
+
+                (*edgeIt1)->sibling = *edgeIt2;
+                (*edgeIt2)->sibling = *edgeIt1;
+
+            } else if (((*edgeIt1) -> start -> position == (*edgeIt2) -> start -> position) &&((*edgeIt1) -> end -> position == (*edgeIt2) -> end -> position)) {
+                //cout<<"Hey, here is a mobius pair!"<<endl;
+                //cout<<"One starts from vertex "<<(*edgeIt1) -> start -> ID<<" and it ends at vertex "<<(*edgeIt1) -> end -> ID<<endl;
+                //cout<<"Another starts from vertex "<<(*edgeIt2) -> start -> ID<<" and it ends at vertex "<<(*edgeIt2) -> end -> ID<<endl;
+
+                (*edgeIt1)->mobiusSibling = *edgeIt2;
+                (*edgeIt2)->mobiusSibling = *edgeIt1;
+
+                (*edgeIt1) -> start -> onMobiusSibling = true;
+                (*edgeIt1) -> end -> onMobiusSibling = true;
+                (*edgeIt2) -> start -> onMobiusSibling = true;
+                (*edgeIt2) -> end -> onMobiusSibling = true;
+
+            }
+        }
+    }
+    //Boundaries
+    vector<vector<int> >::iterator boundIt;
+    vector<vector<Vertex*> > boundaryVertices;
+    for( boundIt = boundaries.begin(); boundIt < boundaries.end(); boundIt ++) {
+        vector<Vertex*> oneBoundary;
+        vector<int>::iterator oneBoundIt;
+        for( oneBoundIt = (*boundIt).end() - 1; oneBoundIt >= (*boundIt).begin(); oneBoundIt--){
+            auto it = mergeVertex.find(*oneBoundIt);
+            if (it != mergeVertex.end()) {
+                oneBoundary.push_back(vertVect[it -> second]);
+                //cout<<"pushed: "<<it -> second<<endl;
+            } else {
+                oneBoundary.push_back(vertVect[*oneBoundIt]);
+                //cout<<"pushed: "<<*oneBoundIt;
+            }
+        }
+        boundaryVertices.push_back(oneBoundary);
+    }
+    makeBoundaries(boundaryVertices, edgeVect);
+    vector<Vertex*> newVertVect;
+    vector<Vertex*>::iterator vIt;
+    for (vIt = vertVect.begin(); vIt < vertVect.end(); vIt ++) {
+        auto it = mergeVertex.find((*vIt) -> ID);
+        if(it == mergeVertex.end()){
+            newVertVect.push_back((*vIt));
+        }
+    }
+    vertVect = newVertVect;
+}
 // Initiate the mesh for OpenGL to render.
 void init(int level);
 
@@ -779,17 +969,20 @@ void init(int level){
     Subdivision myCC(glMesh);
     glMesh = myCC.ccSubdivision(level);
     computeNormals(glMesh);
-    Offset offset(glMesh, 0.2);
+    Offset offset(glMesh, 0.04);
     glPosMesh = offset.posOffsetMesh;
     glNegMesh = offset.negOffsetMesh;
 }
 
 void init(int level, string inputSIF){
-    makeWithSIF(glMesh, inputSIF);
+    makeWithQuadSIF(glMesh, inputSIF);
     //cout<<glMesh.faceVect.size()<<" "<< glMesh.vertVect.size()<<endl;
     Subdivision myCC(glMesh);
     glMesh = myCC.ccSubdivision(level);
     computeNormals(glMesh);
+    Offset offset(glMesh, 0.1);
+    glPosMesh = offset.posOffsetMesh;
+    glNegMesh = offset.negOffsetMesh;
 }
 //************************************************************
 //          OpenGL Display Functions
@@ -873,19 +1066,17 @@ void initRendering(){
 void render(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
-    gluLookAt(5, 5, 5, 0, 0, 0, 0, 0, 1);   //  eye position, aim point, up direction
+    gluLookAt(3, 3, 3, 0, 0, 0, 0, 0, 1);   //  eye position, aim point, up direction
 
     angle += 0.1;
     if (angle > 360) {angle -= 360;}
     glRotatef(angle, 0, 0, 1);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, BLUE);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, YELLOW);
     drawMesh(glMesh);
-    /*
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, CYAN);
     drawMesh(glPosMesh);
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, GREEN);
     drawMesh(glNegMesh);
-    */
     glutSwapBuffers();
 }
 
