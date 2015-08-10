@@ -50,6 +50,7 @@ Mesh glMesh;
 // Another mesh to subdived and display.
 Mesh glPosMesh;
 Mesh glNegMesh;
+Mesh glSideMesh;
 
 // Colors
 GLfloat WHITE[] = {0.8f, 0.8f, 0.8f, 1.0f};
@@ -965,6 +966,7 @@ void init(int level){
     Offset offset(glMesh, 0.2);
     glPosMesh = offset.posOffsetMesh;
     glNegMesh = offset.negOffsetMesh;
+    glSideMesh = offset.sideOffsetMesh;
 }
 
 void init(int level, string inputSIF){
@@ -976,6 +978,7 @@ void init(int level, string inputSIF){
     Offset offset(glMesh, 0.03);
     glPosMesh = offset.posOffsetMesh;
     glNegMesh = offset.negOffsetMesh;
+    glSideMesh = offset.sideOffsetMesh;
 }
 //************************************************************
 //          OpenGL Display Functions
@@ -1059,7 +1062,7 @@ void initRendering(){
 void render(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
-    gluLookAt(0.5, 0.5, 0.5, 0, 0, 0, 0, 0, 1);   //  eye position, aim point, up direction
+    gluLookAt(2, 2, 2, 0, 0, 0, 0, 0, 1);   //  eye position, aim point, up direction
 
     angle += 0.3;
     if (angle > 360) {angle -= 360;}
@@ -1073,7 +1076,10 @@ void render(void) {
     
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, GREEN);
     drawMesh(glNegMesh);
-    
+
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, CYAN);
+    drawMesh(glSideMesh);
+
     glutSwapBuffers();
 }
 

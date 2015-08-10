@@ -31,13 +31,13 @@ public:
     Mesh posOffsetMesh;
     // The negtive offset mesh.
     Mesh negOffsetMesh;
-    // Starting mesh;
-    Mesh startMesh;
+    // The side offset mesh.
+    Mesh sideOffsetMesh;
     // Constructor of offset.
     // @param mesh: the initial mesh to find offset
     // @param val: the offsetVal
     Offset(Mesh & mesh, float val);
-    void resetOffsetVal(float val);
+    //void resetOffsetVal(float val);
 
 private:
     // Calculate the offset for one vertex.
@@ -46,15 +46,13 @@ private:
 
 Offset::Offset(Mesh & mesh, float val) {
     offsetVal = val;
-    startMesh = mesh;
     vector<Vertex*>::iterator vIt;
     vector<Face*>::iterator fIt;
-    Face * currFace;
+    vector<Halfedge*>::iterator eIt;
     for(vIt = mesh.vertVect.begin(); vIt < mesh.vertVect.end(); vIt++) {
         calcVertexOffset(*vIt);
     }
     for(fIt = mesh.faceVect.begin(); fIt < mesh.faceVect.end(); fIt++) {
-        currFace = (*fIt);
         vector<Vertex*> posOffsetVertices;
         vector<Vertex*> negOffsetVertices;
         for(vIt = ((*fIt) -> vertices).begin(); vIt < ((*fIt) -> vertices).end(); vIt++) {
@@ -75,24 +73,68 @@ Offset::Offset(Mesh & mesh, float val) {
         makePolygonFace(posOffsetVertices, posOffsetMesh.faceVect, posOffsetMesh.edgeVect);
         makePolygonFace(negOffsetVertices, negOffsetMesh.faceVect, negOffsetMesh.edgeVect);
     }
-    buildConnections(posOffsetMesh);
-    buildConnections(negOffsetMesh);
-    computeNormals(posOffsetMesh);
-    computeNormals(negOffsetMesh);
-}
+    for(eIt = mesh.edgeVect.begin(); eIt < mesh.edgeVect.end(); eIt++) {
+        if((*eIt) -> sibling == NULL && (*eIt) -> mobiusSibling == NULL) {
+            vector<Vertex*> offsetSideVertices;
+            if((*eIt) -> start -> onMobiusSibling) {
+                vec3 oneOption = (*eIt) -> start -> posOffset -> position - (*eIt) -> start -> position;
+                if(dot(oneOption, (*eIt) -> heFace -> faceNormal) >= 0) {
+                    offsetSideVertices.push_back((*eIt) -> start -> posOffset);
+                    offsetSideVertices.push_back((*eIt) -> start -> negOffset);
+                    offsetSideVertices.push_back((*eIt) -> end -> negOffset);
+                    offsetSideVertices.push_back((*eIt) -> end -> posOffset);
+                } else {
+                    offsetSideVertices.push_back((*eIt) -> start -> negOffset);
+                    offsetSideVertices.push_back((*eIt) -> start -> posOffset);
+                    offsetSideVertices.push_back((*eIt) -> end -> negOffset);
+                    offsetSideVertices.push_back((*eIt) -> end -> posOffset);
+                }
+            } else if((*eIt) -> end -> onMobiusSibling) {
+                vec3 oneOption = (*eIt) -> end -> posOffset -> position - (*eIt) -> end -> position;
+                if(dot(oneOption, (*eIt) -> heFace -> faceNormal) >= 0) {
+                    offsetSideVertices.push_back((*eIt) -> start -> posOffset);
+                    offsetSideVertices.push_back((*eIt) -> start -> negOffset);
+                    offsetSideVertices.push_back((*eIt) -> end -> negOffset);
+                    offsetSideVertices.push_back((*eIt) -> end -> posOffset);
+                } else {
+                    offsetSideVertices.push_back((*eIt) -> start -> posOffset);
+                    offsetSideVertices.push_back((*eIt) -> start -> negOffset);
+                    offsetSideVertices.push_back((*eIt) -> end -> posOffset);
+                    offsetSideVertices.push_back((*eIt) -> end -> negOffset);
+                }
+            } else {
+                offsetSideVertices.push_back((*eIt) -> start -> posOffset);
+                offsetSideVertices.push_back((*eIt) -> start -> negOffset);
+                offsetSideVertices.push_back((*eIt) -> end -> negOffset);
+                offsetSideVertices.push_back((*eIt) -> end -> posOffset);
+            }
+            makePolygonFace(offsetSideVertices, sideOffsetMesh.faceVect, sideOffsetMesh.edgeVect);
+        }
 
+    }
+    buildConnections(sideOffsetMesh);
+    computeNormals(sideOffsetMesh);
+    //buildConnections(posOffsetMesh);
+    //buildConnections(negOffsetMesh);
+    //computeNormals(posOffsetMesh);
+    //computeNormals(negOffsetMesh);
+}
+/*
 void Offset::resetOffsetVal(float val) {
     offsetVal = val;
     vector<Vertex*>::iterator vIt;
-    for(vIt = startMesh.vertVect.begin(); vIt < startMesh.vertVect.end(); vIt++) {
+    for(vIt = (*eIt) -> startMesh.vertVect.begin(); vIt < (*eIt) -> startMesh.vertVect.(*eIt) -> end(); vIt++) {
         calcVertexOffset(*vIt);
     }
 }
+*/
 void Offset::calcVertexOffset(Vertex * v) {
     Vertex * posOffset = new Vertex;
     Vertex * negOffset = new Vertex;
     posOffset -> position = v -> position + v -> normal * offsetVal;
     negOffset -> position = v -> position - v -> normal * offsetVal;
+    posOffset -> normal = v -> normal;
+    negOffset -> normal = - v -> normal;
     v -> posOffset = posOffset;
     v -> negOffset = negOffset;
     posOffsetMesh.vertVect.push_back(posOffset);
