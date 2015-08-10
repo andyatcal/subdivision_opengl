@@ -267,10 +267,10 @@ void render(void) {
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, RED);
     drawMesh(glPosMesh);
     
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, GREEN);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, RED);
     drawMesh(glNegMesh);
 
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, CYAN);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, RED);
     drawMesh(glSideMesh);
 
     glutSwapBuffers();

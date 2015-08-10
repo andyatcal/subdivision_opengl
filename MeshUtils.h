@@ -161,27 +161,42 @@ void makeRectFace(Vertex * va, Vertex* vb, Vertex * vc, Vertex * vd,
 // @param edgeVect: reference to the edgeVect of the mesh.
 void makePolygonFace(vector<Vertex*> vertices, 
                 vector<Face*> &faceVect, 
-                vector<Halfedge*> &edgeVect) {
+                vector<Halfedge*> &edgeVect,
+                bool reverseOrder = false) {
     Face * nextFace = new Face;
     vector<Halfedge*> edges;
     vector<Vertex*>::iterator vIt;
     Vertex * currVert;
     Halfedge * currEdge;
-
-    for(vIt = vertices.begin(); vIt < vertices.end(); vIt++) {
-        currVert = *vIt;
-        Halfedge * tempEdge = new Halfedge;
-        tempEdge -> start = *vIt;
-        if(vIt == (vertices.end() - 1)) {
-            tempEdge -> end = *(vertices.begin());
-        } else {
-            tempEdge -> end = *(vIt + 1);
+    if(!reverseOrder) {
+        for(vIt = vertices.begin(); vIt < vertices.end(); vIt++) {
+            currVert = *vIt;
+            Halfedge * tempEdge = new Halfedge;
+            tempEdge -> start = *vIt;
+            if(vIt == (vertices.end() - 1)) {
+                tempEdge -> end = *(vertices.begin());
+            } else {
+                tempEdge -> end = *(vIt + 1);
+            }
+            edges.push_back(tempEdge);
+            currVert -> oneOutEdge = tempEdge;
+            nextFace -> addVertex(*vIt);
         }
-        edges.push_back(tempEdge);
-        currVert -> oneOutEdge = tempEdge;
-        nextFace -> addVertex(*vIt);
+    } else {
+        for(vIt = vertices.end() - 1; vIt >= vertices.begin(); vIt--) {
+            currVert = *vIt;
+            Halfedge * tempEdge = new Halfedge;
+            tempEdge -> start = *vIt;
+            if(vIt == (vertices.end() - 1)) {
+                tempEdge -> end = *(vertices.begin());
+            } else {
+                tempEdge -> end = *(vIt + 1);
+            }
+            edges.push_back(tempEdge);
+            currVert -> oneOutEdge = tempEdge;
+            nextFace -> addVertex(*vIt);
+        }
     }
-    
     vector<Halfedge*>::iterator eIt;
     for(eIt = edges.begin(); eIt < edges.end(); eIt++) {
         currEdge = *eIt;

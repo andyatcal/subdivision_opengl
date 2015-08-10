@@ -76,7 +76,7 @@ Offset::Offset(Mesh & mesh, float val) {
             }
         }
         makePolygonFace(posOffsetVertices, posOffsetMesh.faceVect, posOffsetMesh.edgeVect);
-        makePolygonFace(negOffsetVertices, negOffsetMesh.faceVect, negOffsetMesh.edgeVect);
+        makePolygonFace(negOffsetVertices, negOffsetMesh.faceVect, negOffsetMesh.edgeVect, true);
     }
     for(eIt = mesh.edgeVect.begin(); eIt < mesh.edgeVect.end(); eIt++) {
         if((*eIt) -> sibling == NULL && (*eIt) -> mobiusSibling == NULL) {
