@@ -20,7 +20,7 @@ class Halfedge;
 class Mesh;
 
 //////////////////////////////////////////////////////////////////////
-// Subdivision Class -- Functions to perform the subdivision for a mesh
+// MeshUtils Class -- Utility Functions with Mesh.
 
 // Flush mesh. Make the vertVect, edgeVect, faceVect of a mesh empty.
 // @param mesh : the mesh to flush.
