@@ -119,10 +119,10 @@ void init(int level){
     glNegMesh = offset.negOffsetMesh;
     glSideMesh = offset.sideOffsetMesh;
     vector<Mesh> meshes;
-    //meshes.push_back(glMesh);
-    meshes.push_back(glPosMesh);
-    meshes.push_back(glNegMesh);
-    meshes.push_back(glSideMesh);
+    meshes.push_back(glMesh);
+    //meshes.push_back(glPosMesh);
+    //meshes.push_back(glNegMesh);
+    //meshes.push_back(glSideMesh);
     STL stl;
     stl.STLOutput(meshes, "debug/STL/Example.stl");
 }
