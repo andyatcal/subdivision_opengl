@@ -100,7 +100,7 @@ void init(int level);
 void init(int level, string inputSIF);
 
 void init(int level){
-    makeCube(glMesh);
+    //makeCube(glMesh);
     //makePyramid(glMesh);
     //makeSharpOctahedron(glMesh);
     //makeOctahedron(glMesh);
@@ -137,6 +137,12 @@ void init(int level, string inputSIF){
     glPosMesh = offset.posOffsetMesh;
     glNegMesh = offset.negOffsetMesh;
     glSideMesh = offset.sideOffsetMesh;
+    vector<Mesh> meshes;
+    meshes.push_back(glPosMesh);
+    meshes.push_back(glNegMesh);
+    meshes.push_back(glSideMesh);
+    STL stl;
+    stl.STLOutput(meshes, "debug/STL/Example.stl");
 }
 //************************************************************
 //          Arcball Functions
