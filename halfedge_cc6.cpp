@@ -124,7 +124,7 @@ void init(int level){
     meshes.push_back(glNegMesh);
     meshes.push_back(glSideMesh);
     STL stl;
-    stl.STLOutput(meshes, "Example.stl");
+    stl.STLOutput(meshes, "debug/STL/Example.stl");
 }
 
 void init(int level, string inputSIF){
