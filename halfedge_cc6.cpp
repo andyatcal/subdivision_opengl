@@ -8,6 +8,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <fstream>
 #include <regex>
@@ -47,10 +48,24 @@ float angle = 0.0;
 float VERYSMALLVALUE = 0.001;
 // The mesh to subdivide and display.
 Mesh glMesh;
-// Another mesh to subdived and display.
+// Three meshes for offests display.
 Mesh glPosMesh;
 Mesh glNegMesh;
 Mesh glSideMesh;
+
+// ArcBall feature.
+int last_mx = 0, last_my = 0, cur_mx = 0, cur_my = 0;
+int arcball_on = false;
+
+// Viewer variables.
+enum MODES { MODE_OBJECT, MODE_CAMERA, MODE_LIGHT, MODE_LAST } view_mode;
+int rotY_direction = 0, rotX_direction = 0, transZ_direction = 0, strife = 0;
+float speed_factor = 1;
+mat4 transforms[MODE_LAST];
+int last_ticks = 0;
+// FPS Count.
+static unsigned int fps_start = glutGet(GLUT_ELAPSED_TIME);
+static unsigned int fps_frames = 0;
 
 // Colors
 GLfloat WHITE[] = {0.8f, 0.8f, 0.8f, 1.0f};
@@ -981,6 +996,39 @@ void init(int level, string inputSIF){
     glSideMesh = offset.sideOffsetMesh;
 }
 //************************************************************
+//          Arcball Functions
+//************************************************************
+
+/**
+ * Get a normalized vector from the center of the virtual ball O to a
+ * point P on the virtual ball surface, such that P is aligned on
+ * screen's (X,Y) coordinates.  If (X,Y) is too far away from the
+ * sphere, return the nearest point on the virtual ball surface.
+ */
+vec3 get_arcball_vector(int x, int y) {
+    vec3 P = vec3(1.0 * x / viewport.width * 2 - 1.0,
+      1.0 * y / viewport.height * 2 - 1.0, 0);
+    P.y = - P.y;
+    float OP_squared = P.x * P.x + P.y * P.y;
+    if (OP_squared <= 1 * 1) {
+        P.z = sqrt(1 * 1 - OP_squared);
+    } else {
+        P = normalize(P);  // nearest point
+    }
+    return P;
+}
+
+void init_view() {
+    transforms[MODE_CAMERA] = lookAt(
+        vec3(0.0,  0.0, 10.0),   // eye
+        vec3(0.0,  0.0, 0.0),   // direction
+        vec3(0.0,  1.0, 0.0));  // up
+    cout<<transforms[MODE_CAMERA][0][0] <<" " <<transforms[MODE_CAMERA][1][0]<<" " << transforms[MODE_CAMERA][2][0]<<" " <<
+    transforms[MODE_CAMERA][0][1]<<" " << transforms[MODE_CAMERA][1][1]<<" " << transforms[MODE_CAMERA][2][1]<<" " <<
+    transforms[MODE_CAMERA][0][2]<<" "<< transforms[MODE_CAMERA][1][2]<<" "<<transforms[MODE_CAMERA][2][2]<<endl;
+}
+
+//************************************************************
 //          OpenGL Display Functions
 //************************************************************
 void initRendering();
@@ -993,9 +1041,19 @@ void keyboard(unsigned char c, int x, int y);
 
 void keySpecial(int key, int x, int y);
 
-void mousePressed(int button, int state, int x, int y);
+void onMouse(int button, int state, int x, int y);
 
-void mouseMoved(int x, int y);
+void onMotion(int x, int y);
+
+void fpsCount(){
+    fps_frames++;
+    int delta_t = glutGet(GLUT_ELAPSED_TIME) - fps_start;
+    if (delta_t > 1000) {
+        cout << 1000.0 * fps_frames / delta_t << endl;
+        fps_frames = 0;
+        fps_start = glutGet(GLUT_ELAPSED_TIME);
+    }
+}
 
 void initRendering(){
 
@@ -1059,42 +1117,59 @@ void initRendering(){
     //glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
 }
 
+
 void render(void) {
+    fpsCount();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
-    gluLookAt(2, 2, 2, 0, 0, 0, 0, 0, 1);   //  eye position, aim point, up direction
 
+    gluLookAt(0, 0, 4, 0, 0, 0, 0, 1, 0);
+    //  eye position, aim point, up direction
+/*
     angle += 0.3;
     if (angle > 360) {angle -= 360;}
     glRotatef(angle, 0, 0, 1);
-/*
+*/
+    if(last_mx != cur_mx || last_my != cur_my) {
+        glm::vec3 va = get_arcball_vector(last_mx, last_my);
+        glm::vec3 vb = get_arcball_vector( cur_mx,  cur_my);
+        float angle = acos(glm::min(1.0f, dot(va, vb)));
+        glm::vec3 axis_in_camera_coord = cross(va, vb);
+        glm::mat3 camera2object = inverse(mat3(transforms[MODE_CAMERA]) * mat3(glMesh.object2world));
+        glm::vec3 axis_in_object_coord = camera2object * axis_in_camera_coord;
+        glMesh.object2world = rotate(glMesh.object2world, angle, axis_in_object_coord);
+        last_mx = cur_mx;
+        last_my = cur_my;
+    }
+    glMultMatrixf(&glMesh.object2world[0][0]);
+    /*
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, YELLOW);
     drawMesh(glMesh);
 */
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, RED);
     drawMesh(glPosMesh);
     
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, RED);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, GREEN);
     drawMesh(glNegMesh);
 
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, RED);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, CYAN);
     drawMesh(glSideMesh);
 
     glutSwapBuffers();
 }
 
 void reshape(int w, int h) {
-    if (h==0) {h=1;} // prevent a division by zero when setting aspect ratio
-    glViewport(0,0,w,h);
+    if (h == 0) {h = 1;} // prevent a division by zero when setting aspect ratio
+    glViewport(0, 0, w, h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity(); 
-    gluPerspective(45, (float)w/h, 0.1, 100);
+    gluPerspective(45, (float) w / h, 0.1, 100);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 }
 
-void myFrameMove() {
-  glutPostRedisplay();
+void onIdle() {
+    glutPostRedisplay();
 }
 
 void keyboard(unsigned char key, int x, int y) {
@@ -1136,14 +1211,24 @@ void keySpecial(int key, int x, int y) {
     glutPostRedisplay();
 }
 
-void mousePressed(int button, int state, int x, int y) {
+void onMouse(int button, int state, int x, int y) {
     if (button == GLUT_RIGHT_BUTTON) {
         exit(0);
     }
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+        arcball_on = true;
+        last_mx = cur_mx = x;
+        last_my = cur_my = y;
+    } else {
+        arcball_on = false;
+    }
 }
 
-void mouseMoved(int x, int y){
-    
+void onMotion(int x, int y){
+  if (arcball_on) {  // if left button is pressed
+    cur_mx = x;
+    cur_my = y;
+  }
 }
 
 //************************************************************
@@ -1152,9 +1237,9 @@ void mouseMoved(int x, int y){
 
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
     viewport.width = 640;
-    viewport.hight = 480;
+    viewport.height = 480;
 
     //Process the command line arguments
     int level;
@@ -1170,18 +1255,19 @@ int main(int argc, char** argv) {
         inputSIF = argv[2];
         init(level, inputSIF);
     }
-    glutInitWindowSize(viewport.width, viewport.hight);
+    glutInitWindowSize(viewport.width, viewport.height);
     glutInitWindowPosition(100, 100);
     glutCreateWindow(argv[0]);
     initRendering();
+    init_view();
     glutDisplayFunc(render);
     // General UI functions
     glutReshapeFunc(reshape);
-    glutIdleFunc(myFrameMove); 
+    glutIdleFunc(onIdle); 
     glutKeyboardFunc(keyboard);
     glutSpecialFunc(keySpecial);
-    glutMouseFunc(mousePressed);
-    glutMotionFunc(mouseMoved);
+    glutMouseFunc(onMouse);
+    glutMotionFunc(onMotion);
 
     glutMainLoop();
 }

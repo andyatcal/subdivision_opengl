@@ -13,7 +13,7 @@
 class Viewport {
 public:
 
-    int width, hight;
+    int width, height;
 };
 
 #endif // __VIEWPORT_H__

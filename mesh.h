@@ -27,10 +27,14 @@ public:
     vector<Halfedge*> edgeVect;
     // An arraylist of all faces that construct this mesh.
     vector<Face*> faceVect;
+    // Transfromation matrix of the object (mesh).
+    mat4 object2world;
     // Constructor.
     Mesh();
 };
 
-Mesh::Mesh(){}
+Mesh::Mesh(){
+	object2world = mat4(1);
+}
 
 #endif // __MESH_H__
