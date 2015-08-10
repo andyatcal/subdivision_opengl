@@ -59,13 +59,8 @@ int arcball_on = false;
 
 // Viewer variables.
 enum MODES { MODE_OBJECT, MODE_CAMERA, MODE_LIGHT, MODE_LAST } view_mode;
-int rotY_direction = 0, rotX_direction = 0, transZ_direction = 0, strife = 0;
-float speed_factor = 1;
+
 mat4 transforms[MODE_LAST];
-int last_ticks = 0;
-// FPS Count.
-static unsigned int fps_start = glutGet(GLUT_ELAPSED_TIME);
-static unsigned int fps_frames = 0;
 
 // Colors
 GLfloat WHITE[] = {0.8f, 0.8f, 0.8f, 1.0f};
@@ -1020,7 +1015,7 @@ vec3 get_arcball_vector(int x, int y) {
 
 void init_view() {
     transforms[MODE_CAMERA] = lookAt(
-        vec3(0.0,  0.0, 10.0),   // eye
+        vec3(0.0,  0.0, 4.0),   // eye
         vec3(0.0,  0.0, 0.0),   // direction
         vec3(0.0,  1.0, 0.0));  // up
     cout<<transforms[MODE_CAMERA][0][0] <<" " <<transforms[MODE_CAMERA][1][0]<<" " << transforms[MODE_CAMERA][2][0]<<" " <<
@@ -1044,16 +1039,6 @@ void keySpecial(int key, int x, int y);
 void onMouse(int button, int state, int x, int y);
 
 void onMotion(int x, int y);
-
-void fpsCount(){
-    fps_frames++;
-    int delta_t = glutGet(GLUT_ELAPSED_TIME) - fps_start;
-    if (delta_t > 1000) {
-        cout << 1000.0 * fps_frames / delta_t << endl;
-        fps_frames = 0;
-        fps_start = glutGet(GLUT_ELAPSED_TIME);
-    }
-}
 
 void initRendering(){
 
@@ -1119,7 +1104,7 @@ void initRendering(){
 
 
 void render(void) {
-    fpsCount();
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
@@ -1130,17 +1115,6 @@ void render(void) {
     if (angle > 360) {angle -= 360;}
     glRotatef(angle, 0, 0, 1);
 */
-    if(last_mx != cur_mx || last_my != cur_my) {
-        glm::vec3 va = get_arcball_vector(last_mx, last_my);
-        glm::vec3 vb = get_arcball_vector( cur_mx,  cur_my);
-        float angle = acos(glm::min(1.0f, dot(va, vb)));
-        glm::vec3 axis_in_camera_coord = cross(va, vb);
-        glm::mat3 camera2object = inverse(mat3(transforms[MODE_CAMERA]) * mat3(glMesh.object2world));
-        glm::vec3 axis_in_object_coord = camera2object * axis_in_camera_coord;
-        glMesh.object2world = rotate(glMesh.object2world, angle, axis_in_object_coord);
-        last_mx = cur_mx;
-        last_my = cur_my;
-    }
     glMultMatrixf(&glMesh.object2world[0][0]);
     /*
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, YELLOW);
@@ -1169,6 +1143,17 @@ void reshape(int w, int h) {
 }
 
 void onIdle() {
+    if(last_mx != cur_mx || last_my != cur_my) {
+        glm::vec3 va = get_arcball_vector(last_mx, last_my);
+        glm::vec3 vb = get_arcball_vector( cur_mx,  cur_my);
+        float angle = acos(glm::min(1.0f, dot(va, vb)));
+        glm::vec3 axis_in_camera_coord = cross(va, vb);
+        glm::mat3 camera2object = inverse(mat3(transforms[MODE_CAMERA]) * mat3(glMesh.object2world));
+        glm::vec3 axis_in_object_coord = camera2object * axis_in_camera_coord;
+        glMesh.object2world = rotate(glMesh.object2world, angle, axis_in_object_coord);
+        last_mx = cur_mx;
+        last_my = cur_my;
+    }
     glutPostRedisplay();
 }
 
