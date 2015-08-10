@@ -37,7 +37,8 @@ public:
     // @param mesh: the initial mesh to find offset
     // @param val: the offsetVal
     Offset(Mesh & mesh, float val);
-    //void resetOffsetVal(float val);
+    // Change the value of offset
+    void changeOffsetValTo(float val);
 
 private:
     // Calculate the offset for one vertex.
@@ -118,17 +119,21 @@ Offset::Offset(Mesh & mesh, float val) {
     }
     buildConnections(sideOffsetMesh);
     computeNormals(sideOffsetMesh);
+
+    // To build a complete offset mesh;
     //buildConnections(posOffsetMesh);
     //buildConnections(negOffsetMesh);
     //computeNormals(posOffsetMesh);
     //computeNormals(negOffsetMesh);
 }
 /*
-void Offset::resetOffsetVal(float val) {
+void Offset::changeOffsetValTo(float val) {
     offsetVal = val;
     vector<Vertex*>::iterator vIt;
-    for(vIt = (*eIt) -> startMesh.vertVect.begin(); vIt < (*eIt) -> startMesh.vertVect.(*eIt) -> end(); vIt++) {
-        calcVertexOffset(*vIt);
+    for(vIt = startMesh.vertVect.begin(); 
+        vIt < startMesh.vertVect.end(); vIt++) {
+        (*vIt) -> posOffset -> position = (*vIt) -> position + (*vIt) -> normal * offsetVal;
+        (*vIt) -> negOffset -> position = (*vIt) -> position - (*vIt) -> normal * offsetVal;
     }
 }
 */

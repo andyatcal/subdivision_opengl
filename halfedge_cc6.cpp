@@ -43,6 +43,7 @@
 #include "viewport.h"
 #include "offset.h"
 #include "makeMesh.h"
+#include "stl.h"
 
 using namespace std;
 using namespace glm;
@@ -113,10 +114,17 @@ void init(int level){
     Subdivision myCC(glMesh);
     glMesh = myCC.ccSubdivision(level);
     computeNormals(glMesh);
-    Offset offset(glMesh, 0.2);
+    Offset offset(glMesh, 0.04);
     glPosMesh = offset.posOffsetMesh;
     glNegMesh = offset.negOffsetMesh;
     glSideMesh = offset.sideOffsetMesh;
+    vector<Mesh> meshes;
+    meshes.push_back(glMesh);
+    meshes.push_back(glPosMesh);
+    meshes.push_back(glNegMesh);
+    meshes.push_back(glSideMesh);
+    STL stl;
+    stl.STLOutput(meshes, "Example.stl");
 }
 
 void init(int level, string inputSIF){

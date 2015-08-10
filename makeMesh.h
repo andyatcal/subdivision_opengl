@@ -549,6 +549,7 @@ void makeWithSIF(Mesh &mesh, string inputSIF){
 
     ifstream file(inputSIF);
     if (!file.good()) {
+        cout<<"THE PATH OF SIF FILE IS NOT VAILD."
         exit(1); // exit if file not found
     }
     string nextLine;
