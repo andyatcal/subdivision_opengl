@@ -255,10 +255,6 @@ void makeRing(Mesh &mesh){
     v7 -> position = vec3(-1, -1, -1);
     v8 -> position = vec3(-1, 1, -1);
 
-    //without the topFace
-    //makeRectFace(v1, v2, v3, v4, faceVect, edgeVect);
-    //bottomFace
-    //makeRectFace(v6, v5, v8, v7, faceVect, edgeVect);
     //leftFace
     makeRectFace(v3, v2, v6, v7, faceVect, edgeVect);
     //rightFace
@@ -905,9 +901,6 @@ void makeWithQuadSIF(Mesh &mesh, string inputSIF){
                 (*edgeIt2)->sibling = *edgeIt1;
 
             } else if (((*edgeIt1) -> start -> position == (*edgeIt2) -> start -> position) &&((*edgeIt1) -> end -> position == (*edgeIt2) -> end -> position)) {
-                //cout<<"Hey, here is a mobius pair!"<<endl;
-                //cout<<"One starts from vertex "<<(*edgeIt1) -> start -> ID<<" and it ends at vertex "<<(*edgeIt1) -> end -> ID<<endl;
-                //cout<<"Another starts from vertex "<<(*edgeIt2) -> start -> ID<<" and it ends at vertex "<<(*edgeIt2) -> end -> ID<<endl;
 
                 (*edgeIt1)->mobiusSibling = *edgeIt2;
                 (*edgeIt2)->mobiusSibling = *edgeIt1;
@@ -980,7 +973,7 @@ void init(int level, string inputSIF){
     Subdivision myCC(glMesh);
     glMesh = myCC.ccSubdivision(level);
     computeNormals(glMesh);
-    Offset offset(glMesh, 0.1);
+    Offset offset(glMesh, 0.03);
     glPosMesh = offset.posOffsetMesh;
     glNegMesh = offset.negOffsetMesh;
 }
@@ -1066,17 +1059,21 @@ void initRendering(){
 void render(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
-    gluLookAt(3, 3, 3, 0, 0, 0, 0, 0, 1);   //  eye position, aim point, up direction
+    gluLookAt(0.5, 0.5, 0.5, 0, 0, 0, 0, 0, 1);   //  eye position, aim point, up direction
 
-    angle += 0.1;
+    angle += 0.3;
     if (angle > 360) {angle -= 360;}
     glRotatef(angle, 0, 0, 1);
+    
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, YELLOW);
     drawMesh(glMesh);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, CYAN);
+
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, RED);
     drawMesh(glPosMesh);
+    
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, GREEN);
     drawMesh(glNegMesh);
+    
     glutSwapBuffers();
 }
 

@@ -58,8 +58,19 @@ Offset::Offset(Mesh & mesh, float val) {
         vector<Vertex*> posOffsetVertices;
         vector<Vertex*> negOffsetVertices;
         for(vIt = ((*fIt) -> vertices).begin(); vIt < ((*fIt) -> vertices).end(); vIt++) {
-            posOffsetVertices.push_back((*vIt) -> posOffset);
-            negOffsetVertices.push_back((*vIt) -> negOffset);
+            if(!((*vIt) -> onMobiusSibling)) {
+                posOffsetVertices.push_back((*vIt) -> posOffset);
+                negOffsetVertices.push_back((*vIt) -> negOffset);
+            } else {
+                vec3 oneOption = (*vIt) -> posOffset -> position - (*vIt) -> position;
+                if(dot(oneOption, (*fIt) -> faceNormal) >= 0) {
+                    posOffsetVertices.push_back((*vIt) -> posOffset);
+                    negOffsetVertices.push_back((*vIt) -> negOffset);
+                } else {
+                    posOffsetVertices.push_back((*vIt) -> negOffset);
+                    negOffsetVertices.push_back((*vIt) -> posOffset);
+                }
+            }
         }
         makePolygonFace(posOffsetVertices, posOffsetMesh.faceVect, posOffsetMesh.edgeVect);
         makePolygonFace(negOffsetVertices, negOffsetMesh.faceVect, negOffsetMesh.edgeVect);
