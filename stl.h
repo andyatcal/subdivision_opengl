@@ -10,6 +10,7 @@
 
 #include <glm/glm.hpp>
 #include <vector>
+#include <iomanip>
 
 using namespace glm;
 using namespace std;
@@ -50,9 +51,10 @@ void STL::STLOutput(vector<Mesh> &meshes, string outputSTL){
                     exit(0);
                 }
                 Vertex * v0 = *(vertices.begin());
+                std::setprecision(6);
                 for(vIt = vertices.begin() + 1; vIt < vertices.end() - 1; vIt++) {
                     file << "  facet normal "<<faceNormal[0]<<" "<<faceNormal[1]<<" "<<faceNormal[2]<<"\n";
-                    file << "    outer Loop\n";
+                    file << "    outer loop\n";
                     vec3 p0 = v0 -> position;
                     vec3 p1 = (*vIt) -> position;
                     vec3 p2 = (*(vIt + 1)) -> position;
