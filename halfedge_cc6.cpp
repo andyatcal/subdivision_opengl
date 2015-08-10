@@ -108,7 +108,7 @@ void init(int level){
     //makeRing(glMesh);
     //makeSharpCube(glMesh);
     //makeMobius(glMesh);
-    //makeHild(glMesh);
+    makeHild(glMesh);
     //cout<< glMesh.faceVect.size()<<" "<<glMesh.edgeVect.size()<<" "<<glMesh.vertVect.size();
     //ccSubDivision();
     Subdivision myCC(glMesh);
