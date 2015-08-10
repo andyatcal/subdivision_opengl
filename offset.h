@@ -62,9 +62,13 @@ Offset::Offset(Mesh & mesh, float val) {
             } else {
                 vec3 oneOption = (*vIt) -> posOffset -> position - (*vIt) -> position;
                 if(dot(oneOption, (*fIt) -> faceNormal) >= 0) {
+                    (*vIt) -> negOffset -> normal = - (*vIt) -> normal;
+                    (*vIt) -> posOffset -> normal = (*vIt) -> normal;
                     posOffsetVertices.push_back((*vIt) -> posOffset);
                     negOffsetVertices.push_back((*vIt) -> negOffset);
                 } else {
+                    (*vIt) -> negOffset -> normal = (*vIt) -> normal;
+                    (*vIt) -> posOffset -> normal = - (*vIt) -> normal;
                     posOffsetVertices.push_back((*vIt) -> negOffset);
                     negOffsetVertices.push_back((*vIt) -> posOffset);
                 }

@@ -1055,8 +1055,8 @@ void initRendering(){
     //glMaterialfv(GL_FRONT, GL_DIFFUSE, yellow);
     //glMaterialfv(GL_BACK, GL_DIFFUSE, purple);
     //glMaterialfv(GL_FRONT, GL_SPECULAR, white);
-    GLfloat shininess[] = {50};
-    glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
+    //GLfloat shininess[] = {50};
+    //glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
 }
 
 void render(void) {
@@ -1067,17 +1067,17 @@ void render(void) {
     angle += 0.3;
     if (angle > 360) {angle -= 360;}
     glRotatef(angle, 0, 0, 1);
-    
+/*
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, YELLOW);
     drawMesh(glMesh);
-
+*/
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, RED);
     drawMesh(glPosMesh);
     
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, GREEN);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, RED);
     drawMesh(glNegMesh);
 
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, CYAN);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, RED);
     drawMesh(glSideMesh);
 
     glutSwapBuffers();
