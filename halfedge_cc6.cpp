@@ -100,14 +100,14 @@ void init(int level);
 void init(int level, string inputSIF);
 
 void init(int level){
-    //makeCube(glMesh);
+    makeCube(glMesh);
     //makePyramid(glMesh);
     //makeSharpOctahedron(glMesh);
     //makeOctahedron(glMesh);
     //makeOpenCube(glMesh);
     //makeRing(glMesh);
     //makeSharpCube(glMesh);
-    makeMobius(glMesh);
+    //makeMobius(glMesh);
     //makeHild(glMesh);
     //cout<< glMesh.faceVect.size()<<" "<<glMesh.edgeVect.size()<<" "<<glMesh.vertVect.size();
     //ccSubDivision();
@@ -119,7 +119,7 @@ void init(int level){
     glNegMesh = offset.negOffsetMesh;
     glSideMesh = offset.sideOffsetMesh;
     vector<Mesh> meshes;
-    meshes.push_back(glMesh);
+    //meshes.push_back(glMesh);
     meshes.push_back(glPosMesh);
     meshes.push_back(glNegMesh);
     meshes.push_back(glSideMesh);
