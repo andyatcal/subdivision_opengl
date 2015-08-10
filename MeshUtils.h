@@ -358,7 +358,7 @@ vec3 getEndOfEdgeNormal(Halfedge * currEdge){
     vec3 oneEdge = v2 -> position - v1 -> position;
     vec3 secondEdge = v3 -> position - v2 -> position;
 
-    vec3 result = cross(secondEdge, oneEdge);
+    vec3 result = cross(oneEdge, secondEdge);
 
     return normalize(result);
 }
