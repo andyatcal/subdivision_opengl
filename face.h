@@ -35,6 +35,8 @@ public:
     void addVertex(Vertex * v);
     // Tracking ID.
     int ID;
+    // The normal of face, by Newell's method.
+    vec3 faceNormal;
 };
 
 Face::Face(){

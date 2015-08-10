@@ -350,7 +350,7 @@ vec3 getEndOfEdgeNormal(Halfedge * currEdge){
 
 // Get the surface normal at the end of a halfedge. 
 // @param currEdge: pointer of the edge, which the vertex on the end of.
-vec3 getFaceNormal(Face * currFace){
+void getFaceNormal(Face * currFace){
     Halfedge * firstEdge = currFace -> oneSideEdge;
     Halfedge * currEdge;
     currEdge = firstEdge;
@@ -359,7 +359,7 @@ vec3 getFaceNormal(Face * currFace){
         avgNorm += getEndOfEdgeNormal(currEdge);
         currEdge = currEdge -> next;
     } while (currEdge != firstEdge);
-    return normalize(avgNorm);
+    currFace -> faceNormal = normalize(avgNorm);
 }
 
 // Get the surface normal at the end of a halfedge. 
@@ -373,9 +373,9 @@ void getVertexNormal(Vertex * currVert){
     int mobiusCounter = 0;
     do {
         if(mobiusCounter % 2 == 0) {
-            avgNorm += getFaceNormal(nextOutEdge -> heFace);
+            avgNorm += nextOutEdge -> heFace -> faceNormal;
         } else {
-            avgNorm -= getFaceNormal(nextOutEdge -> heFace);
+            avgNorm -= nextOutEdge -> heFace -> faceNormal;
         }
         if(nextOutEdge -> sibling != NULL) {
             if(mobiusCounter % 2 == 0) {
@@ -413,7 +413,11 @@ void getVertexNormal(Vertex * currVert){
 void computeNormals(Mesh & mesh){
     vector<Vertex*> vertVect = mesh.vertVect;
     vector<Vertex*>::iterator vIt;
-    Vertex * currVert;
+    vector<Face*> faceVect = mesh.faceVect;
+    vector<Face*>::iterator fIt;
+    for(fIt = faceVect.begin(); fIt < faceVect.end(); fIt++){
+        getFaceNormal(*fIt);
+    }
     for(vIt = vertVect.begin(); vIt < vertVect.end(); vIt++){
         getVertexNormal(*vIt);
     }

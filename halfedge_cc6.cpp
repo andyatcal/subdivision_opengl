@@ -857,7 +857,7 @@ void makeWithQuadSIF(Mesh &mesh, string inputSIF){
                 //cout<<va -> ID<<" "<<vb -> ID<<" "<<vc -> ID<<endl;
             } else {
                 vd = vertVect[c];
-                cout<<vd -> ID<<endl;
+                //cout<<vd -> ID<<endl;
                 makeRectFace(va, vb, vc, vd, faceVect, edgeVect);
             }
             tCounter += 1;
@@ -959,17 +959,17 @@ void init(int level){
     //makePyramid(glMesh);
     //makeSharpOctahedron(glMesh);
     //makeOctahedron(glMesh);
-    makeOpenCube(glMesh);
+    //makeOpenCube(glMesh);
     //makeRing(glMesh);
     //makeSharpCube(glMesh);
-    //makeMobius(glMesh);
+    makeMobius(glMesh);
     //makeHild(glMesh);
     //cout<< glMesh.faceVect.size()<<" "<<glMesh.edgeVect.size()<<" "<<glMesh.vertVect.size();
     //ccSubDivision();
     Subdivision myCC(glMesh);
     glMesh = myCC.ccSubdivision(level);
     computeNormals(glMesh);
-    Offset offset(glMesh, 0.04);
+    Offset offset(glMesh, 0.2);
     glPosMesh = offset.posOffsetMesh;
     glNegMesh = offset.negOffsetMesh;
 }
