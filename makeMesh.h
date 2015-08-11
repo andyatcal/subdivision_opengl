@@ -21,6 +21,38 @@ class Mesh;
 
 //////////////////////////////////////////////////////////////////////
 // MeshUtils Class -- Utility Functions with Mesh.
+void makeSquare(Mesh &mesh) {
+    flushMesh(mesh);
+    vector<Face*> &faceVect = mesh.faceVect;
+    vector<Halfedge*> &edgeVect = mesh.edgeVect;
+    vector<Vertex*> &vertVect = mesh.vertVect;
+
+    //make new mesh
+    Vertex * v1 = new Vertex;
+    Vertex * v2 = new Vertex;
+    Vertex * v3 = new Vertex;
+    Vertex * v4 = new Vertex;
+
+    //push on all new verts
+    vertVect.push_back(v1);
+    vertVect.push_back(v2);
+    vertVect.push_back(v3);
+    vertVect.push_back(v4);
+ 
+    v1 -> position = vec3(1, 1, 0);
+    v2 -> position = vec3(1, -1, 0);
+    v3 -> position = vec3(-1, -1, 0);
+    v4 -> position = vec3(-1, 1, 0);
+
+    v1 -> ID = 1;
+    v2 -> ID = 2;
+    v3 -> ID = 3;
+    v4 -> ID = 4;
+
+    makeRectFace(v1, v2, v3, v4, faceVect, edgeVect);
+    buildConnections(mesh);
+
+}
 
 void makePyramid(Mesh &mesh){
     flushMesh(mesh);
@@ -538,7 +570,113 @@ void makeHild(Mesh &mesh){
 
     buildConnections(mesh);
 }
+void makeCircleSweep(Mesh &mesh) {
+    flushMesh(mesh);
+    vector<Face*> &faceVect = mesh.faceVect;
+    vector<Halfedge*> &edgeVect = mesh.edgeVect;
+    vector<Vertex*> &vertVect = mesh.vertVect;
 
+    int loop_test = 0;
+    int l_slices = 36;
+    float total_arc = 360.0;
+    float step = total_arc / l_slices;
+    vector<vector<Vertex*> > vertices;
+
+    for(float i = 0.0; i <= total_arc; i += step) {
+        vector<Vertex*> crossSection;
+        float angle = i / 180 * PI;
+        vec3 zaxis = vec3(0, 0, 1);
+        vec3 xaxis = vec3(1, 0, 0);
+        vec3 v1 = vec3(0, 2, 1);
+        vec3 v2 = vec3(0, 1, 2);
+        vec3 v3 = vec3(0, -1, -2);
+        vec3 v4 = vec3(0, -2, -1);
+        vec3 trans = vec3(0 , 3, 0);
+
+        // I will twist m * 180 of this sweep.
+        int m = 11;
+
+        v1 = rotate(v1, m*angle/2, xaxis);
+        v2 = rotate(v2, m*angle/2, xaxis);
+        v3 = rotate(v3, m*angle/2, xaxis);
+        v4 = rotate(v4, m*angle/2, xaxis);
+        
+        v1 += trans;
+        v2 += trans;
+        v3 += trans;
+        v4 += trans;
+
+        v1 = rotate(v1, angle, zaxis);
+        v2 = rotate(v2, angle, zaxis);
+        v3 = rotate(v3, angle, zaxis);
+        v4 = rotate(v4, angle, zaxis);
+
+        if(i == total_arc) {
+            if(distance(v1, vertices[0][0] -> position) < VERYSMALLVALUE
+             && distance(v4, vertices[0][3] -> position) < VERYSMALLVALUE) {
+                loop_test = 1;
+                cout<<"This is a normal loop."<<endl;
+                break;
+            } else if(distance(v1, vertices[0][3] -> position) < VERYSMALLVALUE
+             && distance(v4, vertices[0][0] -> position) < VERYSMALLVALUE) {
+                cout<<"This is a moibus loop."<<endl;
+                loop_test = 2;
+                break;
+            }
+        }
+
+        Vertex * P1 = new Vertex;
+        Vertex * P2 = new Vertex;
+        Vertex * P3 = new Vertex;
+        Vertex * P4 = new Vertex;
+
+        P1 -> position = v1;
+        P2 -> position = v2;
+        P3 -> position = v3;
+        P4 -> position = v4;
+
+        vertVect.push_back(P1);
+        vertVect.push_back(P2);
+        vertVect.push_back(P3);
+        vertVect.push_back(P4);
+
+        crossSection.push_back(P1);
+        crossSection.push_back(P2);
+        crossSection.push_back(P3);
+        crossSection.push_back(P4);
+        vertices.push_back(crossSection);
+    }
+    for(size_t j = 0; j < vertices.size() - 1; j += 1) {
+        for(size_t k = 0; k < 3; k += 1){
+            Vertex * v1 = vertices[j][k];
+            Vertex * v2 = vertices[j + 1][k];
+            Vertex * v3 = vertices[j + 1][k + 1];
+            Vertex * v4 = vertices[j][k + 1];
+            makeRectFace(v1, v2, v3, v4, faceVect, edgeVect);
+        }
+    }
+    if(loop_test == 1) { //If it is a loop //allignment test
+        size_t j = vertices.size() - 1;
+        for(size_t k = 0; k < 3; k += 1){
+            Vertex * v1 = vertices[j][k];
+            Vertex * v2 = vertices[0][k];
+            Vertex * v3 = vertices[0][k + 1];
+            Vertex * v4 = vertices[j][k + 1];
+            makeRectFace(v1, v2, v3, v4, faceVect, edgeVect);
+        }        
+    }
+    if(loop_test == 2) { //If it is a mobius loop
+        size_t j = vertices.size() - 1;
+        for(size_t k = 0; k < 3; k += 1){
+            Vertex * v1 = vertices[j][3 - k - 1];
+            Vertex * v2 = vertices[j][3 - k];
+            Vertex * v3 = vertices[0][k];
+            Vertex * v4 = vertices[0][k + 1];
+            makeRectFace(v1, v2, v3, v4, faceVect, edgeVect);
+        }        
+    }
+    buildConnections(mesh);
+}
 void makeWithSIF(Mesh &mesh, string inputSIF){
     vector<Face*>::iterator faceIt;
     vector<Halfedge*>::iterator edgeIt;
