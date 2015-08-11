@@ -425,12 +425,12 @@ void makeMobius(Mesh &mesh){
     //push on all new verts
     vertVect.push_back(v1);
     vertVect.push_back(v2);
-    //vertVect.push_back(v3);
-    //vertVect.push_back(v4);
+    vertVect.push_back(v3);
+    vertVect.push_back(v4);
     vertVect.push_back(v5);
     vertVect.push_back(v6);
-    //vertVect.push_back(v7);
-    //vertVect.push_back(v8);
+    vertVect.push_back(v7);
+    vertVect.push_back(v8);
     vertVect.push_back(v9);
     vertVect.push_back(vX);
 
@@ -458,11 +458,10 @@ void makeMobius(Mesh &mesh){
 
     makeRectFace(v1, v5, vX, v9, faceVect, edgeVect);
     makeRectFace(vX, v9, v6, v2, faceVect, edgeVect);
-    /*
     makeRectFace(v3, v2, v6, v7, faceVect, edgeVect);
     makeRectFace(v4, v3, v7, v8, faceVect, edgeVect);
     makeRectFace(v1, v4, v8, v5, faceVect, edgeVect);
-    */
+
     buildConnections(mesh);
 }
 

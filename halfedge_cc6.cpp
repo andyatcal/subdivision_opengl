@@ -100,14 +100,14 @@ void init(int level);
 void init(int level, string inputSIF);
 
 void init(int level){
-    //makeCube(glMesh);
+    makeCube(glMesh);
     //makePyramid(glMesh);
     //makeSharpOctahedron(glMesh);
     //makeOctahedron(glMesh);
     //makeOpenCube(glMesh);
     //makeRing(glMesh);
     //makeSharpCube(glMesh);
-    makeMobius(glMesh);
+    //makeMobius(glMesh);
     //makeHild(glMesh);
     //cout<< glMesh.faceVect.size()<<" "<<glMesh.edgeVect.size()<<" "<<glMesh.vertVect.size();
     //ccSubDivision();
@@ -260,20 +260,19 @@ void render(void) {
     gluLookAt(0, 0, 4, 0, 0, 0, 0, 1, 0);
 
     glMultMatrixf(&glMesh.object2world[0][0]);
-
+/*
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, YELLOW);
     drawMesh(glMesh);
-/*
+*/
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, RED);
     drawMesh(glPosMesh);
-    */
+    
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, GREEN);
     drawMesh(glNegMesh);
 
-/*
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, CYAN);
     drawMesh(glSideMesh);
-*/
+
     glutSwapBuffers();
 }
 
