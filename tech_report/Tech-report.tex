@@ -1,5 +1,6 @@
 \documentclass[12pt]{article}
-
+\usepackage{tikz}
+\usetikzlibrary{calc}
 \title{An Implementation of Halfedge Data Structure in Catmull-Clark Subdivision for 2-Manifold Single-sided Surface}
 \author{Yu Wang}
 \date{August 2015}
@@ -27,7 +28,7 @@ The definitions and assumptions of vertex, halfedge and face are shown in table 
 \hline
 		&	Definition	& Assumption	\\
 \hline
-Vertex	&	A 3-dimensional point		&	Vertices can overlap when they have the same position		\\
+Vertex	&	A 3-dimensional point		&	There are no overlapping vertex in a mesh. But overlapping vertices can exist in other meshes.		\\
 \hline
 Halfedge	&	An edge that starts from one vertex and end at another vertex & A halfedge connects exactly two non-overlapping vertices and it has a direction\\
 \hline
@@ -37,6 +38,36 @@ Face		&	A polygon that contains a loop of vertices and halfedges	& A face has at
 \caption{Definitions and assumptions of vertex, halfedge, and face} 
 \label{table:vhfdef}
 \end{table}
+
+\begin{figure}[ht]
+  \centering
+  \begin{tikzpicture}
+    \coordinate (Origin)   at (0,0);
+    \coordinate (XAxisMin) at (-3,0);
+    \coordinate (XAxisMax) at (5,0);
+    \coordinate (YAxisMin) at (0,-2);
+    \coordinate (YAxisMax) at (0,5);
+
+   \clip (-1,-1) rectangle (0.4\textwidth, 0.4\textwidth); % Clips the picture...
+   
+   \coordinate (A0) at (0,0);
+   \coordinate (A1) at (4,0);
+   \coordinate (A2) at (4,4);
+   \coordinate (A3) at (0,4);
+
+    \draw [ultra thick,-latex,] (A0)
+        -- (A1) node [below right] {$A_1$};
+    \draw [ultra thick,-latex,] (A1)
+        -- (A2) node [above right] {$A_2$};
+    \draw [ultra thick,-latex,] (A2)
+        -- (A3) node [above left] {$A_3$};
+    \draw [ultra thick,-latex,] (A3)
+        -- (A0) node [below left] {$A_0$};
+
+  \end{tikzpicture}
+  \caption{An example of single face made with four halfedges.}
+  \label{figure:singleFace}
+\end{figure}
 
 \subsection{Face Connections}
 
