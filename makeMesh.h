@@ -9,6 +9,7 @@
 #define __MAKEMESH_H__
 
 #include <glm/glm.hpp>
+#include <glm/gtx/rotate_vector.hpp>
 
 using namespace glm;
 using namespace std;
@@ -594,7 +595,7 @@ void makeCircleSweep(Mesh &mesh) {
         vec3 trans = vec3(0 , 3, 0);
 
         // I will twist m * 180 of this sweep.
-        int m = 11;
+        int m = 1;
 
         v1 = rotate(v1, m*angle/2, xaxis);
         v2 = rotate(v2, m*angle/2, xaxis);
@@ -615,11 +616,11 @@ void makeCircleSweep(Mesh &mesh) {
             if(distance(v1, vertices[0][0] -> position) < VERYSMALLVALUE
              && distance(v4, vertices[0][3] -> position) < VERYSMALLVALUE) {
                 loop_test = 1;
-                cout<<"This is a normal loop."<<endl;
+                //cout<<"This is a normal loop."<<endl;
                 break;
             } else if(distance(v1, vertices[0][3] -> position) < VERYSMALLVALUE
              && distance(v4, vertices[0][0] -> position) < VERYSMALLVALUE) {
-                cout<<"This is a moibus loop."<<endl;
+                //cout<<"This is a moibus loop."<<endl;
                 loop_test = 2;
                 break;
             }

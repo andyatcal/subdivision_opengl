@@ -100,7 +100,7 @@ void init(int level);
 void init(int level, string inputSIF);
 
 void init(int level){
-    makeCube(glMesh);
+    //makeCube(glMesh);
     //makePyramid(glMesh);
     //makeSharpOctahedron(glMesh);
     //makeOctahedron(glMesh);
@@ -109,6 +109,7 @@ void init(int level){
     //makeSharpCube(glMesh);
     //makeMobius(glMesh);
     //makeHild(glMesh);
+    makeCircleSweep(glMesh);
     //cout<< glMesh.faceVect.size()<<" "<<glMesh.edgeVect.size()<<" "<<glMesh.vertVect.size();
     //ccSubDivision();
     Subdivision myCC(glMesh);
@@ -257,7 +258,7 @@ void render(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
-    gluLookAt(0, 0, 4, 0, 0, 0, 0, 1, 0);
+    gluLookAt(0, 0, 10, 0, 0, 0, 0, 1, 0);
 
     glMultMatrixf(&glMesh.object2world[0][0]);
 /*
