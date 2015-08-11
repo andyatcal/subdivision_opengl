@@ -13,16 +13,34 @@
 %\end{abstract}
 
 \section{Introduction}
-Contents of Introduction.\\
- Add later.\\
-Problem statement. 1. Motivation of writing this program: Emulation of sculptures. 2. Describe the rendering problem of Continuum on SLIDE.\\
-\section{Halfedge Data Structure}
+
+\section{Halfedge Data Structure} \label{sec:halfedge}
+
+An object in 3D Euclid space can be represented by a mesh of polygons. A mesh contains three types of geometry element: vertex, edge, and face. The adjacency structure stores the topological information (adjacency and connectivity) of the mesh. The author chose halfedge data structure as the adjacency structure in this project to realize Catmull-Clark subdivision.
 
 \subsection{Vertex, Halfedge, and Face}
 
+The definitions and assumptions of vertex, halfedge and face are shown in table \ref{table:vhfdef}. An example for a single face is shown in figure.
+\begin{table}[h]
+\centering
+\begin{tabular}{| l | p{0.4\textwidth} | p{0.4\textwidth}|}
+\hline
+		&	Definition	& Assumption	\\
+\hline
+Vertex	&	A 3-dimensional point		&	Vertices can overlap when they have the same position		\\
+\hline
+Halfedge	&	An edge that starts from one vertex and end at another vertex & A halfedge connects exactly two non-overlapping vertices and it has a direction\\
+\hline
+Face		&	A polygon that contains a loop of vertices and halfedges	& A face has at least three non-overlapping vertices so it makes a polygon\\
+\hline
+\end{tabular}
+\caption{Definitions and assumptions of vertex, halfedge, and face} 
+\label{table:vhfdef}
+\end{table}
+
 \subsection{Face Connections}
 
-\section{Catumll-Clark Subdivision}
+\section{Catumll-Clark Subdivision} \label{sec:ccsd}
 
 \subsection{General Approach of Catmull-Clark Subdivision}
 
@@ -34,7 +52,7 @@ Problem statement. 1. Motivation of writing this program: Emulation of sculpture
 
 \subsection{Mobius Connection}
 
-\section{Surface Offset}
+\section{Offset Surface} \label{sec:offset}
 
 \subsection{Compute Vertex Normals}
 
