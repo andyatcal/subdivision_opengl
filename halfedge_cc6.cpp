@@ -263,12 +263,13 @@ void render(void) {
 
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, YELLOW);
     drawMesh(glMesh);
-
+/*
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, RED);
     drawMesh(glPosMesh);
-/*
+    */
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, GREEN);
     drawMesh(glNegMesh);
+
 /*
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, CYAN);
     drawMesh(glSideMesh);
