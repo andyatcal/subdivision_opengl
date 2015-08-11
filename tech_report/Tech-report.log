@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  11 AUG 2015 13:28
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  11 AUG 2015 13:40
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -434,51 +434,50 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 
 {/usr/local/texlive/2014/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <12> on input line 27.
+(Font)              <12> on input line 29.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 27.
+(Font)              <8> on input line 29.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 27.
+(Font)              <6> on input line 29.
 
-Underfull \hbox (badness 1077) in paragraph at lines 33--34
+Underfull \hbox (badness 1077) in paragraph at lines 35--36
 []\OT1/cmr/m/n/12 A halfedge con-nects ex-actly
  []
 
 
-Underfull \hbox (badness 1371) in paragraph at lines 33--34
+Underfull \hbox (badness 1371) in paragraph at lines 35--36
 \OT1/cmr/m/n/12 two non-overlapping ver-tices
  []
 
 
-Underfull \hbox (badness 3029) in paragraph at lines 35--36
+Underfull \hbox (badness 3029) in paragraph at lines 37--38
 []\OT1/cmr/m/n/12 A face has at least three
  []
 
 
-Overfull \hbox (2.37952pt too wide) in paragraph at lines 27--38
+Overfull \hbox (2.37952pt too wide) in paragraph at lines 29--40
  [][] 
  []
 
-[2]
-Overfull \vbox (66.95041pt too high) has occurred while \output is active []
 
+LaTeX Warning: `h' float specifier changed to `ht'.
 
-[3] (./Tech-report.aux) ) 
+[2] [3] (./Tech-report.aux) ) 
 Here is how much of TeX's memory you used:
- 11440 strings out of 493117
- 234120 string characters out of 6135433
+ 11401 strings out of 493117
+ 233391 string characters out of 6135433
  267377 words of memory out of 5000000
- 14704 multiletter control sequences out of 15000+600000
+ 14665 multiletter control sequences out of 15000+600000
  8808 words of font info for 31 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 55i,11n,54p,413b,635s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/local/texlive/2014/texmf-dist/fonts/type1/public
-/amsfonts/cm/cmbx12.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/public/
-amsfonts/cm/cmmi12.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/public/a
-msfonts/cm/cmr12.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/public/ams
-fonts/cm/cmr17.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfo
-nts/cm/cmr8.pfb>
-Output written on Tech-report.pdf (3 pages, 64483 bytes).
+ 55i,10n,54p,413b,635s stack positions out of 5000i,500n,10000p,200000b,80000s
+</usr/local/texlive/2014/texmf-dist/fonts/type1/pu
+blic/amsfonts/cm/cmbx12.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/pub
+lic/amsfonts/cm/cmmi12.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/publ
+ic/amsfonts/cm/cmr12.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/public
+/amsfonts/cm/cmr17.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/public/a
+msfonts/cm/cmr8.pfb>
+Output written on Tech-report.pdf (3 pages, 65089 bytes).
 PDF statistics:
  37 PDF objects out of 1000 (max. 8388607)
  26 compressed objects within 1 object stream

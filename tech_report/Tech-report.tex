@@ -17,44 +17,39 @@
 
 \section{Halfedge Data Structure} \label{sec:halfedge}
 
-An object in 3D Euclid space can be represented by a mesh of polygons. A mesh contains three types of geometry element: vertex, edge, and face. The adjacency structure stores the topological information (adjacency and connectivity) of the mesh. The author chose halfedge data structure as the adjacency structure in this project to realize Catmull-Clark subdivision.
+An object in 3D Euclid space can be represented by multiple meshes of polygons. A mesh comprises three types of geometry element: vertex, edge, and face. The adjacency structure stores the topological information (adjacency and connectivity) of the mesh. The author chose halfedge data structure as the adjacency structure in this project to realize Catmull-Clark subdivision.
 
 \subsection{Vertex, Halfedge, and Face}
 
-The definitions and assumptions of vertex, halfedge and face are shown in table \ref{table:vhfdef}. An example for a single face is shown in figure.
+The definitions and assumptions of vertex, halfedge and face are shown in Table \ref{table:vhfdef}. An example for a face made with four halfedges is shown in Figure \ref{figure:singleFace}.
+
+%Table1
 \begin{table}[h]
 \centering
 \begin{tabular}{| l | p{0.4\textwidth} | p{0.4\textwidth}|}
 \hline
 		&	Definition	& Assumption	\\
 \hline
-Vertex	&	A 3-dimensional point		&	There are no overlapping vertex in a mesh. But overlapping vertices can exist in other meshes.		\\
+Vertex	&	A 3-dimensional point.		&	There are no overlapping vertices (vertices that share the same position) in a mesh. But overlapping vertices can exist in different meshes.		\\
 \hline
-Halfedge	&	An edge that starts from one vertex and end at another vertex & A halfedge connects exactly two non-overlapping vertices and it has a direction\\
+Halfedge	&	An edge that starts from one vertex and end at another vertex. & A halfedge connects exactly two non-overlapping vertices and it has a direction. Less than two halfedges start from the same vertex and end at the same vertex in a single mesh.\\
 \hline
-Face		&	A polygon that contains a loop of vertices and halfedges	& A face has at least three non-overlapping vertices so it makes a polygon\\
+Face		&	A polygon that contains a loop of vertices and halfedges.	& A face has at least three non-overlapping vertices so it makes a polygon.\\
 \hline
 \end{tabular}
 \caption{Definitions and assumptions of vertex, halfedge, and face} 
 \label{table:vhfdef}
 \end{table}
 
-\begin{figure}[ht]
+%Figure1
+\begin{figure}[h]
   \centering
   \begin{tikzpicture}
-    \coordinate (Origin)   at (0,0);
-    \coordinate (XAxisMin) at (-3,0);
-    \coordinate (XAxisMax) at (5,0);
-    \coordinate (YAxisMin) at (0,-2);
-    \coordinate (YAxisMax) at (0,5);
-
-   \clip (-1,-1) rectangle (0.4\textwidth, 0.4\textwidth); % Clips the picture...
-   
+   \clip (-1,-1) rectangle (0.2\textwidth, 0.2\textwidth); % Clips the picture...
    \coordinate (A0) at (0,0);
-   \coordinate (A1) at (4,0);
-   \coordinate (A2) at (4,4);
-   \coordinate (A3) at (0,4);
-
+   \coordinate (A1) at (2,0);
+   \coordinate (A2) at (2,2);
+   \coordinate (A3) at (0,2);
     \draw [ultra thick,-latex,] (A0)
         -- (A1) node [below right] {$A_1$};
     \draw [ultra thick,-latex,] (A1)
