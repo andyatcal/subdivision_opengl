@@ -107,22 +107,22 @@ void init(int level){
     //makeOpenCube(glMesh);
     //makeRing(glMesh);
     //makeSharpCube(glMesh);
-    //makeMobius(glMesh);
-    makeHild(glMesh);
+    makeMobius(glMesh);
+    //makeHild(glMesh);
     //cout<< glMesh.faceVect.size()<<" "<<glMesh.edgeVect.size()<<" "<<glMesh.vertVect.size();
     //ccSubDivision();
     Subdivision myCC(glMesh);
     glMesh = myCC.ccSubdivision(level);
     computeNormals(glMesh);
-    Offset offset(glMesh, 0.04);
+    Offset offset(glMesh, 0.2);
     glPosMesh = offset.posOffsetMesh;
     glNegMesh = offset.negOffsetMesh;
     glSideMesh = offset.sideOffsetMesh;
     vector<Mesh> meshes;
     meshes.push_back(glMesh);
-    //meshes.push_back(glPosMesh);
-    //meshes.push_back(glNegMesh);
-    //meshes.push_back(glSideMesh);
+    meshes.push_back(glPosMesh);
+    meshes.push_back(glNegMesh);
+    meshes.push_back(glSideMesh);
     STL stl;
     stl.STLOutput(meshes, "debug/STL/Example.stl");
 }
@@ -260,19 +260,19 @@ void render(void) {
     gluLookAt(0, 0, 4, 0, 0, 0, 0, 1, 0);
 
     glMultMatrixf(&glMesh.object2world[0][0]);
-    /*
+
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, YELLOW);
     drawMesh(glMesh);
-*/
+
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, RED);
     drawMesh(glPosMesh);
-    
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, RED);
+/*
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, GREEN);
     drawMesh(glNegMesh);
-
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, RED);
+/*
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, CYAN);
     drawMesh(glSideMesh);
-
+*/
     glutSwapBuffers();
 }
 
@@ -341,9 +341,6 @@ void keySpecial(int key, int x, int y) {
 }
 
 void onMouse(int button, int state, int x, int y) {
-    if (button == GLUT_RIGHT_BUTTON) {
-        exit(0);
-    }
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
         arcball_on = true;
         last_mx = cur_mx = x;
