@@ -267,10 +267,10 @@ void render(void) {
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, RED);
     drawMesh(glPosMesh);
     
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, GREEN);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, RED);
     drawMesh(glNegMesh);
 
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, CYAN);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, RED);
     drawMesh(glSideMesh);
 
     glutSwapBuffers();
@@ -384,6 +384,7 @@ int main(int argc, char** argv) {
     glutInitWindowSize(viewport.width, viewport.height);
     glutInitWindowPosition(100, 100);
     glutCreateWindow(argv[0]);
+    glClearColor(0.8, 0.8, 0.8, 1.0f);
     initRendering();
     glutDisplayFunc(render);
     // General UI functions
