@@ -62,10 +62,6 @@ void makeTriFace(Vertex * va, Vertex* vb, Vertex * vc,
     e2 = new Halfedge;
     e3 = new Halfedge;
 
-    nextFace -> addVertex(va);
-    nextFace -> addVertex(vb);
-    nextFace -> addVertex(vc);
-
     e1->start = va;
     e2->start = vb;
     e3->start = vc;
@@ -111,11 +107,6 @@ void makeRectFace(Vertex * va, Vertex* vb, Vertex * vc, Vertex * vd,
     e2 = new Halfedge;
     e3 = new Halfedge;
     e4 = new Halfedge;
-
-    nextFace -> addVertex(va);
-    nextFace -> addVertex(vb);
-    nextFace -> addVertex(vc);
-    nextFace -> addVertex(vd);
 
     e1->start = va;
     e2->start = vb;
@@ -180,7 +171,6 @@ void makePolygonFace(vector<Vertex*> vertices,
             }
             edges.push_back(tempEdge);
             currVert -> oneOutEdge = tempEdge;
-            nextFace -> addVertex(*vIt);
         }
     } else {
         for(vIt = vertices.end() - 1; vIt >= vertices.begin(); vIt--) {
@@ -194,7 +184,6 @@ void makePolygonFace(vector<Vertex*> vertices,
             }
             edges.push_back(tempEdge);
             currVert -> oneOutEdge = tempEdge;
-            nextFace -> addVertex(*vIt);
         }
     }
     vector<Halfedge*>::iterator eIt;
@@ -348,19 +337,20 @@ void makeBoundaries(vector<vector<Vertex*> > &boundaries,
     }
 }
 
-// Get the vertex normal at the end of a halfedge. 
+// Return the normal at point v2. 
+// @param p1, p2, p3 are positions of three vertices,
+// with edge p1 -> p2 and edge p2 -> p3.
+vec3 getNormal3Vertex(vec3 p1, vec3 p2, vec3 p3){
+    return normalize(cross(p2 - p1, p3 - p2));
+}
+
+// Get the normal at the end of a halfedge. 
 // @param currEdge: pointer of the edge, which the vertex on the end of.
 vec3 getEndOfEdgeNormal(Halfedge * currEdge){
     Vertex * v1 = currEdge -> start;
     Vertex * v2 = currEdge -> end;
     Vertex * v3 = currEdge -> next -> end;
-
-    vec3 oneEdge = v2 -> position - v1 -> position;
-    vec3 secondEdge = v3 -> position - v2 -> position;
-
-    vec3 result = cross(oneEdge, secondEdge);
-
-    return normalize(result);
+    return getNormal3Vertex(v1 -> position, v2 -> position, v3 -> position);
 }
 
 // Get the surface normal at the end of a halfedge. 
@@ -374,7 +364,7 @@ void getFaceNormal(Face * currFace){
         avgNorm += getEndOfEdgeNormal(currEdge);
         currEdge = currEdge -> next;
     } while (currEdge != firstEdge);
-    currFace -> faceNormal = normalize(avgNorm);
+    currFace -> faceNormal = normalize(avgNorm);;
 }
 
 // Get the surface normal at the end of a halfedge. 
@@ -442,18 +432,21 @@ void computeNormals(Mesh & mesh){
 // @param mesh: reference to the mesh to draw.
 void drawMesh(Mesh & mesh) {
     Face * tempFace;
-    vector<Face*>::iterator dispFaceIt;
+    vector<Face*>::iterator fIt;
     //cout<<endl;
-    for(dispFaceIt = mesh.faceVect.begin(); dispFaceIt < mesh.faceVect.end(); dispFaceIt++){
+    for(fIt = mesh.faceVect.begin(); fIt < mesh.faceVect.end(); fIt++){
         //cout<<"A new Face Begin HERE!"<<endl;
-        tempFace = *dispFaceIt;
+        tempFace = *fIt;
         Vertex * tempv;
-        vector<Vertex*>::iterator vIt;
-        vector<Vertex*> vertices = tempFace -> vertices;
+        Halfedge * firstSideEdge = (*fIt) -> oneSideEdge;
+        if(firstSideEdge == NULL) {
+            cout<<"ERROR: This face (with ID)" <<(*fIt) -> ID << "does not have a sideEdge."<<endl;
+            exit(1);
+        }
         glBegin(GL_POLYGON);
-        for(vIt = vertices.begin(); vIt < vertices.end(); vIt++) {
-            //cout<<"Vert ID: "<<  (*vIt) -> ID<<endl;
-            tempv = *vIt;
+        Halfedge * nextSideEdge = firstSideEdge;
+        do {
+            tempv = nextSideEdge -> end;
             float normx = tempv -> normal[0];
             float normy = tempv -> normal[1];
             float normz = tempv -> normal[2];
@@ -464,7 +457,8 @@ void drawMesh(Mesh & mesh) {
             float z = tempv -> position[2];
             //cout<<"x: "<<x<<" y: "<<y<<" z: "<<z<<endl;
             glVertex3f(x, y, z);
-        }
+            nextSideEdge = nextSideEdge -> next;
+        } while(nextSideEdge != firstSideEdge);
         glEnd();
     }
 }

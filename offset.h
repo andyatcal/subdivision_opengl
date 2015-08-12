@@ -56,25 +56,33 @@ Offset::Offset(Mesh & mesh, float val) {
     for(fIt = mesh.faceVect.begin(); fIt < mesh.faceVect.end(); fIt++) {
         vector<Vertex*> posOffsetVertices;
         vector<Vertex*> negOffsetVertices;
-        for(vIt = ((*fIt) -> vertices).begin(); vIt < ((*fIt) -> vertices).end(); vIt++) {
-            if(!((*vIt) -> onMobiusSibling)) {
-                posOffsetVertices.push_back((*vIt) -> posOffset);
-                negOffsetVertices.push_back((*vIt) -> negOffset);
+        Halfedge * firstSideEdge = (*fIt) -> oneSideEdge;
+        if(firstSideEdge == NULL) {
+            cout<<"ERROR: This face (with ID) does not have a sideEdge."<<endl;
+            exit(1);
+        }
+        Halfedge * nextSideEdge = firstSideEdge;
+        do {
+            Vertex * currVert = nextSideEdge -> end;
+            if(!(currVert -> onMobiusSibling)) {
+                posOffsetVertices.push_back(currVert -> posOffset);
+                negOffsetVertices.push_back(currVert -> negOffset);
             } else {
-                vec3 oneOption = (*vIt) -> posOffset -> position - (*vIt) -> position;
+                vec3 oneOption = currVert -> posOffset -> position - currVert -> position;
                 if(dot(oneOption, (*fIt) -> faceNormal) >= 0) {
-                    (*vIt) -> negOffset -> normal = - (*vIt) -> normal;
-                    (*vIt) -> posOffset -> normal = (*vIt) -> normal;
-                    posOffsetVertices.push_back((*vIt) -> posOffset);
-                    negOffsetVertices.push_back((*vIt) -> negOffset);
+                    currVert -> negOffset -> normal = - currVert -> normal;
+                    currVert -> posOffset -> normal = currVert -> normal;
+                    posOffsetVertices.push_back(currVert -> posOffset);
+                    negOffsetVertices.push_back(currVert -> negOffset);
                 } else {
-                    (*vIt) -> negOffset -> normal = (*vIt) -> normal;
-                    (*vIt) -> posOffset -> normal = - (*vIt) -> normal;
-                    posOffsetVertices.push_back((*vIt) -> negOffset);
-                    negOffsetVertices.push_back((*vIt) -> posOffset);
+                    currVert -> negOffset -> normal = currVert -> normal;
+                    currVert -> posOffset -> normal = - currVert -> normal;
+                    posOffsetVertices.push_back(currVert -> negOffset);
+                    negOffsetVertices.push_back(currVert -> posOffset);
                 }
             }
-        }
+            nextSideEdge = nextSideEdge -> next;
+        } while(nextSideEdge != firstSideEdge);
         makePolygonFace(posOffsetVertices, posOffsetMesh.faceVect, posOffsetMesh.edgeVect);
         makePolygonFace(negOffsetVertices, negOffsetMesh.faceVect, negOffsetMesh.edgeVect, true);
     }

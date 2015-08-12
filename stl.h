@@ -42,29 +42,35 @@ void STL::STLOutput(vector<Mesh> &meshes, string outputSTL){
             vector<Face*> &faceVect = currMesh.faceVect;
             vector<Face*>::iterator fIt;
             for(fIt = faceVect.begin(); fIt < faceVect.end(); fIt++) {
-                vector<Vertex*> vertices = (*fIt) -> vertices;
-                vector<Vertex*>::iterator vIt;
-                if(vertices.size() < 3) {
-                    cout << "COULD NOT DEAL WITH FACE LESS THAN THREE VERTICES.\n";
+                Halfedge * firstSideEdge = (*fIt) -> oneSideEdge;
+                if(firstSideEdge == NULL) {
+                    cout<<"ERROR: This face (with ID)" <<(*fIt) -> ID << "does not have a sideEdge."<<endl;
                     exit(0);
                 }
-                Vertex * v0 = *(vertices.begin());
-                for(vIt = vertices.begin() + 1; vIt < vertices.end() - 1; vIt++) {
+                Vertex * v0 = firstSideEdge -> start;
+                vec3 p0 = v0 -> position;
+                Halfedge * nextSideEdge = firstSideEdge -> next;
+                if(nextSideEdge == NULL) {
+                    cout<<"ERROR: This face (with ID)" <<(*fIt) -> ID << "contains only one edge and can not be drawn."<<endl;
+                }
+                do {
+                    Vertex * v1 = nextSideEdge -> start;
+                    Vertex * v2 = nextSideEdge -> end;
                     Mesh tempMesh;
-                    makeTriFace(v0, *vIt, *(vIt + 1), tempMesh.faceVect, tempMesh.edgeVect);
+                    makeTriFace(v0, v1, v2, tempMesh.faceVect, tempMesh.edgeVect);
                     getFaceNormal(tempMesh.faceVect[0]);
                     vec3 faceNormal = tempMesh.faceVect[0] -> faceNormal;
                     file << "  facet normal "<<faceNormal[0]<<" "<<faceNormal[1]<<" "<<faceNormal[2]<<"\n";
                     file << "    outer loop\n";
-                    vec3 p0 = v0 -> position;
-                    vec3 p1 = (*vIt) -> position;
-                    vec3 p2 = (*(vIt + 1)) -> position;
+                    vec3 p1 = v1 -> position;
+                    vec3 p2 = v2 -> position;
                     file << "      vertex " << p0[0] << " "<< p0[1] << " " << p0[2]<<"\n";
                     file << "      vertex " << p1[0] << " "<< p1[1] << " " << p1[2]<<"\n";
                     file << "      vertex " << p2[0] << " "<< p2[1] << " " << p2[2]<<"\n";
                     file << "    endloop\n";
                     file << "  endfacet\n";
-                }
+                    nextSideEdge = nextSideEdge -> next;
+                } while (nextSideEdge -> next != firstSideEdge);
             }
         }
         file << "endsolid\n";

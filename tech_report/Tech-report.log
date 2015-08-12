@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  12 AUG 2015 12:37
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  12 AUG 2015 13:44
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -433,6 +433,13 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 [1
 
 {/usr/local/texlive/2014/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
+
+LaTeX Warning: Reference `table:vhfdef' on page 2 undefined on input line 30.
+
+
+LaTeX Warning: Reference `figure:singleFace' on page 2 undefined on input line 
+31.
+
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <12> on input line 36.
 LaTeX Font Info:    External font `cmex10' loaded for size
@@ -450,43 +457,40 @@ Underfull \hbox (badness 1371) in paragraph at lines 46--49
  []
 
 
-Underfull \hbox (badness 3029) in paragraph at lines 50--52
+Underfull \hbox (badness 3029) in paragraph at lines 50--53
 []\OT1/cmr/m/n/12 A face has at least three
  []
 
 
-Overfull \hbox (2.37952pt too wide) in paragraph at lines 36--54
- [][] 
- []
-
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 109--110
-[]\OT1/cmr/m/n/12 predecessor and suc-ces-sor
- []
-
-
-Underfull \hbox (badness 2809) in paragraph at lines 111--112
-[]\OT1/cmr/m/n/12 boundary links to ad-ja-cent
- []
-
-
-Overfull \hbox (41.22356pt too wide) in paragraph at lines 99--116
+Overfull \hbox (2.37952pt too wide) in paragraph at lines 36--55
  [][] 
  []
 
 [2]
 
+LaTeX Warning: Reference `table:vhfInfo' on page 3 undefined on input line 96.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 110--111
+[]\OT1/cmr/m/n/12 predecessor and suc-ces-sor
+ []
+
+
+Underfull \hbox (badness 2809) in paragraph at lines 112--113
+[]\OT1/cmr/m/n/12 boundary links to ad-ja-cent
+ []
+
+
+Overfull \hbox (2.37952pt too wide) in paragraph at lines 100--118
+ [][] 
+ []
+
+
 LaTeX Warning: Reference `figure:faceConnections' on page 3 undefined on input 
-line 123.
-
-
-LaTeX Warning: `h' float specifier changed to `ht'.
+line 125.
 
 [3]
-Overfull \vbox (55.7016pt too high) has occurred while \output is active []
+Overfull \vbox (148.35716pt too high) has occurred while \output is active []
 
 
 [4] (./Tech-report.aux)
@@ -498,10 +502,10 @@ LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 
  ) 
 Here is how much of TeX's memory you used:
- 11427 strings out of 493117
- 233700 string characters out of 6135433
- 271385 words of memory out of 5000000
- 14691 multiletter control sequences out of 15000+600000
+ 11468 strings out of 493117
+ 234225 string characters out of 6135433
+ 274337 words of memory out of 5000000
+ 14732 multiletter control sequences out of 15000+600000
  8808 words of font info for 31 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  55i,11n,54p,413b,626s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -509,11 +513,12 @@ Here is how much of TeX's memory you used:
 ></usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb>
 </usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></
 usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></us
-r/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb>
-Output written on Tech-report.pdf (4 pages, 68540 bytes).
+r/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/l
+ocal/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb>
+Output written on Tech-report.pdf (4 pages, 76705 bytes).
 PDF statistics:
- 40 PDF objects out of 1000 (max. 8388607)
- 28 compressed objects within 1 object stream
+ 44 PDF objects out of 1000 (max. 8388607)
+ 31 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  13 words of extra memory for PDF output out of 10000 (max. 10000000)
 

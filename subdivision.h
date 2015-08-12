@@ -63,28 +63,27 @@ Subdivision::Subdivision(Mesh & mesh){
 }
 void Subdivision::makeFacePoints(vector<Face*> &faceVect,
  vector<Vertex*> &vertVect){
-    vector<Face*>::iterator it;
-    for(it = faceVect.begin(); it < faceVect.end(); it++){
-        vector<Vertex*> vertices = (*it) -> vertices;
+    vector<Face*>::iterator fIt;
+    for(fIt = faceVect.begin(); fIt < faceVect.end(); fIt++){
         // Facepoint is the average of vertices in this face
         Vertex * newFacePoint = new Vertex;
         vec3 newFacePointPosition = vec3(0, 0, 0);
-        vector<Vertex*>::iterator vIt;
-        if(!vertices.empty()) {
-            for(vIt = vertices.begin(); vIt < vertices.end(); vIt++) {
-                newFacePointPosition += ((*vIt) -> position);
-            }
-            newFacePointPosition /= vertices.size();
-            newFacePoint -> position = newFacePointPosition;
-            //cout<<newFacePointPosition<<endl;
-        } else {
-            cout << "ERROR: CAN'T CALCULATE FACEPOINTS WITH LESS THAN 0 VERTICES."<<endl;
-            exit(0);
+        Halfedge * firstSideEdge = (*fIt) -> oneSideEdge;
+        if(firstSideEdge == NULL) {
+            cout<<"ERROR: This face (with ID) does not have a sideEdge."<<endl;
+            exit(1);
         }
-        (*it) -> facePoint = newFacePoint;
+        Halfedge * nextSideEdge = firstSideEdge;
+        int counter = 0;
+        do {
+            newFacePointPosition += (nextSideEdge -> end -> position);
+            nextSideEdge = nextSideEdge -> next;
+            counter += 1;
+        } while(nextSideEdge != firstSideEdge);
+        newFacePointPosition /= counter;
+        newFacePoint -> position = newFacePointPosition;
+        (*fIt) -> facePoint = newFacePoint;
         vertVect.push_back(newFacePoint);
-        //cout<<"FacePoint: "<<endl;
-        //cout<<newFacePointPosition;
     }
 }
 
@@ -366,10 +365,6 @@ void Subdivision::compileNewMesh(vector<Face*> &faceVect, vector<Face*> &newFace
             previousB -> next = edgeA;
             edgeA -> previous = previousB;
             newFace = new Face;
-            newFace -> addVertex(edgeA -> start);
-            newFace -> addVertex(edgeIn -> start);
-            newFace -> addVertex(previousOut -> start);
-            newFace -> addVertex(previousB -> start);
             edgeA -> heFace = newFace;
             edgeIn -> heFace = newFace;
             previousOut -> heFace = newFace;
@@ -400,10 +395,6 @@ void Subdivision::compileNewMesh(vector<Face*> &faceVect, vector<Face*> &newFace
         previousB -> next = edgeA;
         edgeA -> previous = previousB;
         newFace = new Face;
-        newFace -> addVertex(edgeA -> start);
-        newFace -> addVertex(edgeIn -> start);
-        newFace -> addVertex(previousOut -> start);
-        newFace -> addVertex(previousB -> start);
         edgeA -> heFace = newFace;
         edgeIn -> heFace = newFace;
         previousOut -> heFace = newFace;
