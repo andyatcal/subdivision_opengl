@@ -134,7 +134,7 @@ void init(int level, string inputSIF){
     Subdivision myCC(glMesh);
     glMesh = myCC.ccSubdivision(level);
     computeNormals(glMesh);
-    Offset offset(glMesh, 0.12);
+    Offset offset(glMesh, 0.01);
     glPosMesh = offset.posOffsetMesh;
     glNegMesh = offset.negOffsetMesh;
     glSideMesh = offset.sideOffsetMesh;
