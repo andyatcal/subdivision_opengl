@@ -107,9 +107,9 @@ void init(int level){
     //makeOpenCube(glMesh);
     //makeRing(glMesh);
     //makeSharpCube(glMesh);
-    //makeMobius(glMesh);
+    makeMobius(glMesh);
     //makeHild(glMesh);
-    makeCircleSweep(glMesh);
+    //makeCircleSweep(glMesh);
     //cout<< glMesh.faceVect.size()<<" "<<glMesh.edgeVect.size()<<" "<<glMesh.vertVect.size();
     //ccSubDivision();
     Subdivision myCC(glMesh);
@@ -134,7 +134,7 @@ void init(int level, string inputSIF){
     Subdivision myCC(glMesh);
     glMesh = myCC.ccSubdivision(level);
     computeNormals(glMesh);
-    Offset offset(glMesh, 0.02);
+    Offset offset(glMesh, 0.12);
     glPosMesh = offset.posOffsetMesh;
     glNegMesh = offset.negOffsetMesh;
     glSideMesh = offset.sideOffsetMesh;
@@ -189,7 +189,7 @@ void initRendering(){
 
     // Two sided pr ones side;
     glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-
+    glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
@@ -258,20 +258,20 @@ void render(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
-    gluLookAt(0, 0, 10, 0, 0, 0, 0, 1, 0);
+    gluLookAt(0, 0, 0.5, 0, 0, 0, 0, 1, 0);
 
     glMultMatrixf(&glMesh.object2world[0][0]);
 /*
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, YELLOW);
     drawMesh(glMesh);
 */
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, RED);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, GREEN);
     drawMesh(glPosMesh);
     
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, RED);
     drawMesh(glNegMesh);
 
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, RED);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, CYAN);
     drawMesh(glSideMesh);
 
     glutSwapBuffers();

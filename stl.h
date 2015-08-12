@@ -42,8 +42,6 @@ void STL::STLOutput(vector<Mesh> &meshes, string outputSTL){
             vector<Face*> &faceVect = currMesh.faceVect;
             vector<Face*>::iterator fIt;
             for(fIt = faceVect.begin(); fIt < faceVect.end(); fIt++) {
-                getFaceNormal(*fIt);
-                vec3 faceNormal = (*fIt) -> faceNormal;
                 vector<Vertex*> vertices = (*fIt) -> vertices;
                 vector<Vertex*>::iterator vIt;
                 if(vertices.size() < 3) {
@@ -51,8 +49,11 @@ void STL::STLOutput(vector<Mesh> &meshes, string outputSTL){
                     exit(0);
                 }
                 Vertex * v0 = *(vertices.begin());
-                std::setprecision(6);
                 for(vIt = vertices.begin() + 1; vIt < vertices.end() - 1; vIt++) {
+                    Mesh tempMesh;
+                    makeTriFace(v0, *vIt, *(vIt + 1), tempMesh.faceVect, tempMesh.edgeVect);
+                    getFaceNormal(tempMesh.faceVect[0]);
+                    vec3 faceNormal = tempMesh.faceVect[0] -> faceNormal;
                     file << "  facet normal "<<faceNormal[0]<<" "<<faceNormal[1]<<" "<<faceNormal[2]<<"\n";
                     file << "    outer loop\n";
                     vec3 p0 = v0 -> position;

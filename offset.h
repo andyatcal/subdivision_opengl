@@ -119,7 +119,7 @@ Offset::Offset(Mesh & mesh, float val) {
     }
     buildConnections(sideOffsetMesh);
     computeNormals(sideOffsetMesh);
-
+    
     // To build a complete offset mesh;
     //buildConnections(posOffsetMesh);
     //buildConnections(negOffsetMesh);
