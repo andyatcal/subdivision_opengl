@@ -140,23 +140,23 @@ void init(int level, string inputSIF){
     computeNormals(glMesh);
 
     Offset offset(glMesh, 0.013);
-    glPosMesh = offset.posOffsetMesh;
-    glNegMesh = offset.negOffsetMesh;
-    glSideMesh = offset.sideOffsetMesh;
-    offset.makeFullOffset();
-    glOffMesh = offset.offsetMesh;
-    Subdivision myOffCC(glOffMesh);
-    glOffMesh = myOffCC.ccSubdivision(1);
     vector<Mesh> meshes;
-/*
-    Subdivision myCC(glOffMesh);
-    glOffMesh = myCC.ccSubdivision(level);
-
-    meshes.push_back(glPosMesh);
-    meshes.push_back(glNegMesh);
-    meshes.push_back(glSideMesh);
-*/
-    meshes.push_back(glOffMesh);
+    bool full = true;
+    if(full) {
+        offset.makeFullOffset();
+        glOffMesh = offset.offsetMesh;
+        Subdivision myOffCC(glOffMesh);
+        glOffMesh = myOffCC.ccSubdivision(level);
+        meshes.push_back(glOffMesh);
+    } else {
+        offset.makeSeperateOffset();
+        glPosMesh = offset.posOffsetMesh;
+        glNegMesh = offset.negOffsetMesh;
+        glSideMesh = offset.sideOffsetMesh;
+        meshes.push_back(glPosMesh);
+        meshes.push_back(glNegMesh);
+        meshes.push_back(glSideMesh);
+    }
     STL stl;
     stl.STLOutput(meshes, "debug/STL/Example.stl");
     
