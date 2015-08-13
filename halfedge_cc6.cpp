@@ -146,7 +146,7 @@ void init(int level, string inputSIF){
         offset.makeFullOffset();
         glOffMesh = offset.offsetMesh;
         Subdivision myOffCC(glOffMesh);
-        glOffMesh = myOffCC.ccSubdivision(3);
+        glOffMesh = myOffCC.ccSubdivision(2);
         meshes.push_back(glOffMesh);
     } else {
         offset.makeSeperateOffset();
