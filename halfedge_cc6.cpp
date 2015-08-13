@@ -138,8 +138,7 @@ void init(int level, string inputSIF){
     Subdivision myCC(glMesh);
     glMesh = myCC.ccSubdivision(level);
     computeNormals(glMesh);
-
-    Offset offset(glMesh, 0.013);
+    Offset offset(glMesh, 0.012);
     vector<Mesh> meshes;
     bool full = true;
     if(full) {
@@ -147,6 +146,7 @@ void init(int level, string inputSIF){
         glOffMesh = offset.offsetMesh;
         Subdivision myOffCC(glOffMesh);
         glOffMesh = myOffCC.ccSubdivision(2);
+        computeNormals(glOffMesh);
         meshes.push_back(glOffMesh);
     } else {
         offset.makeSeperateOffset();
@@ -206,7 +206,7 @@ void initRendering(){
 
     // Two sided pr ones side;
     glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-    glEnable(GL_CULL_FACE);
+    //glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
@@ -278,10 +278,10 @@ void render(void) {
     gluLookAt(0, 0, 2, 0, 0, 0, 0, 1, 0);
 
     glMultMatrixf(&glMesh.object2world[0][0]);
-
+/*
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, YELLOW);
     drawMesh(glMesh);
-/*
+
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, GREEN);
     drawMesh(glPosMesh);
     
@@ -291,8 +291,10 @@ void render(void) {
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, CYAN);
     drawMesh(glSideMesh);
 */
+
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, BLUE);
     drawMesh(glOffMesh);
+
     glutSwapBuffers();
 
 }

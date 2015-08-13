@@ -330,6 +330,7 @@ void getVertexNormal(Vertex * currVert){
             }
         }
     } while ( nextOutEdge != firstOutEdge);
+    //cout<<"The value of avgNorm is :"<<avgNorm[0]<<" "<<avgNorm[1]<<" "<<avgNorm[2]<<endl;
     //cout<<"ID: "<<currVert -> ID <<" has "<<mobiusCounter<<" mConter"<<endl;
     currVert -> normal = normalize(avgNorm);
 }
@@ -345,9 +346,8 @@ void computeNormals(Mesh & mesh){
     for(fIt = faceTable.begin(); fIt != faceTable.end(); fIt++){
         getFaceNormal(fIt -> second);
     }
-    //cout<<vertTable.size()<<endl;
+    cout<<"the vertTable size is"<<vertTable.size()<<endl;
     for(vIt = vertTable.begin(); vIt != vertTable.end(); vIt++){
-        //cout<<"HELLOE";
         getVertexNormal(vIt -> second);
     }
 }
