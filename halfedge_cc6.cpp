@@ -110,7 +110,7 @@ void init(int level){
     //makeRing(glMesh);
     //makeSharpCube(glMesh);
     //makeNormalStrip(glMesh);
-    //makeMobius(glMesh);
+    makeMobius(glMesh);
     //makeHild(glMesh);
     //makeCircleSweep(glMesh);
     //cout<< glMesh.faceTable.size()<<" "<<glMesh.edgeVect.size()<<" "<<glMesh.vertVect.size();
