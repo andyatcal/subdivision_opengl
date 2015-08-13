@@ -30,15 +30,22 @@ public:
     // Constructor.
     Face();
     // Tracking ID.
-    int ID;
+    uint ID;
     // The normal of face, by Newell's method.
     vec3 faceNormal;
+    // Add this face to a hashTable.
+    // @param faceTable: the target HashTable to be added in.
+    void addToHashTable(unordered_map<uint, Face*> & faceTable);
 };
 
 Face::Face(){
     oneSideEdge = NULL;
     facePoint = NULL;
     ID = 0;
+}
+
+void Face::addToHashTable(unordered_map<uint, Face*> & faceTable) {
+    faceTable[ID] = this;
 }
 
 #endif // __FACE_H__

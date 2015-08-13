@@ -22,139 +22,121 @@ class Mesh;
 //////////////////////////////////////////////////////////////////////
 // MeshUtils Class -- Utility Functions with Mesh.
 
-// Flush mesh. Make the vertVect, edgeVect, faceVect of a mesh empty.
+// Flush mesh. Make the vertTable, edgeTable, faceTable of a mesh empty.
 // @param mesh : the mesh to flush.
 void flushMesh(Mesh &mesh) {
-    vector<Face*> faceVect = mesh.faceVect;
-    vector<Halfedge*> edgeVect = mesh.edgeVect;
-    vector<Vertex*> vertVect = mesh.vertVect;
+    unordered_map<uint, Face*> faceTable = mesh.faceTable;
+    unordered_map<unsigned long long, Halfedge*> edgeTable = mesh.edgeTable;
+    unordered_map<unsigned long, Vertex*> vertTable = mesh.vertTable;
     Vertex * tempVert;
     Halfedge * tempEdge;
     Face * tempFace;
-    while(!faceVect.empty()){
-        tempFace = faceVect.back();
-        faceVect.pop_back();
+    unordered_map<uint, Face*>::iterator fIt;
+    unordered_map<unsigned long long, Halfedge*>::iterator eIt;
+    unordered_map<unsigned long, Vertex*>::iterator vIt;
+    for(fIt = faceTable.begin(); fIt != faceTable.end(); fIt++) {
+        tempFace = fIt -> second;
         delete tempFace;
     }
-    while(!edgeVect.empty()){
-        tempEdge = edgeVect.back();
-        edgeVect.pop_back();
+    for(eIt = edgeTable.begin(); eIt != edgeTable.end(); eIt++) {
+        tempEdge = eIt -> second;
         delete tempEdge;
     }
-    while(!vertVect.empty()){
-        tempVert = vertVect.back();
-        vertVect.pop_back();
+    for(vIt = vertTable.begin(); vIt != vertTable.end(); vIt++) {
+        tempVert = vIt -> second;
         delete tempVert;
     }
+    faceTable.clear();
+    edgeTable.clear();
+    vertTable.clear();
 }
 
 // Make a triangle face with three vertex.
 // @param va, vb, vc: three points to construct the face.
-// @param faceVect: reference to the faceVect of the mesh.
-// @param edgeVect: reference to the edgeVect of the mesh.
+// @param faceTable: reference to the faceTable of the mesh.
+// @param edgeTable: reference to the edgeTable of the mesh.
 void makeTriFace(Vertex * va, Vertex* vb, Vertex * vc, 
-                vector<Face*> &faceVect, 
-                vector<Halfedge*> &edgeVect) {
-    Face * nextFace = new Face;
+                unordered_map<uint, Face*> &faceTable, 
+                unordered_map<unsigned long long, Halfedge*> &edgeTable) {
+    Face * currFace = new Face;
     Halfedge *e1, *e2, *e3;
 
-    e1 = new Halfedge;
-    e2 = new Halfedge;
-    e3 = new Halfedge;
+    e1 = new Halfedge(va, vb);
+    e2 = new Halfedge(vb, vc);
+    e3 = new Halfedge(vc, va);
 
-    e1->start = va;
-    e2->start = vb;
-    e3->start = vc;
-    e1->end = vb;
-    e2->end = vc;
-    e3->end = va;
+    e1 -> next = e2;
+    e2 -> next = e3;
+    e3 -> next = e1;
 
-    va->oneOutEdge = e1;
-    vb->oneOutEdge = e2;
-    vc->oneOutEdge = e3;
-
-    e1->next = e2;
-    e2->next = e3;
-    e3->next = e1;
-
-    e2->previous = e1;
-    e3->previous = e2;
-    e1->previous = e3;
+    e2 -> previous = e1;
+    e3 -> previous = e2;
+    e1 -> previous = e3;
     
-    e1->heFace = nextFace;
-    e2->heFace = nextFace;
-    e3->heFace = nextFace;
+    e1 -> heFace = currFace;
+    e2 -> heFace = currFace;
+    e3 -> heFace = currFace;
 
-    nextFace->oneSideEdge = e3;
+    currFace -> oneSideEdge = e3;
+    currFace -> ID = faceTable.size();
+    currFace -> addToHashTable(faceTable);
 
-    faceVect.push_back(nextFace);
-    edgeVect.push_back(e1);
-    edgeVect.push_back(e2);
-    edgeVect.push_back(e3);
+    e1 -> addToHashTable(edgeTable);
+    e2 -> addToHashTable(edgeTable);
+    e3 -> addToHashTable(edgeTable);
+
 }
+
 
 // Make a rectangle face with four vertex.
 // @param va, vb, vc, vd: four points to construct the face.
-// @param faceVect: reference to the faceVect of the mesh.
-// @param edgeVect: reference to the edgeVect of the mesh.
+// @param faceTable: reference to the faceTable of the mesh.
+// @param edgeTable: reference to the edgeTable of the mesh.
 void makeRectFace(Vertex * va, Vertex* vb, Vertex * vc, Vertex * vd, 
-                vector<Face*> &faceVect, 
-                vector<Halfedge*> &edgeVect) {
-    Face * nextFace = new Face;
+                unordered_map<uint, Face*> &faceTable, 
+                unordered_map<unsigned long long, Halfedge*> &edgeTable) {
+    Face * currFace = new Face;
     Halfedge *e1, *e2, *e3, *e4;
 
-    e1 = new Halfedge;
-    e2 = new Halfedge;
-    e3 = new Halfedge;
-    e4 = new Halfedge;
+    e1 = new Halfedge(va, vb);
+    e2 = new Halfedge(vb, vc);
+    e3 = new Halfedge(vc, vd);
+    e4 = new Halfedge(vd, va);
 
-    e1->start = va;
-    e2->start = vb;
-    e3->start = vc;
-    e4->start = vd;
-    e1->end = vb;
-    e2->end = vc;
-    e3->end = vd;
-    e4->end = va;
+    e1 -> next = e2;
+    e2 -> next = e3;
+    e3 -> next = e4;
+    e4 -> next = e1;
 
-    va->oneOutEdge = e1;
-    vb->oneOutEdge = e2;
-    vc->oneOutEdge = e3;
-    vd->oneOutEdge = e4;
+    e2 -> previous = e1;
+    e3 -> previous = e2;
+    e4 -> previous = e3;
+    e1 -> previous = e4;
 
-    e1->next = e2;
-    e2->next = e3;
-    e3->next = e4;
-    e4->next = e1;
+    e1 -> heFace = currFace;
+    e2 -> heFace = currFace;
+    e3 -> heFace = currFace;
+    e4 -> heFace = currFace;
 
-    e2->previous = e1;
-    e3->previous = e2;
-    e4->previous = e3;
-    e1->previous = e4;
+    currFace->oneSideEdge = e4;
+    currFace -> ID = faceTable.size();
+    currFace -> addToHashTable(faceTable);
 
-    e1->heFace = nextFace;
-    e2->heFace = nextFace;
-    e3->heFace = nextFace;
-    e4->heFace = nextFace;
-
-    nextFace->oneSideEdge = e4;
-
-    faceVect.push_back(nextFace);
-    edgeVect.push_back(e1);
-    edgeVect.push_back(e2);
-    edgeVect.push_back(e3);
-    edgeVect.push_back(e4);
+    e1 -> addToHashTable(edgeTable);
+    e2 -> addToHashTable(edgeTable);
+    e3 -> addToHashTable(edgeTable);
+    e4 -> addToHashTable(edgeTable);
 }
 
 // Make a polygon face with n vertex.
 // @param vertices: a list of points to construct the face.
-// @param faceVect: reference to the faceVect of the mesh.
-// @param edgeVect: reference to the edgeVect of the mesh.
+// @param faceTable: reference to the faceTable of the mesh.
+// @param edgeTable: reference to the edgeTable of the mesh.
 void makePolygonFace(vector<Vertex*> vertices, 
-                vector<Face*> &faceVect, 
-                vector<Halfedge*> &edgeVect,
+                unordered_map<uint, Face*> &faceTable, 
+                unordered_map<unsigned long long, Halfedge*> &edgeTable,
                 bool reverseOrder = false) {
-    Face * nextFace = new Face;
+    Face * currFace = new Face;
     vector<Halfedge*> edges;
     vector<Vertex*>::iterator vIt;
     Vertex * currVert;
@@ -162,28 +144,24 @@ void makePolygonFace(vector<Vertex*> vertices,
     if(!reverseOrder) {
         for(vIt = vertices.begin(); vIt < vertices.end(); vIt++) {
             currVert = *vIt;
-            Halfedge * tempEdge = new Halfedge;
-            tempEdge -> start = *vIt;
+            Halfedge * tempEdge;
             if(vIt == (vertices.end() - 1)) {
-                tempEdge -> end = *(vertices.begin());
+                tempEdge = new Halfedge(*vIt, *(vertices.begin()));
             } else {
-                tempEdge -> end = *(vIt + 1);
+                tempEdge = new Halfedge(*vIt, *(vIt + 1));
             }
             edges.push_back(tempEdge);
-            currVert -> oneOutEdge = tempEdge;
         }
     } else {
         for(vIt = vertices.end() - 1; vIt >= vertices.begin(); vIt--) {
             currVert = *vIt;
-            Halfedge * tempEdge = new Halfedge;
-            tempEdge -> start = *vIt;
+            Halfedge * tempEdge;
             if(vIt == (vertices.end() - 1)) {
-                tempEdge -> end = *(vertices.begin());
+                tempEdge = new Halfedge(*(vertices.begin()), *vIt);
             } else {
-                tempEdge -> end = *(vIt + 1);
+                tempEdge = new Halfedge(*(vIt + 1), *vIt);
             }
             edges.push_back(tempEdge);
-            currVert -> oneOutEdge = tempEdge;
         }
     }
     vector<Halfedge*>::iterator eIt;
@@ -198,149 +176,80 @@ void makePolygonFace(vector<Vertex*> vertices,
             Halfedge * temp = *(eIt + 1);
             temp -> previous = currEdge;
         }
-        currEdge -> heFace = nextFace;
-        edgeVect.push_back(*eIt);
+        currEdge -> heFace = currFace;
+        currEdge -> addToHashTable(edgeTable);
     }
-    nextFace -> oneSideEdge = *(edges.begin());
-    faceVect.push_back(nextFace);
+    currFace -> oneSideEdge = *(edges.begin());
+    currFace -> ID = faceTable.size();
+    currFace -> addToHashTable(faceTable);
+}
+
+// Given the list of boundary edges, build the connections between halfedges.
+// @param boundaryEdges. A list of edges on the boundary, not necessarily sorted.
+// @param edgeTable: reference to the edgeTable of the mesh.
+void buildBoundaries(vector<Halfedge*> & boundaryEdges) {
+    vector<Halfedge*>::iterator eIt1;
+    vector<Halfedge*>::iterator eIt2;
+    for(eIt1 = boundaryEdges.begin(); eIt1 < boundaryEdges.end(); eIt1++) {
+        Halfedge * e1 = *eIt1;
+        e1 -> isSharp = true;
+        for(eIt2 = eIt1 + 1; eIt2 < boundaryEdges.end(); eIt2++) {
+            Halfedge * e2 = *eIt2;
+            if(e1 -> start == e2 -> start) {
+                e1 -> mobiusBoundary = e2;
+                e2 -> mobiusBoundary = e1;
+            } else if (e1 -> end == e2 -> end) {
+                e1 -> mobiusBoundary = e2;
+                e2 -> mobiusBoundary = e1;
+            } else if (e1 -> start == e2 -> end) {
+                e1 -> previousBoundary = e2;
+                e2 -> nextBoundary = e1;
+            } else if (e1 -> end == e2 -> start){
+                e1 -> nextBoundary = e2;
+                e2 -> previousBoundary = e1;
+            }
+        }
+    }
 }
 
 // Build connnections after making the faces.
 // @param mesh: reference to the mesh that the connections located in.
 void buildConnections(Mesh &mesh) {
-    vector<Halfedge*> &edgeVect = mesh.edgeVect;
-    vector<Halfedge*>::iterator edgeIt1;
-    vector<Halfedge*>::iterator edgeIt2;
-    vector<Halfedge*>::iterator eIt;
-    for( edgeIt1 = edgeVect.begin(); edgeIt1 < edgeVect.end(); edgeIt1 ++){
-        for(edgeIt2 = edgeIt1 + 1; edgeIt2 < edgeVect.end(); edgeIt2++){
-            if(((*edgeIt1)->start == (*edgeIt2)->end) && ((*edgeIt1)->end
-             == (*edgeIt2)->start)){
-
-                (*edgeIt1)->sibling = *edgeIt2;
-                (*edgeIt2)->sibling = *edgeIt1;
-
-            } else if (((*edgeIt1) -> start == (*edgeIt2) -> start)
-             &&((*edgeIt1) -> end == (*edgeIt2) -> end)) {
-
-                (*edgeIt1)->mobiusSibling = *edgeIt2;
-                (*edgeIt2)->mobiusSibling = *edgeIt1;
-
-                (*edgeIt1) -> start -> onMobiusSibling = true;
-                (*edgeIt1) -> end -> onMobiusSibling = true;
-                (*edgeIt2) -> start -> onMobiusSibling = true;
-                (*edgeIt2) -> end -> onMobiusSibling = true;
-
+    unordered_map<unsigned long long, Halfedge*> &edgeTable = mesh.edgeTable;
+    unordered_map<unsigned long long, Halfedge*>::iterator eIt;
+    unordered_map<unsigned long long, Halfedge*>::iterator eiIt;
+    for(eIt = edgeTable.begin(); eIt != edgeTable.end(); eIt ++){
+        Halfedge * currEdge = eIt -> second;
+        if(currEdge -> sibling == NULL && currEdge -> mobiusSibling == NULL) {
+            Vertex * start = currEdge -> start;
+            Vertex * end = currEdge -> end;
+            unsigned long searchKey = hashKey(end -> ID, start -> ID);
+            eiIt = edgeTable.find(searchKey);
+            if(eiIt != edgeTable.end()) {
+                Halfedge * mySibling = eiIt -> second;
+                currEdge -> sibling = mySibling;
+                mySibling -> sibling = currEdge;
             }
         }
     }
+    cout<<"HERE"<<endl;
     vector<Halfedge*> boundaryEdges;
-    for(eIt = edgeVect.begin(); eIt < edgeVect.end(); eIt ++) {
-        if((*eIt) -> sibling == NULL && (*eIt) -> mobiusSibling == NULL) {
-            boundaryEdges.push_back(*eIt);
+    for(eIt = edgeTable.begin(); eIt != edgeTable.end(); eIt ++) {
+        Halfedge * currEdge = eIt -> second;
+        if(currEdge -> sibling == NULL && currEdge -> mobiusSibling == NULL) {
+            boundaryEdges.push_back(currEdge);
         }
     }
-    for( edgeIt1 = boundaryEdges.begin(); edgeIt1 < boundaryEdges.end();
-     edgeIt1 ++){
-        for(edgeIt2 = edgeIt1 +1; edgeIt2 < boundaryEdges.end(); edgeIt2++){
-            if(((*edgeIt1)->start == (*edgeIt2)->start) &&((*edgeIt1)->end
-             != (*edgeIt2)->end)){
-
-                (*edgeIt1)->mobiusBoundary = *edgeIt2;
-                (*edgeIt2)->mobiusBoundary = *edgeIt1;
-
-            } else if (((*edgeIt1)->end == (*edgeIt2)->end) &&((*edgeIt1)->start
-             != (*edgeIt2)->start)){
-
-                (*edgeIt1)->mobiusBoundary = *edgeIt2;
-                (*edgeIt2)->mobiusBoundary = *edgeIt1;
-
-            } else if ((*edgeIt1)->start == (*edgeIt2)->end){
-
-                (*edgeIt1)->previousBoundary = *edgeIt2;
-                (*edgeIt2)->nextBoundary = *edgeIt1;
-
-            } else if ((*edgeIt1)->end == (*edgeIt2)->start){
-
-                (*edgeIt1)->nextBoundary = *edgeIt2;
-                (*edgeIt2)->previousBoundary = *edgeIt1;
-
-            }
-        }
-    }
-    for(eIt = boundaryEdges.begin(); eIt < boundaryEdges.end(); eIt ++) {
-        (*eIt) -> isSharp = true;
-    }
-}
-
-// Make the boundaries given the vertices on the boundaries.
-// @param boundaries: lists of vertices on all boundaries.
-// @param edgeVect: reference to the edgeVect of the mesh.
-void makeBoundaries(vector<vector<Vertex*> > &boundaries,
- vector<Halfedge*> &edgeVect) {
-    vector<vector<Vertex*> >::iterator allBoundsIt;
-    vector<Vertex*> oneBoundary;
-    vector<Halfedge*> boundaryEdges;
-    vector<Halfedge*>::iterator eIt;
-    for(allBoundsIt = boundaries.begin(); allBoundsIt < boundaries.end();
-     allBoundsIt++) {
-        oneBoundary = *allBoundsIt;
-        vector<Vertex*>::iterator boundIt;
-        for(boundIt = oneBoundary.begin(); boundIt < oneBoundary.end();
-         boundIt ++) {
-            for(eIt = edgeVect.begin(); eIt < edgeVect.end(); eIt++) {
-                if(boundIt != oneBoundary.end() - 1 && (*eIt) -> start ==
-                 (*boundIt) && (*eIt) -> end == *(boundIt + 1)){
-                    boundaryEdges.push_back(*eIt);
-                } else if(boundIt == oneBoundary.end() - 1 && (*eIt) -> start ==
-                 (*boundIt) && (*eIt) -> end == *(oneBoundary.begin())){
-                    boundaryEdges.push_back(*eIt);
-                }
-            }
-        }
-    }
-    vector<Halfedge*>::iterator edgeIt1;
-    vector<Halfedge*>::iterator edgeIt2;
-    for( edgeIt1 = boundaryEdges.begin(); edgeIt1 < boundaryEdges.end();
-     edgeIt1 ++){
-        for(edgeIt2 = edgeIt1 +1; edgeIt2 < boundaryEdges.end(); edgeIt2++){
-            if(((*edgeIt1)->start == (*edgeIt2)->start) &&((*edgeIt1)->end
-             != (*edgeIt2)->end)){
-
-                (*edgeIt1)->mobiusBoundary = *edgeIt2;
-                (*edgeIt2)->mobiusBoundary = *edgeIt1;
-
-            } else if (((*edgeIt1)->end == (*edgeIt2)->end) &&((*edgeIt1)->start
-             != (*edgeIt2)->start)){
-
-                (*edgeIt1)->mobiusBoundary = *edgeIt2;
-                (*edgeIt2)->mobiusBoundary = *edgeIt1;
-
-            } else if ((*edgeIt1)->start == (*edgeIt2)->end){
-
-                (*edgeIt1)->previousBoundary = *edgeIt2;
-                (*edgeIt2)->nextBoundary = *edgeIt1;
-
-            } else if ((*edgeIt1)->end == (*edgeIt2)->start){
-
-                (*edgeIt1)->nextBoundary = *edgeIt2;
-                (*edgeIt2)->previousBoundary = *edgeIt1;
-
-            }
-        }
-    }
-    for(eIt = boundaryEdges.begin(); eIt < boundaryEdges.end(); eIt ++) {
-
-        if((*eIt) -> mobiusSibling == NULL) {
-            (*eIt) -> isSharp = true;
-        }
-    }
+    buildBoundaries(boundaryEdges);
 }
 
 // Return the normal at point v2. 
 // @param p1, p2, p3 are positions of three vertices,
 // with edge p1 -> p2 and edge p2 -> p3.
 vec3 getNormal3Vertex(vec3 p1, vec3 p2, vec3 p3){
+    /*cout<<"p1: "<<p1[0]<<" "<<p1[1]<<" "<<p1[2]<<endl;
+    cout<<"p2: "<<p2[0]<<" "<<p2[1]<<" "<<p2[2]<<endl;
+    cout<<"p3: "<<p3[0]<<" "<<p3[1]<<" "<<p3[2]<<endl;*/
     return normalize(cross(p2 - p1, p3 - p2));
 }
 
@@ -350,20 +259,31 @@ vec3 getEndOfEdgeNormal(Halfedge * currEdge){
     Vertex * v1 = currEdge -> start;
     Vertex * v2 = currEdge -> end;
     Vertex * v3 = currEdge -> next -> end;
+    /*
+    cout<<"ME ID: "<<currEdge -> ID<<endl;
+    cout<<"ME: "<<currEdge -> start -> ID<<" "<< currEdge -> end -> ID<<" "<<endl;
+    cout<<"NEXT: "<<currEdge -> next -> start -> ID<<" "<< currEdge -> next -> end -> ID<<" "<<endl;
+    vec3 result = getNormal3Vertex(v1 -> position, v2 -> position, v3 -> position);
+    */
+    //cout<<"fnormx: "<<result[0]<<" fnormy: "<<result[1]<<" fnormz: "<<result[2]<<endl;
     return getNormal3Vertex(v1 -> position, v2 -> position, v3 -> position);
 }
 
 // Get the surface normal at the end of a halfedge. 
 // @param currEdge: pointer of the edge, which the vertex on the end of.
 void getFaceNormal(Face * currFace){
+    //cout<<endl<<endl<<"New Face: "<<currFace -> ID <<endl;
     Halfedge * firstEdge = currFace -> oneSideEdge;
     Halfedge * currEdge;
     currEdge = firstEdge;
     vec3 avgNorm(0, 0, 0);
     do {
         avgNorm += getEndOfEdgeNormal(currEdge);
+        //cout<<"fanormx: "<<avgNorm[0]<<" fanormy: "<<avgNorm[1]<<" fanormz: "<<avgNorm[2]<<endl;
         currEdge = currEdge -> next;
     } while (currEdge != firstEdge);
+    vec3 result = normalize(avgNorm);
+    //cout<<"fnormx: "<<avgNorm[0]<<" fnormy: "<<avgNorm[1]<<" fnormz: "<<avgNorm[2]<<endl;
     currFace -> faceNormal = normalize(avgNorm);;
 }
 
@@ -377,6 +297,7 @@ void getVertexNormal(Vertex * currVert){
     vec3 avgNorm(0, 0, 0);
     int mobiusCounter = 0;
     do {
+        //cout<<"The value of avgNorm is :"<<avgNorm[0]<<" "<<avgNorm[1]<<" "<<avgNorm[2]<<endl;
         if(mobiusCounter % 2 == 0) {
             avgNorm += nextOutEdge -> heFace -> faceNormal;
         } else {
@@ -410,21 +331,25 @@ void getVertexNormal(Vertex * currVert){
             }
         }
     } while ( nextOutEdge != firstOutEdge);
+    //cout<<"ID: "<<currVert -> ID <<" has "<<mobiusCounter<<" mConter"<<endl;
     currVert -> normal = normalize(avgNorm);
 }
 
 // Iterate over every vertex in the mesh and compute its normal
-// @param vertVect: the vector of vertex to compute normals.
+// @param vertTable: the vector of vertex to compute normals.
 void computeNormals(Mesh & mesh){
-    vector<Vertex*> vertVect = mesh.vertVect;
-    vector<Vertex*>::iterator vIt;
-    vector<Face*> faceVect = mesh.faceVect;
-    vector<Face*>::iterator fIt;
-    for(fIt = faceVect.begin(); fIt < faceVect.end(); fIt++){
-        getFaceNormal(*fIt);
+    unordered_map<unsigned long, Vertex*> & vertTable = mesh.vertTable;
+    unordered_map<unsigned long, Vertex*>::iterator vIt;
+    unordered_map<uint, Face*> & faceTable = mesh.faceTable;
+    unordered_map<uint, Face*>::iterator fIt;
+    //cout<<"faceTable size: "<<faceTable.size()<<endl;
+    for(fIt = faceTable.begin(); fIt != faceTable.end(); fIt++){
+        getFaceNormal(fIt -> second);
     }
-    for(vIt = vertVect.begin(); vIt < vertVect.end(); vIt++){
-        getVertexNormal(*vIt);
+    //cout<<vertTable.size()<<endl;
+    for(vIt = vertTable.begin(); vIt != vertTable.end(); vIt++){
+        //cout<<"HELLOE";
+        getVertexNormal(vIt -> second);
     }
 }
 
@@ -432,15 +357,16 @@ void computeNormals(Mesh & mesh){
 // @param mesh: reference to the mesh to draw.
 void drawMesh(Mesh & mesh) {
     Face * tempFace;
-    vector<Face*>::iterator fIt;
+    unordered_map<uint, Face*>::iterator fIt;
     //cout<<endl;
-    for(fIt = mesh.faceVect.begin(); fIt < mesh.faceVect.end(); fIt++){
+    for(fIt = mesh.faceTable.begin(); fIt != mesh.faceTable.end(); fIt++){
         //cout<<"A new Face Begin HERE!"<<endl;
-        tempFace = *fIt;
+        tempFace = fIt -> second;
         Vertex * tempv;
-        Halfedge * firstSideEdge = (*fIt) -> oneSideEdge;
+        Halfedge * firstSideEdge = fIt -> second -> oneSideEdge;
+        //cout<<"New Face: "<<endl;
         if(firstSideEdge == NULL) {
-            cout<<"ERROR: This face (with ID)" <<(*fIt) -> ID << "does not have a sideEdge."<<endl;
+            cout<<"ERROR: This face (with ID)" <<fIt -> second -> ID << "does not have a sideEdge."<<endl;
             exit(1);
         }
         glBegin(GL_POLYGON);
@@ -462,4 +388,5 @@ void drawMesh(Mesh & mesh) {
         glEnd();
     }
 }
+
 #endif // __MESHUTILS_H__

@@ -11,6 +11,7 @@
 #include <glm/glm.hpp>
 
 using namespace glm;
+using namespace std;
 
 // Forward declarations
 class Halfedge;
@@ -27,7 +28,7 @@ public:
     // The normal of this Vertex.
     vec3 normal;
     // An ID to track this Vertex.
-    int ID;
+    unsigned long ID;
     // Track if this vertex on a mobius junction.
     bool onMobiusSibling;
     // Copy of vertex position, to avoid conficts in makeVertPoints of subdivision.
@@ -40,9 +41,12 @@ public:
     Vertex();
     // Contructor given initial location of vertex.
     // @param x, y, z as the initial x, y, z position of this vertex.
-    Vertex(float x, float y, float z);
+    Vertex(float x, float y, float z, uint ID);
     // Set copy to the current position of this vertex.
     void makeCopy();
+    // Add this face to a hashTable.
+    // @param faceTable: the target HashTable to be added in.
+    void addToHashTable(unordered_map<unsigned long, Vertex*> & vectTable);
 };
 
 Vertex::Vertex(){
@@ -53,16 +57,20 @@ Vertex::Vertex(){
     posOffset = negOffset = NULL;
 }
 
-Vertex::Vertex(float x, float y, float z) {
+Vertex::Vertex(float x, float y, float z, uint ID) {
     position = vec3(x, y, z);
     oneOutEdge = NULL;
-    ID = 0;
+    ID = ID;
     onMobiusSibling = false;
     posOffset = negOffset = NULL;
 }
 
 void Vertex::makeCopy() {
     copy = position;
+}
+
+void Vertex::addToHashTable(unordered_map<unsigned long, Vertex*> & vectTable) {
+    vectTable[ID] = this;
 }
 
 #endif // __VERTEX_H__

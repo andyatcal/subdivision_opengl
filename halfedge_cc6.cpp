@@ -34,16 +34,18 @@
 #include <regex>
 #include <string>
 #include <map>
+#include <unordered_map>
 #include "vertex.h"
 #include "halfedge.h"
 #include "face.h"
 #include "mesh.h"
 #include "meshUtils.h"
+#include "makeMesh.h"
 #include "subdivision.h"
 #include "viewport.h"
 #include "offset.h"
-#include "makeMesh.h"
 #include "stl.h"
+
 
 using namespace std;
 using namespace glm;
@@ -107,11 +109,11 @@ void init(int level){
     //makeOpenCube(glMesh);
     //makeRing(glMesh);
     //makeSharpCube(glMesh);
-    makeMobius(glMesh);
+    //makeNormalStrip(glMesh);
+    //makeMobius(glMesh);
     //makeHild(glMesh);
     //makeCircleSweep(glMesh);
-    //cout<< glMesh.faceVect.size()<<" "<<glMesh.edgeVect.size()<<" "<<glMesh.vertVect.size();
-    //ccSubDivision();
+    //cout<< glMesh.faceTable.size()<<" "<<glMesh.edgeVect.size()<<" "<<glMesh.vertVect.size();
     Subdivision myCC(glMesh);
     glMesh = myCC.ccSubdivision(level);
     computeNormals(glMesh);
@@ -129,11 +131,13 @@ void init(int level){
 }
 
 void init(int level, string inputSIF){
+    //makeWithSIF(glMesh, inputSIF);
     makeWithQuadSIF(glMesh, inputSIF);
     //cout<<glMesh.faceVect.size()<<" "<< glMesh.vertVect.size()<<endl;
     Subdivision myCC(glMesh);
     glMesh = myCC.ccSubdivision(level);
     computeNormals(glMesh);
+
     Offset offset(glMesh, 0.01);
     glPosMesh = offset.posOffsetMesh;
     glNegMesh = offset.negOffsetMesh;
@@ -144,6 +148,7 @@ void init(int level, string inputSIF){
     meshes.push_back(glSideMesh);
     STL stl;
     stl.STLOutput(meshes, "debug/STL/Example.stl");
+    //cout<< glMesh.faceVect.size()<<" "<<glMesh.edgeVect.size()<<" "<<glMesh.vertVect.size();
 }
 //************************************************************
 //          Arcball Functions
@@ -261,10 +266,10 @@ void render(void) {
     gluLookAt(0, 0, 4, 0, 0, 0, 0, 1, 0);
 
     glMultMatrixf(&glMesh.object2world[0][0]);
-/*
+
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, YELLOW);
     drawMesh(glMesh);
-*/
+
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, GREEN);
     drawMesh(glPosMesh);
     
@@ -275,6 +280,7 @@ void render(void) {
     drawMesh(glSideMesh);
 
     glutSwapBuffers();
+
 }
 
 void reshape(int w, int h) {

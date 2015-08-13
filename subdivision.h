@@ -14,11 +14,12 @@ using namespace glm;
 using namespace std;
 
 // Forward declarations
+/*
 class Vertex;
 class Face;
 class Halfedge;
 class Mesh;
-
+*/
 //////////////////////////////////////////////////////////////////////
 // Subdivision Class -- Functions to perform the subdivision for a mesh
 class Subdivision{
@@ -26,7 +27,7 @@ public:
     // The mesh to be subdivide;
     Mesh currMesh;
     // Constructor.
-    Subdivision();
+    Subdivision(){};
     // Constructor. 
     // @param mesh: the reference of given mesh.
     Subdivision(Mesh & mesh);
@@ -35,125 +36,114 @@ public:
     Mesh ccSubdivision(int level);
 private:
     // Construct face points in Catmull-Clark subdivision.
-    // Computed values are stored in face.facepoint. Add new Vertices to vertVect.
-    // @param faceVect: List of faces in the mesh.
-    // @param vertVect: List of vertices in the mesh to store new vertices.
-    void makeFacePoints(vector<Face*> &faceVect, vector<Vertex*> &vertVect);
+    // Computed values are stored in face.facepoint. Add new Vertices to vertTable.
+    // @param faceTable: HashTable of faces in the mesh.
+    // @param vertTable: HashTable of vertices in the mesh to store new vertices.
+    void makeFacePoints(unordered_map<uint, Face*> &faceTable, unordered_map<unsigned long, Vertex*> &vertTable);
     // Construct edge points in Catmull-Clark subdivision.
-    // Computed values are stored in edge.edgepoint. Add new Vertices to vertVect.
-    // @param faceVect: List of edges in the mesh.
-    // @param vertVect: List of vertices in the mesh to store new vertices.
-    void makeEdgePoints(vector<Halfedge*> &edgeVect, vector<Vertex*> &vertVect);
+    // Computed values are stored in edge.edgepoint. Add new Vertices to vertTable.
+    // @param faceTable: HashTable of edges in the mesh.
+    // @param vertTable: HashTable of vertices in the mesh to store new vertices.
+    void makeEdgePoints(unordered_map<unsigned long long, Halfedge*> &edgeTable, unordered_map<unsigned long, Vertex*> &vertTable);
     // Construct vertex points in Catmull-Clark subdivision.
     // By modifying the original position and pointers of the vertex.
-    // @param vertVect: List of vertices in the mesh.
-    void makeVertexPoints(vector<Vertex*> &vertVect);
+    // @param vertTable: List of vertices in the mesh.
+    void makeVertexPoints(unordered_map<unsigned long, Vertex*> &vertTable);
     // Construct a new mesh after given new facepoints, edgepoints, and vertexpoints.
-    // @param faceVect: List of faces in the mesh.
-    // @param newFaceVect: the new list of faces in the mesh.
-    // @param newEdgeVect: the new list of edges in the mesh.
-    void compileNewMesh(vector<Face*> &faceVect, vector<Face*> &newFaceVect,
-     vector<Halfedge*> &newEdgeVect);
+    // @param faceTable: List of faces in the mesh.
+    // @param newFaceTable: the new list of faces in the mesh.
+    // @param newEdgeTable: the new list of edges in the mesh.
+    void compileNewMesh(unordered_map<uint, Face*> &faceTable, unordered_map<uint, Face*> &newFaceTable,
+     unordered_map<unsigned long long, Halfedge*> &newEdgeTable);
 };
 
-Subdivision::Subdivision(){}
+//Subdivision::Subdivision(){}
 
 Subdivision::Subdivision(Mesh & mesh){
     currMesh = mesh;
 }
-void Subdivision::makeFacePoints(vector<Face*> &faceVect,
- vector<Vertex*> &vertVect){
-    vector<Face*>::iterator fIt;
-    for(fIt = faceVect.begin(); fIt < faceVect.end(); fIt++){
+void Subdivision::makeFacePoints(unordered_map<uint, Face*> &faceTable,
+ unordered_map<unsigned long, Vertex*> &vertTable){
+    unsigned long currID = vertTable.size();
+    unordered_map<uint, Face*>::iterator fIt;
+    for(fIt = faceTable.begin(); fIt != faceTable.end(); fIt++){
         // Facepoint is the average of vertices in this face
         Vertex * newFacePoint = new Vertex;
         vec3 newFacePointPosition = vec3(0, 0, 0);
-        Halfedge * firstSideEdge = (*fIt) -> oneSideEdge;
+        Face * currFace = fIt -> second;
+        Halfedge * firstSideEdge = currFace -> oneSideEdge;
         if(firstSideEdge == NULL) {
             cout<<"ERROR: This face (with ID) does not have a sideEdge."<<endl;
             exit(1);
         }
         Halfedge * nextSideEdge = firstSideEdge;
-        int counter = 0;
+        uint counter = 0;
         do {
-            newFacePointPosition += (nextSideEdge -> end -> position);
+            newFacePointPosition += nextSideEdge -> end -> position;
             nextSideEdge = nextSideEdge -> next;
             counter += 1;
         } while(nextSideEdge != firstSideEdge);
         newFacePointPosition /= counter;
         newFacePoint -> position = newFacePointPosition;
-        (*fIt) -> facePoint = newFacePoint;
-        vertVect.push_back(newFacePoint);
+        newFacePoint -> ID = currID;
+        currFace -> facePoint = newFacePoint;
+        newFacePoint -> addToHashTable(vertTable);
+        currID += 1;
     }
 }
 
-void Subdivision::makeEdgePoints(vector<Halfedge*> &edgeVect,
- vector<Vertex*> &vertVect){
-    vector<Halfedge*>::iterator it;
-    for(it = edgeVect.begin(); it < edgeVect.end(); it++){
-        if((*it) -> isSharp) {
-            if((*it) -> sibling != NULL && (*it) -> sibling -> edgePoint != NULL){
-                (*it) -> edgePoint = (*it) -> sibling -> edgePoint;
-            } else if((*it) -> mobiusSibling != NULL && (*it) -> mobiusSibling -> edgePoint
-             != NULL){
-                (*it) -> edgePoint = (*it) -> mobiusSibling -> edgePoint;
+void Subdivision::makeEdgePoints(unordered_map<unsigned long long, Halfedge*> &edgeTable,
+ unordered_map<unsigned long, Vertex*> &vertTable){
+    unsigned long currID = vertTable.size();
+    unordered_map<unsigned long long, Halfedge*>::iterator eIt;
+    for(eIt = edgeTable.begin(); eIt != edgeTable.end(); eIt++){
+        Halfedge * currEdge = eIt -> second;
+        Vertex * newEdgePoint = new Vertex;
+        if(currEdge -> edgePoint == NULL) {
+            if(currEdge -> isSharp) {
+                newEdgePoint -> position = (currEdge -> end -> position + currEdge -> start
+                 -> position) / (float) 2.0;
+                if(currEdge -> sibling != NULL) {
+                    currEdge -> sibling -> edgePoint = newEdgePoint;
+                } else if(currEdge -> mobiusSibling != NULL) {
+                    currEdge -> mobiusSibling -> edgePoint = newEdgePoint;
+                }
             } else {
-                Vertex * newEdgePoint = new Vertex;
-                (*newEdgePoint).position = ((*it) -> end -> position + (*it) -> start
-                 -> position) / (float)2;
-                //cout<<"sharp edge starting from vertex"<<(*it) -> start -> ID<<endl;
-                //cout<<(*newEdgePoint).position<<endl;
-                (*it) -> edgePoint = newEdgePoint;
-                vertVect.push_back(newEdgePoint);
+                Vertex * faceVert1 = currEdge -> heFace -> facePoint;
+                Vertex * edgeVert1 = currEdge -> end;
+                Vertex * edgeVert2 = currEdge -> start;
+                Vertex * faceVert2;
+                if(currEdge -> sibling != NULL) {
+                    faceVert2 = currEdge -> sibling -> heFace -> facePoint;
+                    currEdge -> sibling -> edgePoint = newEdgePoint;
+                } else if(currEdge -> mobiusSibling != NULL) {
+                    faceVert2 = currEdge -> mobiusSibling -> heFace -> facePoint;
+                    newEdgePoint -> onMobiusSibling = true;
+                    currEdge -> mobiusSibling -> edgePoint = newEdgePoint;
+                }
+                newEdgePoint -> position = (faceVert1 -> position + faceVert2 -> position
+                 + edgeVert1 -> position + edgeVert2 -> position) / (float) 4.0;
             }
-        } else {
-            if((*it) -> sibling != NULL && (*it) -> sibling -> edgePoint != NULL){
-                (*it) -> edgePoint = (*it) -> sibling -> edgePoint;
-            } else if((*it) -> sibling != NULL){
-                Vertex faceVert1 = *((*it) -> heFace -> facePoint);
-                Vertex faceVert2 = *((*it) -> sibling -> heFace -> facePoint);
-                Vertex edgeVert1 = *((*it) -> end);
-                Vertex edgeVert2 = *((*it) -> start);
-                Vertex * newEdgePoint = new Vertex;
-                (*newEdgePoint).position = (faceVert1.position + faceVert2.position
-                 + edgeVert1.position + edgeVert2.position) / (float)4;
-                //cout<<"normal edge starting from vertex"<<(*it) -> start -> ID<<endl;
-                //cout<<(*newEdgePoint).position<<endl;
-                (*it) -> edgePoint = newEdgePoint;
-                vertVect.push_back(newEdgePoint);
-            } else if((*it) -> mobiusSibling != NULL && (*it) -> mobiusSibling -> edgePoint != NULL) {
-                (*it) -> edgePoint = (*it) -> mobiusSibling -> edgePoint;
-            } else {
-                Vertex faceVert1 = *((*it) -> heFace -> facePoint);
-                Vertex faceVert2 = *((*it) -> mobiusSibling -> heFace -> facePoint);
-                Vertex edgeVert1 = *((*it) -> end);
-                Vertex edgeVert2 = *((*it) -> start);
-                Vertex * newEdgePoint = new Vertex;
-                (*newEdgePoint).position = (faceVert1.position + faceVert2.position + edgeVert1.position
-                 + edgeVert2.position) / (float)4;
-                (*newEdgePoint).onMobiusSibling = true;
-                //cout<<"mobius edge starting from vertex"<<(*it) -> start -> ID<<endl;
-                //cout<<(*newEdgePoint).position<<endl;
-                (*it) -> edgePoint = newEdgePoint;
-                vertVect.push_back(newEdgePoint);
-                //cout<<"HEY!"<<endl;
-            }   
+            currEdge -> edgePoint = newEdgePoint;
+            newEdgePoint -> ID = currID;
+            newEdgePoint -> addToHashTable(vertTable);
+            currID += 1;
         }
     }
 }
 
-void Subdivision::makeVertexPoints(vector<Vertex*> &vertVect){
-    vector<Vertex*>::iterator it;
+void Subdivision::makeVertexPoints(unordered_map<unsigned long, Vertex*> &vertTable){
+    unordered_map<unsigned long, Vertex*>::iterator vIt;
     Vertex facePointAvg;
     Vertex edgePointAvg;
     Vertex * currVert;
     //make a copy of the original mesh vertex points.
-    for(it = vertVect.begin(); it < vertVect.end(); it++){
-        (*it) -> makeCopy();
+    for(vIt = vertTable.begin(); vIt != vertTable.end(); vIt++){
+        vIt -> second -> makeCopy();
     }
 
-    for(it = vertVect.begin(); it < vertVect.end(); it++){
-        currVert = *it;
+    for(vIt = vertTable.begin(); vIt != vertTable.end(); vIt++){
+        currVert = vIt -> second;
         //cout<<"vertexID: "<<currVert -> ID<<endl;
         Halfedge * firstOutEdge;
         firstOutEdge = currVert -> oneOutEdge;
@@ -282,13 +272,15 @@ void Subdivision::makeVertexPoints(vector<Vertex*> &vertVect){
         }
     }
 }
-void Subdivision::compileNewMesh(vector<Face*> &faceVect, vector<Face*> &newFaceVect,
- vector<Halfedge*> &newEdgeVect){
-    vector<Face*>::iterator it;
-    for(it = faceVect.begin(); it < faceVect.end(); it++){
-        Face currFace = **it;
-        Halfedge * firstEdge = currFace.oneSideEdge;
-        Halfedge * currEdge = currFace.oneSideEdge;
+
+void Subdivision::compileNewMesh(unordered_map<uint, Face*> &faceTable, unordered_map<uint, Face*> &newFaceTable,
+ unordered_map<unsigned long long, Halfedge*> &newEdgeTable){
+    uint currFaceID = 0;
+    unordered_map<uint, Face*>::iterator fIt;
+    for(fIt = faceTable.begin(); fIt != faceTable.end(); fIt++){
+        Face * currFace = fIt -> second;
+        Halfedge * firstEdge = currFace -> oneSideEdge;
+        Halfedge * currEdge = currFace -> oneSideEdge;
         Halfedge * previousB = new Halfedge;
         Halfedge * previousOut = new Halfedge;
         Halfedge * edgeA;
@@ -340,22 +332,23 @@ void Subdivision::compileNewMesh(vector<Face*> &faceVect, vector<Face*> &newFace
 
                 currEdge -> sibling -> firstHalf -> sibling = edgeB;
                 currEdge -> sibling -> secondHalf -> sibling = edgeA;
-            } else if(currEdge -> mobiusSibling != NULL && currEdge -> mobiusSibling -> firstHalf != NULL) {
+            } /* else if(currEdge -> mobiusSibling != NULL && currEdge -> mobiusSibling -> firstHalf != NULL) {
+                DELETE BECAUSE IT WILL BE ADDED LATER in ADDTOHASHTABLE FUNCTION.
                 edgeA -> mobiusSibling = currEdge -> mobiusSibling -> firstHalf;
                 edgeB -> mobiusSibling = currEdge -> mobiusSibling -> secondHalf;
 
                 currEdge -> mobiusSibling -> firstHalf -> mobiusSibling = edgeA;
-                currEdge -> mobiusSibling -> secondHalf -> mobiusSibling = edgeB;                
-            }
+                currEdge -> mobiusSibling -> secondHalf -> mobiusSibling = edgeB;
+            }*/
             currEdge -> start -> oneOutEdge = edgeA;
             edgeIn -> start = currEdge -> edgePoint;
-            edgeIn -> end = currFace.facePoint;
+            edgeIn -> end = currFace -> facePoint;
             edgeOut -> end = currEdge -> edgePoint;
-            edgeOut -> start = currFace.facePoint;
+            edgeOut -> start = currFace -> facePoint;
             edgeIn->sibling = edgeOut;
             edgeOut->sibling = edgeIn;
             currEdge -> edgePoint -> oneOutEdge = edgeIn;
-            currFace.facePoint -> oneOutEdge = edgeOut;
+            currFace -> facePoint -> oneOutEdge = edgeOut;
             edgeA -> next = edgeIn;
             edgeIn -> previous = edgeA;
             edgeIn -> next = previousOut;
@@ -370,21 +363,25 @@ void Subdivision::compileNewMesh(vector<Face*> &faceVect, vector<Face*> &newFace
             previousOut -> heFace = newFace;
             previousB -> heFace = newFace;
             newFace -> oneSideEdge = previousB;
-
-            newEdgeVect.push_back(edgeA);
-            newEdgeVect.push_back(edgeB);
-            newEdgeVect.push_back(edgeIn);
-            newEdgeVect.push_back(edgeOut);
+            edgeA -> ID = hashKey(edgeA -> start -> ID, edgeA -> end -> ID);
+            edgeB -> ID = hashKey(edgeB -> start -> ID, edgeB -> end -> ID);
+            edgeIn -> ID = hashKey(edgeIn -> start -> ID, edgeIn -> end -> ID);
+            edgeOut -> ID = hashKey(edgeOut -> start -> ID, edgeOut -> end -> ID);
+            edgeA -> addToHashTable(newEdgeTable);
+            edgeB -> addToHashTable(newEdgeTable);
+            edgeIn -> addToHashTable(newEdgeTable);
+            edgeOut -> addToHashTable(newEdgeTable);
             if(currEdge!= firstEdge){
-                newFaceVect.push_back(newFace);
+                newFace -> ID = currFaceID;
+                newFace -> addToHashTable(newFaceTable);
+                currFaceID += 1;
             }
             currEdge = currEdge -> next;
             previousB = edgeB;
             previousOut = edgeOut;
-        } while (currEdge != currFace.oneSideEdge);
-
+        } while (currEdge != firstEdge);
         //Connect the first and last
-        edgeA = currFace.oneSideEdge -> firstHalf;
+        edgeA = currFace -> oneSideEdge -> firstHalf;
         edgeIn = edgeA -> next;
         edgeA -> next = edgeIn;
         edgeIn -> previous = edgeA;
@@ -394,13 +391,19 @@ void Subdivision::compileNewMesh(vector<Face*> &faceVect, vector<Face*> &newFace
         previousB -> previous = previousOut;
         previousB -> next = edgeA;
         edgeA -> previous = previousB;
+        newEdgeTable[edgeA -> ID] = edgeA;
+        newEdgeTable[edgeB -> ID] = edgeB;
+        newEdgeTable[edgeIn -> ID] = edgeIn;
+        newEdgeTable[edgeOut -> ID] = edgeOut;
         newFace = new Face;
         edgeA -> heFace = newFace;
         edgeIn -> heFace = newFace;
         previousOut -> heFace = newFace;
         previousB -> heFace = newFace;
         newFace -> oneSideEdge = previousB;
-        newFaceVect.push_back(newFace);
+        newFace -> ID = currFaceID;
+        newFace -> addToHashTable(newFaceTable);
+        currFaceID += 1;
     }
 }
 
@@ -409,26 +412,32 @@ Mesh Subdivision::ccSubdivision(int level){
         Mesh newMesh;
         Halfedge * tempEdge;
         Face * tempFace;
-        newMesh.vertVect = currMesh.vertVect;
-        makeFacePoints(currMesh.faceVect, currMesh.vertVect);
-        makeEdgePoints(currMesh.edgeVect, currMesh.vertVect);
-        makeVertexPoints(newMesh.vertVect);
-        compileNewMesh(currMesh.faceVect, newMesh.faceVect, newMesh.edgeVect);
-        computeNormals(currMesh);
-        while(!currMesh.faceVect.empty()){
-            tempFace = currMesh.faceVect.back();
-            currMesh.faceVect.pop_back();
+        newMesh.vertTable = currMesh.vertTable;
+        makeFacePoints(currMesh.faceTable, currMesh.vertTable);
+        makeEdgePoints(currMesh.edgeTable, currMesh.vertTable);
+        makeVertexPoints(newMesh.vertTable);
+        compileNewMesh(currMesh.faceTable, newMesh.faceTable, newMesh.edgeTable);
+
+        unordered_map<uint, Face*>::iterator fIt;
+        unordered_map<unsigned long long, Halfedge*>::iterator eIt;
+
+        for(fIt = currMesh.faceTable.begin(); fIt != currMesh.faceTable.end(); fIt++) {
+            tempFace = fIt -> second;
             delete tempFace;
         }
-        while(!currMesh.edgeVect.empty()){
-            tempEdge = currMesh.edgeVect.back();
-            currMesh.edgeVect.pop_back();
+        for(eIt = currMesh.edgeTable.begin(); eIt != currMesh.edgeTable.end(); eIt++) {
+            tempEdge = eIt -> second;
             delete tempEdge;
         }
-        currMesh.faceVect = newMesh.faceVect;
-        currMesh.edgeVect = newMesh.edgeVect;
+        currMesh.faceTable.clear();
+        currMesh.edgeTable.clear();
+
+        currMesh.faceTable = newMesh.faceTable;
+        currMesh.edgeTable = newMesh.edgeTable;
+
     }
     return currMesh;
+
 }
 
 #endif // __SUBDIVISION_H__

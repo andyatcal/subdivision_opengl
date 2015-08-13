@@ -8,6 +8,9 @@
 #ifndef __HALFEDGE_H__
 #define __HALFEDGE_H__
 
+using namespace glm;
+using namespace std;
+
 // Forward declarations
 class Vertex;
 class Face;
@@ -53,13 +56,42 @@ public:
     // For boundary and mobius feature.
     Halfedge * mobiusBoundary;
     // Tracking ID;
-    int ID;
+    unsigned long long ID;
     // Constructor.
     Halfedge();
+    // Constructor with start and end vertex.
+    // @param v1, v2: pointers to the start and end vertices.
+    Halfedge(Vertex * v1, Vertex * v2);
+    // Add this edge to a hashTable.
+    // @param edgeTable: the target HashTable to be added in.
+    void addToHashTable(unordered_map<unsigned long long, Halfedge*> & edgeTable);
 };
 
-Halfedge::Halfedge(){
+Halfedge::Halfedge() {
     start = end = NULL;
+    sibling = NULL;
+    ID = 0;
+    next = previous = NULL;
+    heFace = NULL;
+    edgePoint = NULL;
+    firstHalf = secondHalf = NULL;
+    isSharp = false;
+    nextBoundary = NULL;
+    previousBoundary = NULL;
+    mobiusSibling = NULL;
+    mobiusBoundary = NULL;
+    sibling = mobiusSibling = NULL;
+}
+
+unsigned long hashKey(uint vID1, uint vID2) {
+    return vID1 * 4294967295 + vID2;
+}
+
+Halfedge::Halfedge(Vertex * v1, Vertex * v2) {
+    start = v1;
+    start -> oneOutEdge = this;
+    end = v2;
+    ID = hashKey(v1 -> ID, v2 -> ID);
     sibling = NULL;
     next = previous = NULL;
     heFace = NULL;
@@ -70,7 +102,29 @@ Halfedge::Halfedge(){
     previousBoundary = NULL;
     mobiusSibling = NULL;
     mobiusBoundary = NULL;
-    ID = 0;
+    sibling = mobiusSibling = NULL;
 }
 
+void Halfedge::addToHashTable(unordered_map<unsigned long long, Halfedge*> & edgeTable) {
+    if(edgeTable.find(ID) == edgeTable.end()) {
+        edgeTable[ID] = this;
+    } else {
+        Halfedge * myMobiusSibling = edgeTable[ID];
+        if(myMobiusSibling -> mobiusSibling != NULL) {
+            cout<<"ERROR: Edge start from ID "<<myMobiusSibling -> start -> ID
+            <<" and end at ID "<<myMobiusSibling -> end -> ID<<" has already got a mobiusSibling!"<<endl;
+            exit(0);
+        } else if(this -> mobiusSibling != NULL) {
+            cout<<"ERROR: Edge start from ID "<<start -> ID
+            <<" and end at ID "<<end -> ID<<" has already got a mobiusSibling!"<<endl;
+            exit(0);
+        }
+        //cout<<"ADDING MOBIUS: Edge start from ID "<<myMobiusSibling -> start -> ID
+        //    <<" and end at ID "<<myMobiusSibling -> end -> ID<<endl;        
+        mobiusSibling = myMobiusSibling;
+        myMobiusSibling -> mobiusSibling = this;
+        start -> onMobiusSibling = true;
+        end -> onMobiusSibling = true;
+    }
+}
 #endif // __HALFEDGE_H__
