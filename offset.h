@@ -227,8 +227,8 @@ void Offset::makeFullOffset() {
         }
 
     }
-    buildConnections(sideOffsetMesh);
-    computeNormals(sideOffsetMesh);
+    buildConnections(offsetMesh);
+    computeNormals(offsetMesh);
 }
 
 void Offset::calcVertexOffset(Vertex * v) {
