@@ -72,6 +72,7 @@ Mesh glMesh;
 Mesh glPosMesh;
 Mesh glNegMesh;
 Mesh glSideMesh;
+Mesh glOffMesh;
 
 // ArcBall feature.
 int last_mx = 0, last_my = 0, cur_mx = 0, cur_my = 0;
@@ -142,12 +143,21 @@ void init(int level, string inputSIF){
     glPosMesh = offset.posOffsetMesh;
     glNegMesh = offset.negOffsetMesh;
     glSideMesh = offset.sideOffsetMesh;
+    offset.makeFullOffset();
+    glOffMesh = offset.offsetMesh;
     vector<Mesh> meshes;
+/*
+    Subdivision myCC(glOffMesh);
+    glOffMesh = myCC.ccSubdivision(level);
+
     meshes.push_back(glPosMesh);
     meshes.push_back(glNegMesh);
     meshes.push_back(glSideMesh);
+*/
+    meshes.push_back(glOffMesh);
     STL stl;
     stl.STLOutput(meshes, "debug/STL/Example.stl");
+    
     //cout<< glMesh.faceVect.size()<<" "<<glMesh.edgeVect.size()<<" "<<glMesh.vertVect.size();
 }
 //************************************************************
@@ -263,13 +273,13 @@ void render(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
-    gluLookAt(0, 0, 4, 0, 0, 0, 0, 1, 0);
+    gluLookAt(0, 0, 2, 0, 0, 0, 0, 1, 0);
 
     glMultMatrixf(&glMesh.object2world[0][0]);
 
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, YELLOW);
     drawMesh(glMesh);
-
+/*
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, GREEN);
     drawMesh(glPosMesh);
     
@@ -278,7 +288,9 @@ void render(void) {
 
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, CYAN);
     drawMesh(glSideMesh);
-
+*/
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, BLUE);
+    drawMesh(glOffMesh);
     glutSwapBuffers();
 
 }

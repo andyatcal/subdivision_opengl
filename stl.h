@@ -44,14 +44,16 @@ void STL::STLOutput(vector<Mesh> &meshes, string outputSTL){
             for(fIt = faceTable.begin(); fIt != faceTable.end(); fIt++) {
                 Halfedge * firstSideEdge = fIt -> second -> oneSideEdge;
                 if(firstSideEdge == NULL) {
-                    cout<<"ERROR: This face (with ID)" <<fIt -> second -> ID << "does not have a sideEdge."<<endl;
+                    cout<<"ERROR: This face (with ID)" <<fIt -> second -> ID
+                     << "does not have a sideEdge."<<endl;
                     exit(0);
                 }
                 Vertex * v0 = firstSideEdge -> start;
                 vec3 p0 = v0 -> position;
                 Halfedge * nextSideEdge = firstSideEdge -> next;
                 if(nextSideEdge == NULL) {
-                    cout<<"ERROR: This face (with ID)" <<fIt -> second -> ID << "contains only one edge and can not be drawn."<<endl;
+                    cout<<"ERROR: This face (with ID)" <<fIt -> second -> ID
+                     << "contains only one edge and can not be drawn."<<endl;
                 }
                 do {
                     Vertex * v1 = nextSideEdge -> start;

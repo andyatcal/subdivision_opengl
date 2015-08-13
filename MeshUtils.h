@@ -232,7 +232,6 @@ void buildConnections(Mesh &mesh) {
             }
         }
     }
-    cout<<"HERE"<<endl;
     vector<Halfedge*> boundaryEdges;
     for(eIt = edgeTable.begin(); eIt != edgeTable.end(); eIt ++) {
         Halfedge * currEdge = eIt -> second;
