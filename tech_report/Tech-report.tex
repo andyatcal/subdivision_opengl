@@ -28,7 +28,7 @@ adjacency structure in this project to realize Catmull-Clark subdivision.
 
 The definitions and assumptions of vertex, halfedge and face are shown 
 in Table \ref{table:vhfdef}. A quadrilateral face made with four halfedges 
-is shown in Figure \ref{figure:singleFace}. 
+is shown in Figure \ref{figure:singleFace} . 
 
 %Table1
 \begin{table}[ht]
@@ -92,7 +92,7 @@ with a complete loop of halfedges with on openings.\\
   \label{figure:singleFace}
 \end{figure}
 
-The vertex, halfedge, and face store their own information and pointers to the adjacent elements. The information that these elements store can be classifed into self-information and adjacency information, which is shown in Table \ref{table:vhfInfo}
+Elements store two types of data: self-information and adjacency information, where the adjacency includes within a face and between faces. As shown in Table \ref{table:vhfInfo}. 
 %Table2
 \begin{table}[ht]
 \centering
@@ -101,28 +101,27 @@ The vertex, halfedge, and face store their own information and pointers to the a
 \hline
 Element & Self-Information & Adjacency Information  \\
 \hline
-Vertex  & vertex position & one outgoing halfedge   \\
-& vertex normal & \\
-& vertex ID & \\
+Vertex  & 1. vertex ID & 1. one outgoing halfedge   \\
+& 2. vertex position & 2. on mobius connection? \\
+& 3. vertex normal & \\
 \hline
-Halfedge & & start vertex and end vertex\\
-& & the face it belongs to\\
-& & predecessor and successor halfedge in the face\\
-& & sibling links to adjacent face\\
-& & boundary links to adjacent face \\
+Halfedge & 1. edge ID & 1. start and end vertex\\
+& & 2. link to parent face\\
+& & 3. predecessor and successor in the parent face\\
+& & 4. sibling links to adjacent face\\
+& & 5. boundary links to adjacent face \\
 \hline
-Face    &  face normal & vertices of the face.\\ %(Redundant, should be delete later.)\\
-& & one side halfedge\\
+Face    &  1. face ID & 1. one side halfedge\\
+& 2. face normal &\\
 \hline
 \end{tabular}
 \caption{Definitions and assumptions of vertex, halfedge, and face} 
 \label{table:vhfInfo}
 \end{table}
 
-
 \subsection{Face Connections}
 
-There are two types of face connections, the normal connection and the mobius connection, as shown in Figure \ref{figure:faceConnections}
+There are two types of face connections, the normal connection and the mobius connection, as shown in Figure \ref{figure:faceConnections}. In a typical halfedge data structure, the pair of halfedges between two faces are defined with opposite direction. The author extend this idea and add another type of connection In a normal connection, the pair of halfedges between two faces are in opposite direction. In the mobius connection, the pair are in same direction.
 
 %Figure2
 \begin{figure}[ht]
@@ -167,6 +166,7 @@ There are two types of face connections, the normal connection and the mobius co
       \draw [thick,-latex,] (B7)
         -- (B4);
       \node [left] at (1.8, 1) {$e_1$};
+      \node [right] at (2.2, 1) {$e_1'$};
   \end{tikzpicture}
   
   %Mobius Junction
@@ -215,8 +215,17 @@ There are two types of face connections, the normal connection and the mobius co
   \label{figure:faceConnections}
 \end{figure}
 
-\subsection{Build a Mesh}
+\subsection{Traversals} 
+Three basic traversals are necessary to implement Catmull-Clark subdivision: 1) traversal around a face, 2) The traversal around an edge, and 3) traversal around a vertex.\\
 
+\subsubsection{Traverse around a face}
+
+\subsubsection{Traverse around an edge}
+
+\subsubsection{Traverse around a vertex}
+
+
+\subsection{Mesh Construction}
 \subsubsection{Build from Elements}
 \subsubsection{Instantiation and Rotation}
 \subsubsection{Build by Merging Meshes}
@@ -241,15 +250,9 @@ There are two types of face connections, the normal connection and the mobius co
 
 \subsection{Mobius Connection Issue}
 
+\section{Input and Output}
 
 \section{Test Cases and Discussions}
-
-
-
-\section{Contribution to Knowledge}
-
-
-
 
 \section{Future Researches}
 
