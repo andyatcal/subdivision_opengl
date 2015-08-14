@@ -15,20 +15,17 @@ Subdivision for 2-Manifold Single-sided Surface}
 %\end{abstract}
 
 \section{Introduction}
-Catmull-Clark Subdivision is a 
+Catmull-Clark subdivision is widely applied to construct a smooth surface from an initial mesh of polygons. It is independent of the topology of initial mesh.
 \section{Halfedge Data Structure} \label{sec:halfedge}
 
-An object in 3D Euclid space can be represented by multiple meshes of polygons. 
-A mesh comprises three types of geometry element: vertex, edge, and face. 
-The adjacency structure stores the topological information (adjacency and 
-connectivity) of the mesh. The author chose halfedge data structure as the 
-adjacency structure in this project to realize Catmull-Clark subdivision.
+An object in the 3D Euclid space can be modeled as several meshes of polygons. For a single mesh, it comprises three types of geometry elements: vertex, edge, and face. Adjacency data structure is need to store the topological information (adjacency and connectivity) between these elements.\\
+Several adjacency structures have been fully developed, including simple data structure, winged edge data structure (Baumgart, 1975), halfedge data structure (Eastman, 1982), QuadEdge Data structure (Guibas and Stolfi), and FaceEdge Data Structure (Dobkin and Laszlo, 1987).\\
+Among all these data structures, the author chooses halfedge data structure in this project to realize Catmull-Clark subdivision, because 1) the storage size is independent of the mesh topology, and 2) it has a simple implementation. The author also extends its definition to add the ability in dealing with single-sided surfaces (or non-orientable object).
 
 \subsection{Vertex, Halfedge, and Face}
 
-The definitions and assumptions of vertex, halfedge and face are shown 
-in Table \ref{table:vhfdef}. A quadrilateral face made with four halfedges 
-is shown in Figure \ref{figure:singleFace} . 
+The author assumes The definitions and assumptions of vertex, halfedge and face are shown in Table \ref{table:vhfdef}. A quadrilateral face made with four halfedges 
+is shown in Figure \ref{figure:singleFace}.
 
 %Table1
 \begin{table}[ht]
@@ -92,7 +89,7 @@ with a complete loop of halfedges with on openings.\\
   \label{figure:singleFace}
 \end{figure}
 
-Elements store two types of data: self-information and adjacency information, where the adjacency includes within a face and between faces. As shown in Table \ref{table:vhfInfo}. 
+Elements store two types of data: self-information and adjacency information, where the adjacency information include links in a face and links between faces. As shown in Table \ref{table:vhfInfo}. 
 %Table2
 \begin{table}[ht]
 \centering
@@ -121,7 +118,7 @@ Face    &  1. face ID & 1. one side halfedge\\
 
 \subsection{Face Connections}
 
-There are two types of face connections, the normal connection and the mobius connection, as shown in Figure \ref{figure:faceConnections}. In a typical halfedge data structure, the pair of halfedges between two faces are defined with opposite direction. The author extend this idea and add another type of connection In a normal connection, the pair of halfedges between two faces are in opposite direction. In the mobius connection, the pair are in same direction.
+There are two types of face connections, the normal connection and the mobius connection, as shown in Figure \ref{figure:faceConnections}. In a typical halfedge data structure, the pair of halfedges between two faces are defined with opposite direction. The author extends this idea and adds another type of connection. In a normal connection, the pair of halfedges between two faces are in opposite direction. In a mobius connection, the pair are in same direction.
 
 %Figure2
 \begin{figure}[ht]
