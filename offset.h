@@ -261,8 +261,8 @@ void Offset::calcVertexOffset(Vertex * v, bool full) {
     Vertex * negOffset = new Vertex;
     posOffset -> position = v -> position + v -> normal * offsetVal;
     negOffset -> position = v -> position - v -> normal * offsetVal;
-    posOffset -> ID = v -> ID + 400000;
-    negOffset -> ID = v -> ID + 800000;
+    posOffset -> ID = v -> ID + 2000000;
+    negOffset -> ID = v -> ID + 4000000;
     posOffset -> normal = v -> normal;
     negOffset -> normal = - v -> normal;
     v -> posOffset = posOffset;
