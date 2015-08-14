@@ -1,10 +1,16 @@
 \documentclass[12pt]{article}
+
 \usepackage{tikz}
 \usetikzlibrary{calc}
+
 \title{An Implementation of Halfedge Data Structure in Catmull-Clark 
 Subdivision for 2-Manifold Single-sided Surface}
 \author{Yu Wang}
 \date{August 2015}
+
+\makeatletter
+\def\BState{\State\hskip-\ALG@thistlm}
+\makeatother
 
 \begin{document}
 \maketitle
@@ -24,11 +30,11 @@ Among all these data structures, the author chooses halfedge data structure in t
 
 \subsection{Vertex, Halfedge, and Face}
 
-The author assumes The definitions and assumptions of vertex, halfedge and face are shown in Table \ref{table:vhfdef}. A quadrilateral face made with four halfedges 
-is shown in Figure \ref{figure:singleFace}.
+The definitions and assumptions of vertex, halfedge and face follow the assumption of 2-manifold, as shown in Table \ref{table:vhfdef}. The element ID is unique. When two elements fall into the same group of element, they can not have the same ID.\\
+A quadrilateral face made with four halfedges and four vertices is shown in Figure \ref{figure:singleFace}.
 
 %Table1
-\begin{table}[ht]
+\begin{table}[h]
 \centering
 \begin{tabular}{| l | p{0.4\textwidth} | p{0.4\textwidth}|}
 
@@ -38,7 +44,7 @@ is shown in Figure \ref{figure:singleFace}.
 Vertex	&	A 3-dimensional point.		&	No overlapping vertices 
 exits in a mesh. But overlapping vertices can exist in different meshes.\\
 \hline
-Halfedge	&	An edge that starts from one vertex and end at another vertex. & 
+Halfedge	&	An edge that starts from one vertex and ends at another vertex. & 
 A halfedge connects exactly two non-overlapping vertices and it has a direction. 
 Less than two halfedges start from the same vertex and end at the same vertex in a 
 single mesh.\\
@@ -53,7 +59,7 @@ with a complete loop of halfedges with on openings.\\
 \end{table}
 
 %Figure1
-\begin{figure}[ht]
+\begin{figure}[h]
   \centering
   \begin{tikzpicture}
     \coordinate (A0) at (0,0);
@@ -89,7 +95,8 @@ with a complete loop of halfedges with on openings.\\
   \label{figure:singleFace}
 \end{figure}
 
-Elements store two types of data: self-information and adjacency information, where the adjacency information include links in a face and links between faces. As shown in Table \ref{table:vhfInfo}. 
+Elements store two categories of information: self-information and adjacency information, where the adjacency information include links in a face and links between faces. As shown in Table \ref{table:vhfInfo}. 
+
 %Table2
 \begin{table}[ht]
 \centering
@@ -118,7 +125,7 @@ Face    &  1. face ID & 1. one side halfedge\\
 
 \subsection{Face Connections}
 
-There are two types of face connections, the normal connection and the mobius connection, as shown in Figure \ref{figure:faceConnections}. In a typical halfedge data structure, the pair of halfedges between two faces are defined with opposite direction. The author extends this idea and adds another type of connection. In a normal connection, the pair of halfedges between two faces are in opposite direction. In a mobius connection, the pair are in same direction.
+There are two types of face connections, the normal connection and the mobius connection, as shown in Figure \ref{figure:faceConnections}. In a typical halfedge data structure, with the assumption of double-sided surface, the pair of halfedges between two faces are defined with opposite direction. The author extends this idea to single-sided surface and adds another type of connection, named as mobius connection. In a mobius connection, the pair of halfedges are in same direction. In the example of Figure \ref{figure:faceConnections}, on the top, $e_1$ and $e_1'$ are siblings to each other. On the bottom, $e_1$ and $e_1'$ are mobius siblings to each other.
 
 %Figure2
 \begin{figure}[ht]
@@ -140,7 +147,7 @@ There are two types of face connections, the normal connection and the mobius co
     \coordinate (B6) at (3.8,1.8);
     \coordinate (B7) at (2.2,1.8);
       \draw(A0) -- (A1) node [below] {$A_1$};
-      \draw (A1) -- (A2) node [above] {$A_2$};
+      \draw [ultra thick] (A1) -- (A2) node [above] {$A_2$};
       \draw (A2) -- (A3) node [above left] {$A_3$};
       \draw (A3) -- (A0) node [below left] {$A_0$};
       \draw (A1) -- (A4) node [below right] {$A_4$};
@@ -183,7 +190,7 @@ There are two types of face connections, the normal connection and the mobius co
     \coordinate (B6) at (3.8,1.8);
     \coordinate (B7) at (2.2,1.8);
       \draw(A0) -- (A1) node [below] {$A_1$};
-      \draw (A1) -- (A2) node [above] {$A_2$};
+      \draw [ultra thick] (A1) -- (A2) node [above] {$A_2$};
       \draw (A2) -- (A3) node [above left] {$A_3$};
       \draw (A3) -- (A0) node [below left] {$A_0$};
       \draw (A1) -- (A4) node [below right] {$A_4$};
@@ -208,21 +215,245 @@ There are two types of face connections, the normal connection and the mobius co
       \node [left] at (1.8, 1) {$e_1$};
       \node [right] at (2.2, 1) {$e_1'$};
   \end{tikzpicture}
-  \caption{Normal junction (left) and mobius junction (right) between two faces}
+  \caption{Normal connection (up) and mobius connection (bottom) between two faces}
   \label{figure:faceConnections}
 \end{figure}
 
 \subsection{Traversals} 
-Three basic traversals are necessary to implement Catmull-Clark subdivision: 1) traversal around a face, 2) The traversal around an edge, and 3) traversal around a vertex.\\
+Two basic traversals are necessary to implement Catmull-Clark subdivision: 1) traversal around a face, and 2) traversal around a vertex.
+\subsubsection{Traversal Around Face}
+The traversal around a face lead to all the edges and vertices belong to this face. It starts from one side halfedge, follows the halfedge flow, and ends at the halfedge that the face traverse starts.
+Traversal of all faces in a mesh takes O(F) time, where F is the total number of faces in the mesh.
+\subsubsection{Traversal Around Vertex}
+The traversal around a vertex lead to all the edges and faces that contains this vertex. The traversal of a vertex need to consider two issues: 1) is this vertex on a boundary, and  2) is this vertex on a mobius connection. This makes four different types of vertex traversals. See Figure \ref{figure:traversalAroundVertexNormal} - \ref{figure:traversalAroundVertexMobiusB} for examples.
 
-\subsubsection{Traverse around a face}
+In the vertex traversal without boundary and mobius issue, we start from one outgoing halfedge of this vertex. We continue to go to the next outgoing halfedge by going to the successor of its sibling until we hit the first outgoing halfedge. In the example of Figure \ref{figure:traversalAroundVertexNormal}, if start and end at halfedge $e_1$, the sequence of traversal is: $e_1$ (sibling link to) $e_1'$ (successor link to) $e_2$ (sibling link to) $e_2'$ (successor link to) $e_3$ (sibling link to) $e_3'$ (successor link to) $e_4$ (sibling link to ) $e_4'$  (successor link to)  $e_1$.
 
-\subsubsection{Traverse around an edge}
+In order to address the issue of a vertex on boundary, instead of using sibling links, we use boundary links. In the example of Figure \ref{figure:traversalAroundVertexNormalB}, we have a boundary $e_4'$ to $e_2$. If start and end at halfedge $e_1$, the sequence of traversal is: $e_1$ (sibling link to) $e_1'$ (successor link to) $e_2$ (boundary link to) $e_4'$ (successor link to)  $e_1$.
 
-\subsubsection{Traverse around a vertex}
+To address the issue of vertex on a mobius connection, instead of using normal links, we use mobius links. At the same time, we switch between the successor and predecessor to the sibling every time we hit a mobius connection.  In the example of Figure \ref{figure:traversalAroundVertexNormal}, $e_1$ to $e_1'$ and $e_3$ to $e_3'$ have mobius siblings rather than normal sibling. If start and end at halfedge $e_1$, the sequence of traversal is: $e_1$ (mobius sibling link to) $e_1'$ (predecessor link to) $e_2$ (sibling link to) $e_2'$ (predecessor link to) $e_3$ (mobius sibling link to) $e_3'$ (successor link to) $e_4$ (sibling link to ) $e_4'$  (successor link to)  $e_1$.
 
+If boundary and mobius connection both occur, we use a combination of the two methods above. In the example of Figure \ref{figure:traversalAroundVertexNormal}, $e_1$ to $e_1'$ and $e_3$ to $e_3'$ have mobius siblings rather than normal sibling and we have a mobius boundary connection between $e_4'$ and $e_2$. If start end end at halfedge $e_1$, the sequence of traversal is: $e_1$ (mobius sibling link to) $e_1'$ (predecessor link to) $e_2$ (mobius boundary link to ) $e_4'$  (successor link to)  $e_1$.
+
+We can combine the four cases together as shown in Algorithm 1.
+
+%Figure3
+\begin{figure}[ht]
+  \centering
+  %Normal Junction
+  \begin{tikzpicture}
+    \coordinate (A0) at (0,0);
+    \coordinate (A1) at (2,0);
+    \coordinate (A2) at (2,2);
+    \coordinate (A3) at (0,2);
+    \coordinate (A4) at (4,0);
+    \coordinate (A5) at (4,2);
+    \coordinate (A6) at (4,4);
+    \coordinate (A7) at (2,4);
+    \coordinate (A8) at (0,4);
+    
+    \coordinate (B0) at (0.2,0.2);
+    \coordinate (B1) at (1.8,0.2);
+    \coordinate (B2) at (1.8,1.8);
+    \coordinate (B3) at (0.2,1.8);
+    \coordinate (B4) at (2.2,0.2);
+    \coordinate (B5) at (3.8,0.2);
+    \coordinate (B6) at (3.8,1.8);
+    \coordinate (B7) at (2.2,1.8);
+    \coordinate (B8) at (0.2,2.2);
+    \coordinate (B9) at (1.8,2.2);
+    \coordinate (B10) at (1.8,3.8);
+    \coordinate (B11) at (0.2,3.8);
+    \coordinate (B12) at (2.2,2.2);
+    \coordinate (B13) at (3.8,2.2);
+    \coordinate (B14) at (3.8,3.8);
+    \coordinate (B15) at (2.2,3.8);
+
+     \draw (A0) -- (A1);
+     \draw [ultra thick](A1) -- (A2);
+     \draw  [ultra thick](A2) -- (A3);
+     \draw (A3) -- (A0);
+     \draw (A1) -- (A4);
+     \draw (A4) -- (A5);
+     \draw [ultra thick](A5) -- (A2);
+     \draw (A3) -- (A8);
+     \draw (A8) -- (A7);
+     \draw (A7) -- (A6);
+     \draw (A6) -- (A5);
+     \draw [ultra thick] (A7) -- (A2);
+
+     \draw [thick,-latex,] (B1) -- (B2);
+     \draw [thick,-latex,] (B2) -- (B3);
+     \draw [thick,-latex,] (B6) -- (B7);
+     \draw [thick,-latex,] (B7) -- (B4);
+     \draw [thick,-latex,] (B8) -- (B9);
+     \draw  [thick,-latex] (B9) -- (B10);
+     \draw [thick,-latex,] (B15) -- (B12);
+     \draw [thick,-latex,] (B12) -- (B13);
+     \node [left] at (1.8, 1) {$e_1'$};
+     \node [right] at (2.2, 1) {$e_1$};
+     \node [left] at (1.8, 3) {$e_3$};
+     \node [right] at (2.2, 3) {$e_3'$};
+     \node [below] at (1, 1.8) {$e_2$};
+     \node [above] at (1, 2.2) {$e_2'$};
+     \node [below] at (3, 1.8) {$e_4'$};
+     \node [above] at (3, 2.2) {$e_4$};
+  \end{tikzpicture}
+  \caption{Vertex traversal without boundary and without moibus connection}
+  \label{figure:traversalAroundVertexNormal}
+\end{figure}
+%Figure 4
+\begin{figure}[ht]
+  \centering
+  \begin{tikzpicture}
+    \coordinate (A0) at (0,0);
+    \coordinate (A1) at (2,0);
+    \coordinate (A2) at (2,2);
+    \coordinate (A3) at (0,2);
+    \coordinate (A4) at (4,0);
+    \coordinate (A5) at (4,2);
+    \coordinate (A6) at (4,4);
+    \coordinate (A7) at (2,4);
+    \coordinate (A8) at (0,4);
+    
+    \coordinate (B0) at (0.2,0.2);
+    \coordinate (B1) at (1.8,0.2);
+    \coordinate (B2) at (1.8,1.8);
+    \coordinate (B3) at (0.2,1.8);
+    \coordinate (B4) at (2.2,0.2);
+    \coordinate (B5) at (3.8,0.2);
+    \coordinate (B6) at (3.8,1.8);
+    \coordinate (B7) at (2.2,1.8);
+    \coordinate (B8) at (0.2,2.2);
+    \coordinate (B9) at (1.8,2.2);
+    \coordinate (B10) at (1.8,3.8);
+    \coordinate (B11) at (0.2,3.8);
+    \coordinate (B12) at (2.2,2.2);
+    \coordinate (B13) at (3.8,2.2);
+    \coordinate (B14) at (3.8,3.8);
+    \coordinate (B15) at (2.2,3.8);
+
+     \draw (A0) -- (A1);
+     \draw [ultra thick](A1) -- (A2);
+     \draw  [ultra thick](A2) -- (A3);
+     \draw (A3) -- (A0);
+     \draw (A1) -- (A4);
+     \draw (A4) -- (A5);
+     \draw [ultra thick](A5) -- (A2);
+     \draw (A3) -- (A8);
+     \draw (A8) -- (A7);
+     \draw (A7) -- (A6);
+     \draw (A6) -- (A5);
+     \draw [ultra thick] (A7) -- (A2);
+
+     \draw [thick,-latex,] (B1) -- (B2);
+     \draw [thick,-latex,] (B2) -- (B3);
+     \draw [thick,-latex,] (B7) -- (B6);
+     \draw [thick,-latex,] (B4) -- (B7);
+     \draw [thick,-latex,] (B8) -- (B9);
+     \draw [thick,-latex] (B9) -- (B10);
+     \draw [thick,-latex,] (B13) -- (B12);
+     \draw [thick,-latex,] (B12) -- (B15);
+     \node [left] at (1.8, 1) {$e_1'$};
+     \node [right] at (2.2, 1) {$e_1$};
+     \node [left] at (1.8, 3) {$e_3$};
+     \node [right] at (2.2, 3) {$e_3'$};
+     \node [below] at (1, 1.8) {$e_2$};
+     \node [above] at (1, 2.2) {$e_2'$};
+     \node [below] at (3, 1.8) {$e_4'$};
+     \node [above] at (3, 2.2) {$e_4$};  \end{tikzpicture}
+  \caption{Vertex traversal without boundary and with moibus connection}
+  \label{figure:traversalAroundVertexMobius}
+\end{figure}
+%Figure4
+\begin{figure}[ht]
+  \centering
+  %Normal Junction
+  \begin{tikzpicture}
+    \coordinate (A0) at (0,0);
+    \coordinate (A1) at (2,0);
+    \coordinate (A2) at (2,2);
+    \coordinate (A3) at (0,2);
+    \coordinate (A4) at (4,0);
+    \coordinate (A5) at (4,2);
+    
+    \coordinate (B0) at (0.2,0.2);
+    \coordinate (B1) at (1.8,0.2);
+    \coordinate (B2) at (1.8,1.8);
+    \coordinate (B3) at (0.2,1.8);
+    \coordinate (B4) at (2.2,0.2);
+    \coordinate (B5) at (3.8,0.2);
+    \coordinate (B6) at (3.8,1.8);
+    \coordinate (B7) at (2.2,1.8);
+
+     \draw (A0) -- (A1);
+     \draw [ultra thick](A1) -- (A2);
+     \draw  [ultra thick](A2) -- (A3);
+     \draw (A3) -- (A0);
+     \draw (A1) -- (A4);
+     \draw (A4) -- (A5);
+     \draw [ultra thick](A5) -- (A2);
+
+     \draw [thick,-latex,] (B1) -- (B2);
+     \draw [thick,-latex,] (B2) -- (B3);
+     \draw [thick,-latex,] (B6) -- (B7);
+     \draw [thick,-latex,] (B7) -- (B4);
+     
+     \node [left] at (1.8, 1) {$e_1'$};
+     \node [right] at (2.2, 1) {$e_1$};
+     \node [below] at (1, 1.8) {$e_2$};
+     \node [below] at (3, 1.8) {$e_4'$};
+  \end{tikzpicture}
+  \caption{Vertex traversal withboundary and without moibus connection}
+  \label{figure:traversalAroundVertexNormalB}
+\end{figure}
+
+%Figure5
+\begin{figure}[ht]
+  \centering
+  %Normal Junction
+  \begin{tikzpicture}
+    \coordinate (A0) at (0,0);
+    \coordinate (A1) at (2,0);
+    \coordinate (A2) at (2,2);
+    \coordinate (A3) at (0,2);
+    \coordinate (A4) at (4,0);
+    \coordinate (A5) at (4,2);
+    
+    \coordinate (B0) at (0.2,0.2);
+    \coordinate (B1) at (1.8,0.2);
+    \coordinate (B2) at (1.8,1.8);
+    \coordinate (B3) at (0.2,1.8);
+    \coordinate (B4) at (2.2,0.2);
+    \coordinate (B5) at (3.8,0.2);
+    \coordinate (B6) at (3.8,1.8);
+    \coordinate (B7) at (2.2,1.8);
+
+     \draw (A0) -- (A1);
+     \draw [ultra thick](A1) -- (A2);
+     \draw  [ultra thick](A2) -- (A3);
+     \draw (A3) -- (A0);
+     \draw (A1) -- (A4);
+     \draw (A4) -- (A5);
+     \draw [ultra thick](A5) -- (A2);
+
+     \draw [thick,-latex,] (B1) -- (B2);
+     \draw [thick,-latex,] (B2) -- (B3);
+     \draw [thick,-latex,] (B7) -- (B6);
+     \draw [thick,-latex,] (B4) -- (B7);
+     
+     \node [left] at (1.8, 1) {$e_1'$};
+     \node [right] at (2.2, 1) {$e_1$};
+     \node [below] at (1, 1.8) {$e_2$};
+     \node [below] at (3, 1.8) {$e_4'$};
+
+  \end{tikzpicture}
+  \caption{Vertex traversal with boundary and with moibus connection}
+  \label{figure:traversalAroundVertexMobiusB}
+\end{figure}
 
 \subsection{Mesh Construction}
+The input of Catmull-Clark is a polygon mesh with arbitrary topology.
 \subsubsection{Build from Elements}
 \subsubsection{Instantiation and Rotation}
 \subsubsection{Build by Merging Meshes}
