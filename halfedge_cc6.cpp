@@ -138,7 +138,7 @@ void init(int level, string inputSIF){
     Subdivision myCC(glMesh);
     glMesh = myCC.ccSubdivision(level);
     computeNormals(glMesh);
-    Offset offset(glMesh, 0.012);
+    Offset offset(glMesh, 0.013);
     vector<Mesh> meshes;
     bool full = true;
     if(full) {

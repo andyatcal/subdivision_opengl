@@ -346,7 +346,7 @@ void computeNormals(Mesh & mesh){
     for(fIt = faceTable.begin(); fIt != faceTable.end(); fIt++){
         getFaceNormal(fIt -> second);
     }
-    cout<<"the vertTable size is"<<vertTable.size()<<endl;
+    //cout<<"the vertTable size is"<<vertTable.size()<<endl;
     for(vIt = vertTable.begin(); vIt != vertTable.end(); vIt++){
         getVertexNormal(vIt -> second);
     }
