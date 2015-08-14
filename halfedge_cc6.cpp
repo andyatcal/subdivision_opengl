@@ -330,11 +330,11 @@ void keyboard(unsigned char key, int x, int y) {
     }
     if (key == 's') {
         if (smoothShading) {
-            glShadeModel(GL_SMOOTH);
-            smoothShading = true;
-        } else {
             glShadeModel(GL_FLAT);
             smoothShading = false;
+        } else {
+            glShadeModel(GL_SMOOTH);
+            smoothShading = true;
         }
     }
     if (key == 'w') {
