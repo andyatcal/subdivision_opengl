@@ -2,6 +2,7 @@
 
 \usepackage{tikz}
 \usetikzlibrary{calc}
+\usepackage{listings}
 
 \title{An Implementation of Halfedge Data Structure in Catmull-Clark 
 Subdivision for 2-Manifold Single-sided Surface}
@@ -219,8 +220,17 @@ There are two types of face connections, the normal connection and the mobius co
   \label{figure:faceConnections}
 \end{figure}
 
+With definition extension of mobius connection, there can be three different situations for a halfedge in a mesh: 1) it has a sibling pointer and on a normal connection, 2) it has a mobius pointer and on a mobius connection, and 3) it does not have a sibling pointer or mobius poniter, and it lies on the boundary of the surface.
+
+\subsection{Boundaries}
+
+For halfedges on boundary of the mesh, they contains boundary links to each other. In a surface with no mobius connetion, the boundary halfedges follows a continous flow. It can start from one vertex and end at this vertex eventually by following the flow on the boundary. We create previous and next boundary pointers to these halfedges. However, when mobius connection occurs in the mesh, some adjacent boundary halfedges start or end at same vertex. We build mobius boundary pointers to these halfedges. Figure X shows an example of boundary halfedges with and without mobius connections.
+
+<Add normal boundary links figure and mobius boundary link figures here!>
+
 \subsection{Traversals} 
 Two basic traversals are necessary to implement Catmull-Clark subdivision: 1) traversal around a face, and 2) traversal around a vertex.
+\lstset{float=htpb, language=c++}
 \subsubsection{Traversal Around Face}
 The traversal around a face lead to all the edges and vertices belong to this face. It starts from one side halfedge, follows the halfedge flow, and ends at the halfedge that the face traverse starts.
 Traversal of all faces in a mesh takes O(F) time, where F is the total number of faces in the mesh.
@@ -235,7 +245,7 @@ To address the issue of vertex on a mobius connection, instead of using normal l
 
 If boundary and mobius connection both occur, we use a combination of the two methods above. In the example of Figure \ref{figure:traversalAroundVertexNormal}, $e_1$ to $e_1'$ and $e_3$ to $e_3'$ have mobius siblings rather than normal sibling and we have a mobius boundary connection between $e_4'$ and $e_2$. If start end end at halfedge $e_1$, the sequence of traversal is: $e_1$ (mobius sibling link to) $e_1'$ (predecessor link to) $e_2$ (mobius boundary link to ) $e_4'$  (successor link to)  $e_1$.
 
-We can combine the four cases together as shown in Algorithm 1.
+As a summary of the four different situations above, in a vertex traversal, we 1) start the traversal from with one outgoing halfedge of the vertex, 2) go to sibling or boundary link halfedge, 3) go to the next or previous halfedge that contains the vertex as one end, and 4) repeat 2) and 3) until we reach to the starting outgoing halfedge. This vertex traversal runs in O(E) time, where E is the total number of halfedges in the mesh.
 
 %Figure3
 \begin{figure}[ht]

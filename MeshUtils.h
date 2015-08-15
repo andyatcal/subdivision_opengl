@@ -184,10 +184,41 @@ void makePolygonFace(vector<Vertex*> vertices,
     currFace -> addToHashTable(faceTable);
 }
 
+// Give several single face contructed, build the sibling or mobius sibling pointers
+// to all halfedges not on the boundary.
+// @param mesh: reference to the mesh to build siblings.
+void buildSiblingPointers(Mesh &mesh) {
+    unordered_map<unsigned long long, Halfedge*> &edgeTable = mesh.edgeTable;
+    unordered_map<unsigned long long, Halfedge*>::iterator eIt;
+    unordered_map<unsigned long long, Halfedge*>::iterator eiIt;
+    for(eIt = edgeTable.begin(); eIt != edgeTable.end(); eIt ++){
+        Halfedge * currEdge = eIt -> second;
+        if(currEdge -> sibling == NULL && currEdge -> mobiusSibling == NULL) {
+            Vertex * start = currEdge -> start;
+            Vertex * end = currEdge -> end;
+            unsigned long searchKey = hashKey(end -> ID, start -> ID);
+            eiIt = edgeTable.find(searchKey);
+            if(eiIt != edgeTable.end()) {
+                Halfedge * mySibling = eiIt -> second;
+                currEdge -> sibling = mySibling;
+                mySibling -> sibling = currEdge;
+            }
+        }
+    }
+}
 // Given the list of boundary edges, build the connections between halfedges.
 // @param boundaryEdges. A list of edges on the boundary, not necessarily sorted.
 // @param edgeTable: reference to the edgeTable of the mesh.
-void buildBoundaries(vector<Halfedge*> & boundaryEdges) {
+void buildBoundaryPointers2(Mesh & mesh) {
+    unordered_map<unsigned long long, Halfedge*> &edgeTable = mesh.edgeTable;
+    unordered_map<unsigned long long, Halfedge*>::iterator eIt;
+    vector<Halfedge*> boundaryEdges;
+    for(eIt = edgeTable.begin(); eIt != edgeTable.end(); eIt ++) {
+        Halfedge * currEdge = eIt -> second;
+        if(currEdge -> sibling == NULL && currEdge -> mobiusSibling == NULL) {
+            boundaryEdges.push_back(currEdge);
+        }
+    }
     vector<Halfedge*>::iterator eIt1;
     vector<Halfedge*>::iterator eIt2;
     for(eIt1 = boundaryEdges.begin(); eIt1 < boundaryEdges.end(); eIt1++) {
@@ -212,34 +243,69 @@ void buildBoundaries(vector<Halfedge*> & boundaryEdges) {
     }
 }
 
-// Build connnections after making the faces.
-// @param mesh: reference to the mesh that the connections located in.
-void buildConnections(Mesh &mesh) {
+void buildBoundaryPointers(Mesh &mesh) {
     unordered_map<unsigned long long, Halfedge*> &edgeTable = mesh.edgeTable;
     unordered_map<unsigned long long, Halfedge*>::iterator eIt;
-    unordered_map<unsigned long long, Halfedge*>::iterator eiIt;
-    for(eIt = edgeTable.begin(); eIt != edgeTable.end(); eIt ++){
+    for(eIt = edgeTable.begin(); eIt != edgeTable.end(); eIt++) {
         Halfedge * currEdge = eIt -> second;
         if(currEdge -> sibling == NULL && currEdge -> mobiusSibling == NULL) {
-            Vertex * start = currEdge -> start;
-            Vertex * end = currEdge -> end;
-            unsigned long searchKey = hashKey(end -> ID, start -> ID);
-            eiIt = edgeTable.find(searchKey);
-            if(eiIt != edgeTable.end()) {
-                Halfedge * mySibling = eiIt -> second;
-                currEdge -> sibling = mySibling;
-                mySibling -> sibling = currEdge;
+            if(currEdge -> previousBoundary == NULL && currEdge -> mobiusBoundary == NULL) {
+                int mobiusCounter = 0;
+                Halfedge * firstBoundaryEdge = currEdge;
+                //cout<<"first: "<<currEdge -> start -> ID<<" "<<currEdge -> end -> ID<<endl;
+                do {
+                    //cout<<"mobius counter: " << mobiusCounter<<endl;
+                    Halfedge * nextBoundaryEdge;
+                    currEdge -> isSharp = true;
+                    //cout<<currEdge -> start -> ID<<" "<<currEdge -> end -> ID<<endl;
+                    if(mobiusCounter % 2 == 0) {
+                        nextBoundaryEdge = currEdge -> next;
+                    } else {
+                        nextBoundaryEdge = currEdge -> previous;
+                    }
+                    while(nextBoundaryEdge -> sibling != NULL || nextBoundaryEdge -> mobiusSibling != NULL) {
+                        if(nextBoundaryEdge -> sibling != NULL) {
+                            nextBoundaryEdge = nextBoundaryEdge -> sibling;
+                        } else {
+                            mobiusCounter += 1;
+                            nextBoundaryEdge = nextBoundaryEdge -> mobiusSibling;
+                        }
+                        if(mobiusCounter % 2 == 0) {
+                            nextBoundaryEdge = nextBoundaryEdge -> next;
+                        } else {
+                            nextBoundaryEdge = nextBoundaryEdge -> previous;
+                        }
+                    }
+                    //cout<<"CurrEdge: "<<currEdge -> start -> ID<<" "<<currEdge -> end -> ID<<endl;
+                    //cout<<"nextBoundaryEdge: "<<nextBoundaryEdge -> start -> ID<<" "<<nextBoundaryEdge -> end -> ID<<endl;
+                    if(nextBoundaryEdge -> start == currEdge -> end) {
+                        currEdge -> nextBoundary = nextBoundaryEdge;
+                        nextBoundaryEdge -> previousBoundary = currEdge;
+                    } else if(nextBoundaryEdge -> end == currEdge -> start) {
+                        currEdge -> previousBoundary = nextBoundaryEdge;
+                        nextBoundaryEdge -> nextBoundary = currEdge;
+                    } else if(nextBoundaryEdge -> start == currEdge -> start
+                     || nextBoundaryEdge -> end == currEdge -> end) {
+                        currEdge -> mobiusBoundary = nextBoundaryEdge;
+                        nextBoundaryEdge -> mobiusBoundary = currEdge;
+                    } else {
+                        cout<<"ERROR: DEBUG the boundary builder"<<endl;
+                        exit(0);
+                    }
+                    currEdge = nextBoundaryEdge;
+                } while (currEdge != firstBoundaryEdge);
             }
         }
     }
-    vector<Halfedge*> boundaryEdges;
-    for(eIt = edgeTable.begin(); eIt != edgeTable.end(); eIt ++) {
-        Halfedge * currEdge = eIt -> second;
-        if(currEdge -> sibling == NULL && currEdge -> mobiusSibling == NULL) {
-            boundaryEdges.push_back(currEdge);
-        }
-    }
-    buildBoundaries(boundaryEdges);
+}
+
+// Build connnections after making the faces.
+// @param mesh: reference to the mesh that the connections located in.
+void buildConnections(Mesh &mesh) {
+    buildSiblingPointers(mesh);
+    buildBoundaryPointers(mesh);
+    //buildBoundaryPointers2(mesh);
+    
 }
 
 // Return the normal at point v2. 
@@ -286,8 +352,8 @@ void getFaceNormal(Face * currFace){
     currFace -> faceNormal = normalize(avgNorm);;
 }
 
-// Get the surface normal at the end of a halfedge. 
-// @param currEdge: pointer of the edge, which the vertex on the end of.
+// Get the vertex normal
+// @param currVert: pointer of the edge, which the vertex on the end of.
 void getVertexNormal(Vertex * currVert){
     Halfedge * firstOutEdge;
     Halfedge * nextOutEdge;

@@ -103,6 +103,7 @@ void init(int level);
 void init(int level, string inputSIF);
 
 void init(int level){
+    //makeSquare(glMesh);
     //makeCube(glMesh);
     //makePyramid(glMesh);
     //makeSharpOctahedron(glMesh);
@@ -117,7 +118,9 @@ void init(int level){
     //cout<< glMesh.faceTable.size()<<" "<<glMesh.edgeVect.size()<<" "<<glMesh.vertVect.size();
     Subdivision myCC(glMesh);
     glMesh = myCC.ccSubdivision(level);
+
     computeNormals(glMesh);
+    /*
     Offset offset(glMesh, 0.2);
     glPosMesh = offset.posOffsetMesh;
     glNegMesh = offset.negOffsetMesh;
@@ -129,6 +132,7 @@ void init(int level){
     meshes.push_back(glSideMesh);
     STL stl;
     stl.STLOutput(meshes, "debug/STL/Example.stl");
+    */
 }
 
 void init(int level, string inputSIF){
@@ -145,7 +149,7 @@ void init(int level, string inputSIF){
         offset.makeFullOffset();
         glOffMesh = offset.offsetMesh;
         Subdivision myOffCC(glOffMesh);
-        glOffMesh = myOffCC.ccSubdivision(2);
+        glOffMesh = myOffCC.ccSubdivision(1);
         computeNormals(glOffMesh);
         meshes.push_back(glOffMesh);
     } else {
@@ -159,7 +163,6 @@ void init(int level, string inputSIF){
     }
     STL stl;
     stl.STLOutput(meshes, "debug/STL/Example.stl");
-    
     //cout<< glMesh.faceVect.size()<<" "<<glMesh.edgeVect.size()<<" "<<glMesh.vertVect.size();
 }
 //************************************************************
@@ -275,13 +278,13 @@ void render(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
-    gluLookAt(0, 0, 2, 0, 0, 0, 0, 1, 0);
+    gluLookAt(0, 0, 4, 0, 0, 0, 0, 1, 0);
 
     glMultMatrixf(&glMesh.object2world[0][0]);
-/*
+
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, YELLOW);
     drawMesh(glMesh);
-
+/*
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, GREEN);
     drawMesh(glPosMesh);
     
