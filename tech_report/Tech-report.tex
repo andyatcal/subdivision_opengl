@@ -260,6 +260,29 @@ This step takes O(E) time, where E is the number of halfedges in the mesh.
 
 Now this mesh contains everything that we need to start a Catmull-Clark subdivision. In total, it takes O(E) time from step 1 to step 4.
 
+\subsection{Mesh Operations}
+Building from basic elements is not the only way to create the initial mesh for Catmull-Clark subdivison. A new mesh can also be made by the following mesh operations: 1) copy a mesh, 2) 3D transformation of a mesh, and 3) merging the boundaries for two meshes. 
+
+\subsubsection{Copy a Mesh}
+In order to make a copy, we create one element instance for every element that belongs to the original mesh. The copy of a mesh will keep the adjacency for elements and positions of vertices. Therefore, new element instances remain exact same adjacency information as the original mesh, except that the element ID is different and pointers are pointing to the new instances. 
+
+\subsubsection{Mesh Transformation}
+In a 3D tranformation, the positions for all vertices in the mesh will perform tranformation. The adjacency of original mesh remains the same, so halfedges and faces will transform at the same time while vertices transform. Typically, for linear transformations, we mutiply the transformation matrix to the position of every vertex from the oringal mesh.
+
+\subsubsection{Merging Meshes}
+Meshes can be merged into a new mesh if sibling links can be made between some of the boundary halfedges that belongs them. This merge of boundary halfedge will keep the new mesh as a 2-manifold. We also want the elements ID from these meshes stays different, so no collision occurs after we merge them together.
+
+Two types of mesh merging are implemented in this project: automatic merging and manual merging. In automatic merging, we define a very small tolerance value. If any pair of vertices on the boundary of the two meshes have a distance smaller than the tolerance, we check if their boundary halfedges can be merged with sibling links. If they do, we merge them, continue to trace along the boundaries of these two meshes and merge boundary halfedges until we can't.
+
+In manual merging, we force to merge boundaries from two meshes even if the distance of their vertices are larger than tolerance. In practice, we have four ways to perform the manual merging. Assume we would like to force merge the bounday of Mesh 1 and Mesh 2, we can apply one of the following stratergies:
+
+1) Vertex positions in mesh 1 remain the same after merging. The boundary faces on Mesh 2 extend to the boundary of Mesh 1.
+
+2) The opposite of 1).
+
+3) Use the arithmetric mean position for vertex from Mesh 1 and Mesh 2 as the final vertex position after merging. The boundary faces from Mesh 1 and Mesh 2 both extend to these new vertex positions.
+
+4) Build new faces between the two meshes and the vertex positions for Mesh 1 and Mesh 2 remain the same.
 
 \subsection{Mesh Traversals} 
 Catmull-Clark subdivision also requires two types of traversals in a mesh: 1) traversal around a face, and 2) traversal around a vertex. Traversal around a face is necessary to build face points and calculate face normals in the face. Traversal around a vertex is necessary to build vertex points and calculate vertex normals in the face.
@@ -496,34 +519,34 @@ As a summary of the four different situations above, in a vertex traversal, we 1
   \label{figure:traversalAroundVertexMobiusB}
 \end{figure}
 
-\subsection{Mesh Operations}
-Building from basic elements is not the only way to create the initial mesh for Catmull-Clark subdivison. A new mesh can also be made by the following mesh operations: 1) copy an existing mesh, 2) 3D transformation on a mesh, and 3) merging the boundaries for multiple exsiting meshes. We also assume and make sure that the new mesh resumes properties of 2-manifold after these mesh operations.
-
-We also need to make sure that the element ID from different meshes stays unique, so no collision occurs when we merge them together.
-
-
-\subsubsection{Copy a Mesh}
-In this project, the mesh is defined as hashtable to its 
-
-
-\subsubsection{Instantiation and Rotation}
-\subsubsection{Build by Merging Meshes}
-
 \section{Catumll-Clark Subdivision} \label{sec:ccsd}
 
-\subsection{General Approach of Catmull-Clark Subdivision}
+Catmull-Clark subdivision is a recursive call on a mesh that we build in section X. Four each level of Catmull-Clark subdivision, we divide every polygon face in the mesh into N quadalaterial faces, where N is the number of halfedges of the polygon face. The new vertices for these sub-faces can be classifid into three groups: 1) face points, 2) edge points, and 3) vertex points. We also need to add adjacency information to new sub-faces so that they be subdivided for the next level. Therefore, each level of subdivision is done in two steps: 1) compute the positions of new vertices, and 2) compile a new mesh given the new vertices.
 
-\subsubsection{Compute Vertex Positions of New Mesh}
+\subsection{Compute New Vertex Positions}
+There are three steps to compute the positions of vertices in the new mesh: 1) make new face points, 2) make new edge points, and 3) make new Vertex Points. Apart from finding the positions for these new vertices, we also need to assign unique IDs for them so no collision will occur for the new mesh.
 
-\subsubsection{Make Connections of New Mesh}
+\subsubsection{Face Points}
+Face points are related with faces from the mesh. For every face in the mesh, the position of its face point is defined as the average for positions of all vertices belong to this face. (Show equation here!)
 
-\subsection{Sharp Crease and Boundary Feature}
+Therefore, in order to get the face point position, we can do a traversal around a face, find all vertices and get the average of their positions.
 
-\subsection{Mobius Connection}
+\subsubsection{Edge Points}
+Edge points are related with edges from the mesh. In a mesh without boundary or sharp edges, every pair of halfedges, either with sibling links or moibus sibling links, will create an edge points. (And we discuss boundary issue and sharp crease in section X.) The edge point is the  
+
+\subsubsection{Vertex Points}
+
+\subsection{Compile a New Mesh}
+
+\subsection{Sharp Crease and Boundary}
 
 \section{Offset Surface} \label{sec:offset}
 
 \subsection{Compute Vertex Normals}
+
+\subsubsection{Newell's Method and Surface Normals}
+
+\subsubsection{Vertex normals}
 
 \subsection{Positive and Negative Offsets}
 
