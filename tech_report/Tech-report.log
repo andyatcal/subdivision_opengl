@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  14 AUG 2015 17:01
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  15 AUG 2015 17:17
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -460,28 +460,28 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 
 {/usr/local/texlive/2014/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <12> on input line 40.
+(Font)              <12> on input line 39.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 40.
+(Font)              <8> on input line 39.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 40.
+(Font)              <6> on input line 39.
 
-Underfull \hbox (badness 1077) in paragraph at lines 49--52
+Underfull \hbox (badness 1077) in paragraph at lines 46--48
 []\OT1/cmr/m/n/12 A halfedge con-nects ex-actly
  []
 
 
-Underfull \hbox (badness 1371) in paragraph at lines 49--52
+Underfull \hbox (badness 1371) in paragraph at lines 46--48
 \OT1/cmr/m/n/12 two non-overlapping ver-tices
  []
 
 
-Underfull \hbox (badness 3029) in paragraph at lines 53--56
+Underfull \hbox (badness 3029) in paragraph at lines 49--50
 []\OT1/cmr/m/n/12 A face has at least three
  []
 
 
-Overfull \hbox (2.37952pt too wide) in paragraph at lines 40--58
+Overfull \hbox (2.37952pt too wide) in paragraph at lines 39--52
  [][] 
  []
 
@@ -492,53 +492,41 @@ LaTeX Warning: `h' float specifier changed to `ht'.
 LaTeX Warning: `h' float specifier changed to `ht'.
 
 
-Overfull \hbox (2.37952pt too wide) in paragraph at lines 104--123
+Overfull \hbox (2.37952pt too wide) in paragraph at lines 98--117
  [][] 
  []
 
-[2] (/usr/local/texlive/2014/texmf-dist/tex/latex/listings/lstlang1.sty
+[2] [3] [4] (/usr/local/texlive/2014/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2014/03/04 1.5c listings language file
-)
-(/usr/local/texlive/2014/texmf-dist/tex/latex/listings/lstlang1.sty
+) (/usr/local/texlive/2014/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2014/03/04 1.5c listings language file
 )
 (/usr/local/texlive/2014/texmf-dist/tex/latex/listings/lstmisc.sty
 File: lstmisc.sty 2014/03/04 1.5c (Carsten Heinz)
-)
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 228.
+) [5]
+[6] [7] [8] [9] (./Tech-report.aux)
 
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 
-(/usr/local/texlive/2014/texmf-dist/tex/latex/base/omscmr.fd
-File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
-)
-LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <12> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 228.
- [3] [4] [5]
-[6]
-Overfull \vbox (78.84435pt too high) has occurred while \output is active []
-
-
-[7] (./Tech-report.aux) ) 
+ ) 
 Here is how much of TeX's memory you used:
- 12914 strings out of 493117
- 255451 string characters out of 6135433
- 331869 words of memory out of 5000000
- 16155 multiletter control sequences out of 15000+600000
+ 12790 strings out of 493117
+ 254019 string characters out of 6135433
+ 325145 words of memory out of 5000000
+ 16034 multiletter control sequences out of 15000+600000
  8808 words of font info for 31 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 55i,10n,58p,732b,1211s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/local/texlive/2014/texmf-dist/fonts/type1/public
-/amsfonts/cm/cmbx12.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/public/
-amsfonts/cm/cmmi12.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/public/a
-msfonts/cm/cmr12.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/public/ams
-fonts/cm/cmr17.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfo
-nts/cm/cmr8.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts
-/cm/cmsy10.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/
-cm/cmsy8.pfb>
-Output written on Tech-report.pdf (7 pages, 91907 bytes).
+ 55i,10n,58p,732b,626s stack positions out of 5000i,500n,10000p,200000b,80000s
+</usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb
+></usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb>
+</usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></
+usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></us
+r/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/l
+ocal/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb>
+Output written on Tech-report.pdf (9 pages, 89062 bytes).
 PDF statistics:
- 59 PDF objects out of 1000 (max. 8388607)
- 42 compressed objects within 1 object stream
+ 61 PDF objects out of 1000 (max. 8388607)
+ 43 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  13 words of extra memory for PDF output out of 10000 (max. 10000000)
 

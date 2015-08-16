@@ -207,8 +207,8 @@ void buildSiblingPointers(Mesh &mesh) {
     }
 }
 // Given the list of boundary edges, build the connections between halfedges.
-// @param boundaryEdges. A list of edges on the boundary, not necessarily sorted.
-// @param edgeTable: reference to the edgeTable of the mesh.
+// @param mesh: refer to the mesh to build connection in.
+// THis one takes O(E^2) time.
 void buildBoundaryPointers2(Mesh & mesh) {
     unordered_map<unsigned long long, Halfedge*> &edgeTable = mesh.edgeTable;
     unordered_map<unsigned long long, Halfedge*>::iterator eIt;
@@ -226,10 +226,7 @@ void buildBoundaryPointers2(Mesh & mesh) {
         e1 -> isSharp = true;
         for(eIt2 = eIt1 + 1; eIt2 < boundaryEdges.end(); eIt2++) {
             Halfedge * e2 = *eIt2;
-            if(e1 -> start == e2 -> start) {
-                e1 -> mobiusBoundary = e2;
-                e2 -> mobiusBoundary = e1;
-            } else if (e1 -> end == e2 -> end) {
+            if(e1 -> start == e2 -> start || e1 -> end == e2 -> end) {
                 e1 -> mobiusBoundary = e2;
                 e2 -> mobiusBoundary = e1;
             } else if (e1 -> start == e2 -> end) {
@@ -243,6 +240,9 @@ void buildBoundaryPointers2(Mesh & mesh) {
     }
 }
 
+// Given the list of boundary edges, build the connections between halfedges.
+// @param mesh: refer to the mesh to build connection in.
+// This one takes O(E) time.
 void buildBoundaryPointers(Mesh &mesh) {
     unordered_map<unsigned long long, Halfedge*> &edgeTable = mesh.edgeTable;
     unordered_map<unsigned long long, Halfedge*>::iterator eIt;

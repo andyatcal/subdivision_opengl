@@ -31,8 +31,7 @@ Among all these data structures, the author chooses halfedge data structure in t
 
 \subsection{Vertex, Halfedge, and Face}
 
-The definitions and assumptions of vertex, halfedge and face follow the assumption of 2-manifold, as shown in Table \ref{table:vhfdef}. The element ID is unique. When two elements fall into the same group of element, they can not have the same ID.\\
-A quadrilateral face made with four halfedges and four vertices is shown in Figure \ref{figure:singleFace}.
+The definitions and assumptions of vertex, halfedge and face follow the assumption of 2-manifold, as shown in Table \ref{table:vhfdef}. Element IDs are unique. When two elements fall into the same group of element, they can not have the same ID. (Mobius sibling halfedges are exceptions as we discuss later). A quadrilateral face made with four halfedges and four vertices is shown in Figure \ref{figure:singleFace}.
 
 %Table1
 \begin{table}[h]
@@ -42,17 +41,12 @@ A quadrilateral face made with four halfedges and four vertices is shown in Figu
 \hline
 		&	Definition	& Assumption	\\
 \hline
-Vertex	&	A 3-dimensional point.		&	No overlapping vertices 
-exits in a mesh. But overlapping vertices can exist in different meshes.\\
+Vertex	&	A 3-dimensional point.		&	No overlapping vertices exits in a mesh. But overlapping vertices can exist in different meshes.\\
 \hline
-Halfedge	&	An edge that starts from one vertex and ends at another vertex. & 
-A halfedge connects exactly two non-overlapping vertices and it has a direction. 
-Less than two halfedges start from the same vertex and end at the same vertex in a 
-single mesh.\\
+Halfedge	&	An edge that starts from one vertex and ends at another vertex. & A halfedge connects exactly two non-overlapping vertices and it has a direction. 
+Less than two halfedges start from the same vertex and end at the same vertex in a single mesh.\\
 \hline
-Face		&	A polygon that contains a loop of vertices and halfedges.	& A face has at 
-least three non-overlapping vertices so it makes a polygon. The face has to be constructed 
-with a complete loop of halfedges with on openings.\\
+Face		&	A polygon that contains a loop of vertices and halfedges.	& A face has at least three non-overlapping vertices so it makes a polygon. The face has to be constructed with a complete loop of halfedges with on openings.\\
 \hline
 \end{tabular}
 \caption{Definitions and assumptions of vertex, halfedge, and face} 
@@ -96,7 +90,7 @@ with a complete loop of halfedges with on openings.\\
   \label{figure:singleFace}
 \end{figure}
 
-Elements store two categories of information: self-information and adjacency information, where the adjacency information include links in a face and links between faces. As shown in Table \ref{table:vhfInfo}. 
+Every element stores two types of information: self-information and adjacency information. The adjacency information include adjacency in a face and adjacency between faces. The adjacency between faces include sibling links and boundary links. As shown in Table \ref{table:vhfInfo}. 
 
 %Table2
 \begin{table}[ht]
@@ -124,9 +118,20 @@ Face    &  1. face ID & 1. one side halfedge\\
 \label{table:vhfInfo}
 \end{table}
 
-\subsection{Face Connections}
+\subsection{Mesh}
+The author defines a mesh as a collection of basic elements (i.e. vertex, halfedge, and face). We implement hashtable represent the collection in this project, because of the constant serach time for elements in a hashtable. We construct three hashtable for all vertices, halfedges, and faces in the mesh respectively. The keys for this hashtable is the element ID and the content is the element pointer.
 
-There are two types of face connections, the normal connection and the mobius connection, as shown in Figure \ref{figure:faceConnections}. In a typical halfedge data structure, with the assumption of double-sided surface, the pair of halfedges between two faces are defined with opposite direction. The author extends this idea to single-sided surface and adds another type of connection, named as mobius connection. In a mobius connection, the pair of halfedges are in same direction. In the example of Figure \ref{figure:faceConnections}, on the top, $e_1$ and $e_1'$ are siblings to each other. On the bottom, $e_1$ and $e_1'$ are mobius siblings to each other.
+The ID of a halfedge is related with the IDs of its start vertex and end vertex. In this project, we define the ID of a halfedge as start vertex ID * maximum number of vertices in a mesh + end vertex ID. This definition will guarantee a unique ID for every halfedge when they have a different start or different end vertex from other halfedges. 
+
+In order to construct a mesh from elements, we need three steps: 1) contruct every indivdual face, 2) build sibling links if direct connection exist between a pair of faces, and 3) build boundary links for boundary halfedges the whole mesh. 
+
+\subsection{Face Connections and Sibling Links}
+
+There are two types of face connections, the normal connection and the mobius connection, as shown in Figure \ref{figure:faceConnections}. In a typical halfedge data structure, with the assumption of double-sided surface, a pair of halfedges between two faces are defined with opposite direction. We extends this idea to represent single-sided surface by adding another type of connection, named as mobius connection. In a mobius connection, a pair of halfedges are in same direction. In the example of Figure \ref{figure:faceConnections}, on the top, $e_1$ and $e_1'$ are siblings to each other. On the bottom, $e_1$ and $e_1'$ are mobius siblings to each other. 
+
+One thing to point out here is that mobius sibling halfedges have the same element ID. Because they have the start vertex and end vertex. However, we could check for the mobius sibling pointers in order to find all halfedges in the edge traveral of a mesh.
+
+With this extension mobius connection, there can be three different situations for a halfedge in a mesh: 1) it has a sibling pointer and on a normal connection, 2) it has a mobius pointer and on a mobius connection, and 3) it does not have a sibling pointer or mobius poniter, and it lies on the boundary of the surface.
 
 %Figure2
 \begin{figure}[ht]
@@ -220,11 +225,9 @@ There are two types of face connections, the normal connection and the mobius co
   \label{figure:faceConnections}
 \end{figure}
 
-With definition extension of mobius connection, there can be three different situations for a halfedge in a mesh: 1) it has a sibling pointer and on a normal connection, 2) it has a mobius pointer and on a mobius connection, and 3) it does not have a sibling pointer or mobius poniter, and it lies on the boundary of the surface.
+\subsection{Boundary Links}
 
-\subsection{Boundaries}
-
-For halfedges on boundary of the mesh, they contains boundary links to each other. In a surface with no mobius connetion, the boundary halfedges follows a continous flow. It can start from one vertex and end at this vertex eventually by following the flow on the boundary. We create previous and next boundary pointers to these halfedges. However, when mobius connection occurs in the mesh, some adjacent boundary halfedges start or end at same vertex. We build mobius boundary pointers to these halfedges. Figure X shows an example of boundary halfedges with and without mobius connections.
+For halfedges on the boundary of a mesh, we connect them with boundary links. In a surface with no mobius connetion, the boundary halfedges follows a continous flow. We can traverse the boundary by starting and ending at one vertex following the natural flow on the boundary. We create previous and next boundary pointers to these halfedges. However, when mobius connection occurs in a mesh, some adjacent boundary halfedges start or end at same vertex. We build mobius boundary pointers to these halfedges. Figure X shows an example of boundary halfedges with and without mobius connections.
 
 <Add normal boundary links figure and mobius boundary link figures here!>
 
@@ -463,8 +466,10 @@ As a summary of the four different situations above, in a vertex traversal, we 1
 \end{figure}
 
 \subsection{Mesh Construction}
-The input of Catmull-Clark is a polygon mesh with arbitrary topology.
+
 \subsubsection{Build from Elements}
+In order to build a mesh from elements, we need to do three steps: 1) contruct every indivdual face, 2) build the sibling links if normal connection or mobius connection exist between a pair of faces, and 3) build the boundary links for the whole mesh.
+
 \subsubsection{Instantiation and Rotation}
 \subsubsection{Build by Merging Meshes}
 
