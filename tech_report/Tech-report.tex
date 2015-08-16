@@ -527,18 +527,47 @@ Catmull-Clark subdivision is a recursive call on a mesh that we build in section
 There are three steps to compute the positions of vertices in the new mesh: 1) make new face points, 2) make new edge points, and 3) make new Vertex Points. Apart from finding the positions for these new vertices, we also need to assign unique IDs for them so no collision will occur for the new mesh.
 
 \subsubsection{Face Points}
-Face points are related with faces from the mesh. For every face in the mesh, the position of its face point is defined as the average for positions of all vertices belong to this face. (Show equation here!)
+Face points are related with faces from the mesh. For every face in the mesh, the position of its face point is defined as the average for positions of all vertices belong to this face. If we label the face point as $f$ and vertices of this face as $v_i$, the equation to calcuate face point is,
+
+$$v_f = \frac{v_1 + v_2 + ... + v_n}{n}$$
 
 Therefore, in order to get the face point position, we can do a traversal around a face, find all vertices and get the average of their positions.
 
 \subsubsection{Edge Points}
-Edge points are related with edges from the mesh. In a mesh without boundary or sharp edges, every pair of halfedges, either with sibling links or moibus sibling links, will create an edge points. (And we discuss boundary issue and sharp crease in section X.) The edge point is the  
+Edge points are related with halfedges from the mesh. In this project, we used the idea from (Reference) and define the sharpness of a halfedge as either infinite sharp or smooth. Depends on the position and sharpness of the edge, we have two ways to calculate the edge point. 
+
+If a halfedge does not lie on the boundary, it has a sibling link or mobius link to anthoer halfedge. For the halfedges that are not marked as sharp, the position of edge point of a halfedge is the average of its start vertex position, end vertex position, the face point position of the face it belongs to, and the face point position of the face its sibling or mobius sibling belongs to. If we label the edge point as $v_e$, the start and end vertices as $v_1$ and $v_2$, the face point of its face is $v_3$ and the face point of its sibling face is $v_4$, the equation to calcuate edge point is,
+
+$$v_e = \frac{v_1 + v_2 + v_3 + v_4}{4}$$
+
+If a halfedge lie on the boundary or it is marked as sharp, the position of the edge point is the average of its start vertex position and end vertex position. If we label the edge point as $v_e$, the start and end vertices as $v_1$ and $v_2$, the equation to calcuate edge point is,
+
+$$v_e = \frac{v_1 + v_2}{2}$$
 
 \subsubsection{Vertex Points}
+Vertex points are related with vertices from the mesh. Depends on the number of sharp halfedge linking with this vertex, we have three ways to calculate vertex points.
+
+1) A vertex with three or more incident sharp edges is called a corner, the new vertex point has same position with the original vertex. If we label the vertex point as $v_p$, the original vertex as $v_1$, the equation to calcuate vertex point is,
+
+$$v_p = v_1$$
+
+2) A vertex with two incident sharp edges is called a crease vertex. If we label the vertex point as $v_p$, the original vertex as $v_1$ and the two halfedges are labeled with $v_1v_2$ and $v_1v_3$. the equation to calculate vertex point is,
+
+$$v_p=\frac{v_2 + 6v_1 + v_3}{8}$$
+
+3) A vertex with less than two sharp edges is a normal vertex. There are two different approaches in calculating the vertex point for a normal vertex. We label the vertex point as $v_p$, the original vertex point as $v_1$, the average for all midpoints of edges that contains the original vertex is $v_2$, the average for all edge points of edges that contains the original vertex is $v_2'$, the average of the face points of all faces adjacent to the old vertex point as $v_3$, and the valance of the vertex (the number of edges adjacent) as n. Catmull-Clark (Reference) defined vertex point as 
+
+$$v_p=\frac{(n - 3)v_1 + 2v_2 + v_3}{n}$$
+
+While DeRose (Reference) defined vertex point as
+
+$$v_p=\frac{(n - 2)v_1 + v_2' + v_3}{n}$$
+
+The difference between these two equations is very small. On one hand, with Catmull-Clark's equation, when we meet a vertex of valance 3, e.g. a corner of a cube, the weight for the original point becomes zero. This does not produce a good subdivision. Therefore, we apply $n = 4$ when the valance equal to 3. On the contrary, DeRose's equation is applicatable to all vertices. On the other hand, compared to DeRose's equation, Catmull-Clark's equation has one more weight on the edge point average and one less weight on the original vertex, meaning that vertex points are more related with the neighbours of the original vertex.
+
+In this project, we used DeRose's equation to calcuate vertex point for a normal vertex.
 
 \subsection{Compile a New Mesh}
-
-\subsection{Sharp Crease and Boundary}
 
 \section{Offset Surface} \label{sec:offset}
 

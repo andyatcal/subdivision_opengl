@@ -427,6 +427,7 @@ void drawMesh(Mesh & mesh) {
     for(fIt = mesh.faceTable.begin(); fIt != mesh.faceTable.end(); fIt++){
         //cout<<"A new Face Begin HERE!"<<endl;
         tempFace = fIt -> second;
+        vec3 fNormal = tempFace -> faceNormal;
         Vertex * tempv;
         Halfedge * firstSideEdge = fIt -> second -> oneSideEdge;
         //cout<<"New Face: "<<endl;
@@ -438,9 +439,25 @@ void drawMesh(Mesh & mesh) {
         Halfedge * nextSideEdge = firstSideEdge;
         do {
             tempv = nextSideEdge -> end;
-            float normx = tempv -> normal[0];
-            float normy = tempv -> normal[1];
-            float normz = tempv -> normal[2];
+            float normx;
+            float normy;
+            float normz;
+            if(tempv -> onMobiusSibling) {
+                vec3 vNormal = tempv -> normal;
+                if(dot(vNormal, fNormal) >= 0) {
+                    normx = tempv -> normal[0];
+                    normy = tempv -> normal[1];
+                    normz = tempv -> normal[2];
+                } else {
+                    normx = - tempv -> normal[0];
+                    normy = - tempv -> normal[1];
+                    normz = - tempv -> normal[2];
+                }
+            } else {
+                normx = tempv -> normal[0];
+                normy = tempv -> normal[1];
+                normz = tempv -> normal[2];
+            }
             //cout<<"normx: "<<normx<<" normy: "<<normy<<" normz: "<<normz<<endl;
             glNormal3f(normx, normy, normz);
             float x = tempv -> position[0];

@@ -118,7 +118,6 @@ void init(int level){
     //cout<< glMesh.faceTable.size()<<" "<<glMesh.edgeVect.size()<<" "<<glMesh.vertVect.size();
     Subdivision myCC(glMesh);
     glMesh = myCC.ccSubdivision(level);
-
     computeNormals(glMesh);
     /*
     Offset offset(glMesh, 0.2);

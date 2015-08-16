@@ -24,7 +24,7 @@ class Mesh{
 public:
     // An Hashtable of all halfedges.
     // Key = {Vertex ID}, Value = {pointer to the vertex}
-    unordered_map<unsigned long, Vertex*> veartTable;
+    unordered_map<unsigned long, Vertex*> vertTable;
     // An Hashtable of all halfedges. 
     // Key = {Edge ID}, Value = {pointer to the edge}
     unordered_map<unsigned long long, Halfedge*> edgeTable;

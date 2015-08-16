@@ -45,10 +45,13 @@ private:
     // @param faceTable: HashTable of edges in the mesh.
     // @param vertTable: HashTable of vertices in the mesh to store new vertices.
     void makeEdgePoints(unordered_map<unsigned long long, Halfedge*> &edgeTable, unordered_map<unsigned long, Vertex*> &vertTable);
-    // Construct vertex points in Catmull-Clark subdivision.
+    // Construct vertex points in Catmull-Clark subdivision with DeRose et al's Equation.
     // By modifying the original position and pointers of the vertex.
     // @param vertTable: List of vertices in the mesh.
-    void makeVertexPoints(unordered_map<unsigned long, Vertex*> &vertTable);
+    void makeVertexPointsD(unordered_map<unsigned long, Vertex*> &vertTable);
+    // Similar to the above function, but with Catmull-Clark's equation.
+    // @param vertTable: List of vertices in the mesh.
+    void makeVertexPointsC(unordered_map<unsigned long, Vertex*> &vertTable);
     // Construct a new mesh after given new facepoints, edgepoints, and vertexpoints.
     // @param faceTable: List of faces in the mesh.
     // @param newFaceTable: the new list of faces in the mesh.
@@ -132,7 +135,7 @@ void Subdivision::makeEdgePoints(unordered_map<unsigned long long, Halfedge*> &e
     }
 }
 
-void Subdivision::makeVertexPoints(unordered_map<unsigned long, Vertex*> &vertTable){
+void Subdivision::makeVertexPointsC(unordered_map<unsigned long, Vertex*> &vertTable){
     unordered_map<unsigned long, Vertex*>::iterator vIt;
     Vertex facePointAvg;
     Vertex edgePointAvg;
@@ -157,12 +160,158 @@ void Subdivision::makeVertexPoints(unordered_map<unsigned long, Vertex*> &vertTa
 
         vec3 newFacePointAvgPosition = vec3(0, 0, 0);
         vec3 newEdgePointAvgPoistion = vec3(0, 0, 0);
-        int n = 0;
+        int en = 0;
+        int fn = 0;
+        do {
+            //cout<<"here"<<endl<<nextOutEdge -> end -> ID<<endl;
+            newEdgePointAvgPoistion += (nextOutEdge -> start -> position + nextOutEdge -> end -> position) / 2.0f;
+            newFacePointAvgPosition += nextOutEdge -> heFace -> facePoint -> position;
+            en += 1;
+            fn += 1;
+            if(nextOutEdge -> isSharp) {
+                //cout<<"A"<<endl;
+                sharpEdgeCounter += 1;
+                if(sharpEdgeCounter == 1) {
+                    sharpEdgeI = nextOutEdge;
+                } else if(sharpEdgeCounter == 2) {
+                    sharpEdgeK = nextOutEdge;
+                }
+                if(nextOutEdge -> sibling == NULL && nextOutEdge -> mobiusSibling == NULL) { // It is on a boundary!
+                    //cout<<"A1"<<endl;
+                    sharpEdgeCounter += 1;
+                    if(!(currVert -> onMobiusSibling)) { // It is on a normal boundary!
+                        //cout<<"A11"<<endl;
+                        newEdgePointAvgPoistion += (nextOutEdge -> previousBoundary -> start -> position + nextOutEdge -> previousBoundary -> end -> position)/2.0f;
+                        en += 1;
+                        if(sharpEdgeCounter == 1) {
+                            sharpEdgeI = nextOutEdge -> previousBoundary;
+                        } else if(sharpEdgeCounter == 2) {
+                            sharpEdgeK = nextOutEdge -> previousBoundary;
+                        }
+                        if(mobiusCounter % 2 == 0) {
+                            nextOutEdge = nextOutEdge -> previousBoundary -> next;
+                        } else {
+                            nextOutEdge = nextOutEdge -> previousBoundary -> previous;
+                        }
+                    } else { //It is on a mobius boundary.
+                        //cout<<"A12"<<endl;
+                        mobiusCounter += 1;
+
+                        newEdgePointAvgPoistion += (nextOutEdge -> mobiusBoundary -> start -> position + nextOutEdge -> mobiusBoundary -> end -> position)/2.0f;
+                        en += 1;
+                        if(sharpEdgeCounter == 1) {
+                            sharpEdgeI = nextOutEdge -> mobiusBoundary;
+                        } else if(sharpEdgeCounter == 2) {
+                            sharpEdgeK = nextOutEdge -> mobiusBoundary;
+                        }
+                        if(mobiusCounter % 2 == 0) {
+                            nextOutEdge = nextOutEdge -> mobiusBoundary -> next;
+                        } else {
+                            //bool ak = nextOutEdge -> mobiusBoundary -> previous == NULL;
+                            //cout<<ak<<endl;
+                            nextOutEdge = nextOutEdge -> mobiusBoundary -> previous;
+                            //cout<<nextOutEdge -> start -> ID<<endl;
+                        }
+                    }
+                } else if(nextOutEdge -> sibling != NULL){ // It has a normal sibling
+                    //cout<<"A2"<<endl;
+                    if(mobiusCounter % 2 == 0) {
+                        nextOutEdge = nextOutEdge -> sibling -> next;
+                    } else {
+                        nextOutEdge = nextOutEdge -> sibling -> previous;
+                    }
+                } else { //when "nextOutEdge -> mobiusSibling != NULL"
+                    //cout<<"A3"<<endl;
+                    mobiusCounter += 1;
+                    if(mobiusCounter % 2 == 0) {
+                        nextOutEdge = nextOutEdge -> mobiusSibling -> next;
+                    } else {
+                        nextOutEdge = nextOutEdge -> mobiusSibling -> previous;
+                    }
+                }
+            } else { // When it is not sharp.
+                //cout<<"B"<<endl;
+                if(nextOutEdge -> sibling != NULL) {
+                    //cout<<"B1"<<endl;
+                    if(mobiusCounter % 2 == 0) {
+                        nextOutEdge = nextOutEdge -> sibling -> next;
+                    } else {
+                        nextOutEdge = nextOutEdge -> sibling -> previous;
+                    }
+                } else if(nextOutEdge -> mobiusSibling != NULL){
+                    //cout<<"B2"<<endl;
+                    mobiusCounter += 1;
+                    if(mobiusCounter % 2 == 0) {
+                        nextOutEdge = nextOutEdge -> mobiusSibling -> next;
+                    } else {
+                        nextOutEdge = nextOutEdge -> mobiusSibling -> previous;
+                    }
+                }
+            }
+        } while ( nextOutEdge != firstOutEdge); // Need to check if we can go back to the first when there are borders;
+        if(sharpEdgeCounter <= 1) {
+            newFacePointAvgPosition /= fn;
+            newEdgePointAvgPoistion /= en;
+            edgePointAvg.position = newEdgePointAvgPoistion;
+            facePointAvg.position = newFacePointAvgPosition;
+            currVert->position = ((float) (fn - 3) * currVert->position + 2.0f * edgePointAvg.position +
+             facePointAvg.position) / (float) en;
+            //cout<<"this is a normal vertex!"<<currVert -> position<<endl;            
+        } else if(sharpEdgeCounter == 2) {
+            Vertex * pointI;
+            if(sharpEdgeI -> end == currVert) {
+                pointI = sharpEdgeI -> start;
+            } else {
+                pointI = sharpEdgeI -> end;
+            }
+            Vertex * pointK;
+            if(sharpEdgeK -> end == currVert) {
+                pointK = sharpEdgeK -> start;
+            } else {
+                pointK = sharpEdgeK -> end;
+            }
+            currVert -> position = (pointI -> copy + pointK -> copy + 6.0f * currVert -> copy) / 8.0f;
+            //cout<<"this is a crease vertex!"<<currVert -> position<<endl;
+        } else {
+            currVert -> position = currVert -> position; // Nothing happens when sharp edges is more than 3.
+            //cout<<"this is a conner vertex!"<<currVert -> position<<endl;
+        }
+    }
+}
+
+void Subdivision::makeVertexPointsD(unordered_map<unsigned long, Vertex*> &vertTable){
+    unordered_map<unsigned long, Vertex*>::iterator vIt;
+    Vertex facePointAvg;
+    Vertex edgePointAvg;
+    Vertex * currVert;
+    //make a copy of the original mesh vertex points.
+    for(vIt = vertTable.begin(); vIt != vertTable.end(); vIt++){
+        vIt -> second -> makeCopy();
+    }
+
+    for(vIt = vertTable.begin(); vIt != vertTable.end(); vIt++){
+        currVert = vIt -> second;
+        //cout<<"vertexID: "<<currVert -> ID<<endl;
+        Halfedge * firstOutEdge;
+        firstOutEdge = currVert -> oneOutEdge;
+        Halfedge * nextOutEdge = firstOutEdge;
+
+        int sharpEdgeCounter = 0;
+        int mobiusCounter = 0;
+
+        Halfedge * sharpEdgeI;
+        Halfedge * sharpEdgeK;
+
+        vec3 newFacePointAvgPosition = vec3(0, 0, 0);
+        vec3 newEdgePointAvgPoistion = vec3(0, 0, 0);
+        int en = 0;
+        int fn = 0;
         do {
             //cout<<"here"<<endl<<nextOutEdge -> end -> ID<<endl;
             newEdgePointAvgPoistion += nextOutEdge -> edgePoint -> position;
             newFacePointAvgPosition += nextOutEdge -> heFace -> facePoint -> position;
-            n += 1;
+            en += 1;
+            fn += 1;
             if(nextOutEdge -> isSharp) {
                 //cout<<"A"<<endl;
                 sharpEdgeCounter += 1;
@@ -177,6 +326,7 @@ void Subdivision::makeVertexPoints(unordered_map<unsigned long, Vertex*> &vertTa
                     if(!(currVert -> onMobiusSibling)) { // It is on a normal boundary!
                         //cout<<"A11"<<endl;
                         newEdgePointAvgPoistion += nextOutEdge -> previousBoundary -> edgePoint -> position;
+                        en += 1;
                         if(sharpEdgeCounter == 1) {
                             sharpEdgeI = nextOutEdge -> previousBoundary;
                         } else if(sharpEdgeCounter == 2) {
@@ -244,12 +394,12 @@ void Subdivision::makeVertexPoints(unordered_map<unsigned long, Vertex*> &vertTa
             }
         } while ( nextOutEdge != firstOutEdge); // Need to check if we can go back to the first when there are borders;
         if(sharpEdgeCounter <= 1) {
-            newFacePointAvgPosition /= n;
-            newEdgePointAvgPoistion /= n;
+            newFacePointAvgPosition /= fn;
+            newEdgePointAvgPoistion /= en;
             edgePointAvg.position = newEdgePointAvgPoistion;
             facePointAvg.position = newFacePointAvgPosition;
-            currVert->position = ((float) (n - 2) * currVert->position + edgePointAvg.position +
-             facePointAvg.position) / (float) n;
+            currVert->position = ((float) (en - 2) * currVert->position + edgePointAvg.position +
+             facePointAvg.position) / (float) en;
             //cout<<"this is a normal vertex!"<<currVert -> position<<endl;            
         } else if(sharpEdgeCounter == 2) {
             Vertex * pointI;
@@ -415,7 +565,7 @@ Mesh Subdivision::ccSubdivision(int level){
         newMesh.vertTable = currMesh.vertTable;
         makeFacePoints(currMesh.faceTable, currMesh.vertTable);
         makeEdgePoints(currMesh.edgeTable, currMesh.vertTable);
-        makeVertexPoints(newMesh.vertTable);
+        makeVertexPointsC(newMesh.vertTable);
         compileNewMesh(currMesh.faceTable, newMesh.faceTable, newMesh.edgeTable);
 
         unordered_map<uint, Face*>::iterator fIt;
