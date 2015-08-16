@@ -258,11 +258,11 @@ To do this, we need a counter to keep track of how many times we cross a mobius 
 
 This step takes O(E) time, where E is the number of halfedges in the mesh.
 
-Now this mesh contains everything that we need to start a Catmull-Clark subdivision. It takes O(E) time from step 1 to step 4 as a summary.
+Now this mesh contains everything that we need to start a Catmull-Clark subdivision. In total, it takes O(E) time from step 1 to step 4.
 
 
 \subsection{Mesh Traversals} 
-The Catmull-Clark also requires two types of traversals in a mesh: 1) traversal around a face, and 2) traversal around a vertex. Traversal around a face is necessary to build face points and calculate face normals in the face. Traversal around a vertex is necessary to build vertex points and calculate vertex normals in the face.
+Catmull-Clark subdivision also requires two types of traversals in a mesh: 1) traversal around a face, and 2) traversal around a vertex. Traversal around a face is necessary to build face points and calculate face normals in the face. Traversal around a vertex is necessary to build vertex points and calculate vertex normals in the face.
 
 \subsubsection{Traversal Around Face}
 The traversal around a face lead to all the edges and vertices belong to this face. It starts from one side halfedge of this face, follows the halfedge flow, and ends at starting the halfedge of the traversal.
@@ -497,7 +497,14 @@ As a summary of the four different situations above, in a vertex traversal, we 1
 \end{figure}
 
 \subsection{Mesh Operations}
-Building from basic elements is not the only way to construct a mesh. A new mesh can also be made by copy a
+Building from basic elements is not the only way to create the initial mesh for Catmull-Clark subdivison. A new mesh can also be made by the following mesh operations: 1) copy an existing mesh, 2) 3D transformation on a mesh, and 3) merging the boundaries for multiple exsiting meshes. We also assume and make sure that the new mesh resumes properties of 2-manifold after these mesh operations.
+
+We also need to make sure that the element ID from different meshes stays unique, so no collision occurs when we merge them together.
+
+
+\subsubsection{Copy a Mesh}
+In this project, the mesh is defined as hashtable to its 
+
 
 \subsubsection{Instantiation and Rotation}
 \subsubsection{Build by Merging Meshes}
