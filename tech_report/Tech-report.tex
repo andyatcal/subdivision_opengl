@@ -90,7 +90,7 @@ Face		&	A polygon that contains a loop of vertices and halfedges.	& A face has a
   \label{figure:singleFace}
 \end{figure}
 
-Every element stores two types of information: self-information and adjacency information. The adjacency information include adjacency in a face and adjacency between faces. The adjacency between faces include sibling links and boundary links. As shown in Table \ref{table:vhfInfo}. 
+Every element stores two types of information: self-information and adjacency information. As shown in Table \ref{table:vhfInfo}. The adjacency information include adjacency in a face and adjacency between faces. The adjacency between faces include sibling links and boundary links. (And we will discussion more in the mesh section.) 
 
 %Table2
 \begin{table}[ht]
@@ -119,13 +119,13 @@ Face    &  1. face ID & 1. one side halfedge\\
 \end{table}
 
 \subsection{Mesh}
-The author defines a mesh as a collection of basic elements (i.e. vertex, halfedge, and face). We implement hashtable represent the collection in this project, because of the constant serach time for elements in a hashtable. We construct three hashtable for all vertices, halfedges, and faces in the mesh respectively. The keys for this hashtable is the element ID and the content is the element pointer.
+We define a mesh as a collection of basic elements (i.e. vertex, halfedge, and face). Hashtable is implemented to represent the collection in this project, because of its constant serach time for element. We construct three hashtables for all vertices, halfedges, and faces in the mesh respectively. The keys for these hashtable are element IDs and the contents are the element pointers.
 
 The ID of a halfedge is related with the IDs of its start vertex and end vertex. In this project, we define the ID of a halfedge as start vertex ID * maximum number of vertices in a mesh + end vertex ID. This definition will guarantee a unique ID for every halfedge when they have a different start or different end vertex from other halfedges. 
 
-In order to construct a mesh from elements, we need three steps: 1) contruct every indivdual face, 2) build sibling links if direct connection exist between a pair of faces, and 3) build boundary links for boundary halfedges the whole mesh. 
+A mesh also includes the adjacency and connectivity of elements in it. They can be classifed into three types: 1) halfedge flow in an individual face, 2) face connections, and 3) boundary connections.
 
-\subsection{Face Connections and Sibling Links}
+\subsubsection{Face Connections and Sibling Links}
 
 There are two types of face connections, the normal connection and the mobius connection, as shown in Figure \ref{figure:faceConnections}. In a typical halfedge data structure, with the assumption of double-sided surface, a pair of halfedges between two faces are defined with opposite direction. We extends this idea to represent single-sided surface by adding another type of connection, named as mobius connection. In a mobius connection, a pair of halfedges are in same direction. In the example of Figure \ref{figure:faceConnections}, on the top, $e_1$ and $e_1'$ are siblings to each other. On the bottom, $e_1$ and $e_1'$ are mobius siblings to each other. 
 
@@ -230,6 +230,23 @@ With this extension mobius connection, there can be three different situations f
 For halfedges on the boundary of a mesh, we connect them with boundary links. In a surface with no mobius connetion, the boundary halfedges follows a continous flow. We can traverse the boundary by starting and ending at one vertex following the natural flow on the boundary. We create previous and next boundary pointers to these halfedges. However, when mobius connection occurs in a mesh, some adjacent boundary halfedges start or end at same vertex. We build mobius boundary pointers to these halfedges. Figure X shows an example of boundary halfedges with and without mobius connections.
 
 <Add normal boundary links figure and mobius boundary link figures here!>
+
+\subsection{Build Mesh from Elements}
+
+In order to construct a mesh from basic elements, we need four steps.
+
+Step1: create individual vertices. We create instances of vertices, with their position and ID defined. The position of a vetex can be the same but the ID should always be unique. This step taks O(V) time, where V is the number of vertices in the mesh.
+
+Step2: construct indivdual face. To build an indivdual face, we create consecutive instances of halfedges, with their start and end vertices given. We also add the 
+
+Step3: build sibling links. if direct connection exist between a pair of faces, and 
+
+Step4: build boundary links. for boundary halfedges the whole mesh.
+
+In step 1,  It includes create n 
+
+
+
 
 \subsection{Traversals} 
 Two basic traversals are necessary to implement Catmull-Clark subdivision: 1) traversal around a face, and 2) traversal around a vertex.

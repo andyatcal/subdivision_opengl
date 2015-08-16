@@ -24,22 +24,14 @@ class Mesh{
 public:
     // An Hashtable of all halfedges.
     // Key = {Vertex ID}, Value = {pointer to the vertex}
-    unordered_map<unsigned long, Vertex*> vertTable;
+    unordered_map<unsigned long, Vertex*> veartTable;
     // An Hashtable of all halfedges. 
     // Key = {Edge ID}, Value = {pointer to the edge}
     unordered_map<unsigned long long, Halfedge*> edgeTable;
     // An Hashtable of all halfedges. 
     // Key = {Face ID}, Value = {pointer to the face}
     unordered_map<uint, Face*> faceTable;
-    /*
-    // An arraylist of all vertices that construct this mesh.
-    vector<Vertex*> vertVect;
-    // An arraylist of all halfedges that construct this mesh.
-    vector<Halfedge*> edgeVect;
-    // An arraylist of all faces that construct this mesh.
-    vector<Face*> faceVect;
     // Transfromation matrix of the object (mesh).
-    */
     mat4 object2world;
     // Constructor.
     Mesh();
