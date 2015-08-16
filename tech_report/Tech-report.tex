@@ -31,7 +31,7 @@ Among all these data structures, the author chooses halfedge data structure in t
 
 \subsection{Vertex, Halfedge, and Face}
 
-The definitions and assumptions of vertex, halfedge and face follow the assumption of 2-manifold, as shown in Table \ref{table:vhfdef}. Element IDs are unique. When two elements fall into the same group of element, they can not have the same ID. (Mobius sibling halfedges are exceptions as we discuss later). A quadrilateral face made with four halfedges and four vertices is shown in Figure \ref{figure:singleFace}.
+The definitions and assumptions of vertex, halfedge and face follow the assumption of 2-manifold, as shown in Table \ref{table:vhfdef}. Element IDs are unique. When two elements fall into the same group of element, they can not have same ID. (Mobius sibling halfedges are exceptions as we discuss later). A quadrilateral face made with four halfedges and four vertices is shown in Figure \ref{figure:singleFace}.
 
 %Table1
 \begin{table}[h]
@@ -123,15 +123,18 @@ We define a mesh as a collection of basic elements (i.e. vertex, halfedge, and f
 
 The ID of a halfedge is related with the IDs of its start vertex and end vertex. In this project, we define the ID of a halfedge as start vertex ID * maximum number of vertices in a mesh + end vertex ID. This definition will guarantee a unique ID for every halfedge when they have a different start or different end vertex from other halfedges. 
 
-A mesh also includes the adjacency and connectivity of elements in it. They can be classifed into three types: 1) halfedge flow in an individual face, 2) face connections, and 3) boundary connections.
+A mesh also includes the adjacency and connectivity for elements within. They can be classifed into three groups: 1) halfedge flow in an single face, 2) face connections, and 3) boundary connections.
+
+\subsubsection{Halfedge Flow in One Face}
+A face is constructed by a loop of consecutive halfedges. The start of one halfedge is the end of its previous halfedge, and the end is the start of its next halfedge. Every halfedge contains two pointers, pointing to its previous and next halfedge respectively. Every vertex in this face will also have a pointer to its outgoing halfedge.
 
 \subsubsection{Face Connections and Sibling Links}
 
-There are two types of face connections, the normal connection and the mobius connection, as shown in Figure \ref{figure:faceConnections}. In a typical halfedge data structure, with the assumption of double-sided surface, a pair of halfedges between two faces are defined with opposite direction. We extends this idea to represent single-sided surface by adding another type of connection, named as mobius connection. In a mobius connection, a pair of halfedges are in same direction. In the example of Figure \ref{figure:faceConnections}, on the top, $e_1$ and $e_1'$ are siblings to each other. On the bottom, $e_1$ and $e_1'$ are mobius siblings to each other. 
+There are two types of face connections, the normal connection and the mobius connection, as shown in Figure \ref{figure:faceConnections}. In a typical halfedge data structure, with the assumption of double-sided surface, a pair of halfedges between two faces are defined with opposite direction. We extends this idea to represent single-sided surface by adding another type of connection, named as mobius connection. In a mobius connection, a pair of halfedges are in same direction. The vertex on a mobius connection will also be marked for the purpose of vertex traversal in the future. In the example of Figure \ref{figure:faceConnections}, on the top, $e_1$ and $e_1'$ are siblings to each other. On the bottom, $e_1$ and $e_1'$ are mobius siblings to each other. 
 
-One thing to point out here is that mobius sibling halfedges have the same element ID. Because they have the start vertex and end vertex. However, we could check for the mobius sibling pointers in order to find all halfedges in the edge traveral of a mesh.
+One thing to point out is that mobius sibling halfedges have the same element ID. Because they have the start vertex and end vertex. However, we could check for the mobius sibling pointers in order to find all halfedges in the edge traveral of a mesh.
 
-With this extension mobius connection, there can be three different situations for a halfedge in a mesh: 1) it has a sibling pointer and on a normal connection, 2) it has a mobius pointer and on a mobius connection, and 3) it does not have a sibling pointer or mobius poniter, and it lies on the boundary of the surface.
+With the extension of mobius connection, there can be three different adjacent situations for a halfedge in a mesh: 1) it is on a normal connection and has a normal sibling, 2) it is on a mobius connection and has a mobius pointer, and 3) it lies on the boundary of the surface and does not have a sibling pointer nor a mobius poniter.
 
 %Figure2
 \begin{figure}[ht]
@@ -221,41 +224,52 @@ With this extension mobius connection, there can be three different situations f
       \node [left] at (1.8, 1) {$e_1$};
       \node [right] at (2.2, 1) {$e_1'$};
   \end{tikzpicture}
-  \caption{Normal connection (up) and mobius connection (bottom) between two faces}
+  \caption{Normal connection (up) and mobius connection (down) between two faces}
   \label{figure:faceConnections}
 \end{figure}
 
-\subsection{Boundary Links}
+\subsubsection{Boundary and Boundary Links}
 
-For halfedges on the boundary of a mesh, we connect them with boundary links. In a surface with no mobius connetion, the boundary halfedges follows a continous flow. We can traverse the boundary by starting and ending at one vertex following the natural flow on the boundary. We create previous and next boundary pointers to these halfedges. However, when mobius connection occurs in a mesh, some adjacent boundary halfedges start or end at same vertex. We build mobius boundary pointers to these halfedges. Figure X shows an example of boundary halfedges with and without mobius connections.
+For halfedges on the boundary of a mesh, we connect them with boundary links. In a surface with no mobius connetion, the boundary halfedges follows a continous flow. We can traverse the boundary when starting at one vertex, following the natural flow on the boundary, and ending at the starting vertex. Previous boundary pointerss and next boundary pointers are created to link these halfedges. When mobius connection occurs in a mesh, however, some adjacent boundary halfedges will start or end at same vertex, which blocks the natural flow of boundary halfedges. If this happens, we build mobius boundary pointers to link these halfedges. Figure X shows an example of boundary halfedges with and without mobius connections.
 
 <Add normal boundary links figure and mobius boundary link figures here!>
 
-\subsection{Build Mesh from Elements}
+\subsubsection{Build Mesh from Elements}
 
-In order to construct a mesh from basic elements, we need four steps.
+As a conclusion of adjacency in a mesh, we need four steps in order to construct a mesh from basic elements.
 
-Step1: create individual vertices. We create instances of vertices, with their position and ID defined. The position of a vetex can be the same but the ID should always be unique. This step taks O(V) time, where V is the number of vertices in the mesh.
+Step 1: Create individual vertices. We create instances of vertices with their position and ID. The position of two vertices can be the same but their ID should always be unique. 
 
-Step2: construct indivdual face. To build an indivdual face, we create consecutive instances of halfedges, with their start and end vertices given. We also add the 
+This step takes O(V) time, where V is the number of vertices in the mesh.
 
-Step3: build sibling links. if direct connection exist between a pair of faces, and 
+Step 2: Construct indivdual faces. To build an indivdual face, we create consecutive instances of halfedges, with their start and end vertices. Meanwhile, every vertex will be asigned a pointer to its outgoing halfedge when we create halfedges. For each halfedge, We then add the previous and next pointers to its previous halfedge and next halfedge respectively. 
 
-Step4: build boundary links. for boundary halfedges the whole mesh.
+This step takes O(E) time, where E is the number of halfedges in the mesh.
 
-In step 1,  It includes create n 
+Step 3: Build sibling links. For every halfedge, we need to find if there exist a sibling or mobius sibling from other faces in this mesh. If its start vertex is same with the end of another halfedge, and its end vertex is same with the start of another halfedge, we then find a sibling. If it has the same start and end vertex with another halfedge, we then find a mobius sibling. 
+
+In this project, with the implementation of hashtable, the ID of a halfedge is related with its start vertex ID and end vertex ID. The mobius sibling link is actually generated in step 2. When we create the halfedge, if its ID is equal to a halfedge that we created before, we know they are mobius siblings. The search of normal sibling is also in constant time because we can calculate the ID of its sibling halfedge knowing that their start and end vertex are reversed. 
+
+This step takes O(E) time, where E is number of halfedges in the mesh.
+
+Step 4: Build boundary links. After step 3, if a halfedge does not have a sibling or mobius sibling, it lies on the boundary of this mesh. We need to build the boundary links to these halfedges.
+
+To do this, we need a counter to keep track of how many times we cross a mobius connection. We 1) set counter equal to zero and start from one halfedge on the boudary, 2) we go to its next halfedge if the counter is even, or its previous halfedge if the counter is odd, 3) we then go to its the sibling or moibus sibling, the counter increase by 1 if it is a mobius sibling, 4) check if the current halfedge is on boundary, if not, we repeat 2) and 3) until we reach to one, and 5) this boundary halfedge shares one vertex with our last boundary halfedge, so we can build boundary links between them, and 6) we repeat 1) to 5) to build bounary links until we reach the starting boundary halfedge in 1). From 1) to 6), one boundary loop of this mesh is built. And we move on to build other loops by repeating 1) to 6), until every boundary halfedges have boundary links to its adjacent boundaries.
+
+This step takes O(E) time, where E is the number of halfedges in the mesh.
+
+Now this mesh contains everything that we need to start a Catmull-Clark subdivision. It takes O(E) time from step 1 to step 4 as a summary.
 
 
+\subsection{Mesh Traversals} 
+The Catmull-Clark also requires two types of traversals in a mesh: 1) traversal around a face, and 2) traversal around a vertex. Traversal around a face is necessary to build face points and calculate face normals in the face. Traversal around a vertex is necessary to build vertex points and calculate vertex normals in the face.
 
-
-\subsection{Traversals} 
-Two basic traversals are necessary to implement Catmull-Clark subdivision: 1) traversal around a face, and 2) traversal around a vertex.
-\lstset{float=htpb, language=c++}
 \subsubsection{Traversal Around Face}
-The traversal around a face lead to all the edges and vertices belong to this face. It starts from one side halfedge, follows the halfedge flow, and ends at the halfedge that the face traverse starts.
-Traversal of all faces in a mesh takes O(F) time, where F is the total number of faces in the mesh.
+The traversal around a face lead to all the edges and vertices belong to this face. It starts from one side halfedge of this face, follows the halfedge flow, and ends at starting the halfedge of the traversal.
+Traversals of all faces in a mesh takes O(E) time, where E is the number of faces in the mesh.
+
 \subsubsection{Traversal Around Vertex}
-The traversal around a vertex lead to all the edges and faces that contains this vertex. The traversal of a vertex need to consider two issues: 1) is this vertex on a boundary, and  2) is this vertex on a mobius connection. This makes four different types of vertex traversals. See Figure \ref{figure:traversalAroundVertexNormal} - \ref{figure:traversalAroundVertexMobiusB} for examples.
+The traversal around a vertex lead to all edges and faces that contains this vertex. The traversal of a vertex need to consider two issues: 1) is this vertex on a boundary, and  2) is this vertex on a mobius connection. This makes four different types of vertex traversals. See Figure \ref{figure:traversalAroundVertexNormal} - \ref{figure:traversalAroundVertexMobiusB} for examples.
 
 In the vertex traversal without boundary and mobius issue, we start from one outgoing halfedge of this vertex. We continue to go to the next outgoing halfedge by going to the successor of its sibling until we hit the first outgoing halfedge. In the example of Figure \ref{figure:traversalAroundVertexNormal}, if start and end at halfedge $e_1$, the sequence of traversal is: $e_1$ (sibling link to) $e_1'$ (successor link to) $e_2$ (sibling link to) $e_2'$ (successor link to) $e_3$ (sibling link to) $e_3'$ (successor link to) $e_4$ (sibling link to ) $e_4'$  (successor link to)  $e_1$.
 
@@ -482,10 +496,8 @@ As a summary of the four different situations above, in a vertex traversal, we 1
   \label{figure:traversalAroundVertexMobiusB}
 \end{figure}
 
-\subsection{Mesh Construction}
-
-\subsubsection{Build from Elements}
-In order to build a mesh from elements, we need to do three steps: 1) contruct every indivdual face, 2) build the sibling links if normal connection or mobius connection exist between a pair of faces, and 3) build the boundary links for the whole mesh.
+\subsection{Mesh Operations}
+Building from basic elements is not the only way to construct a mesh. A new mesh can also be made by copy a
 
 \subsubsection{Instantiation and Rotation}
 \subsubsection{Build by Merging Meshes}

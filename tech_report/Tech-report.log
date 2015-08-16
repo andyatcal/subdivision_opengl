@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  15 AUG 2015 19:29
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  15 AUG 2015 21:57
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -496,7 +496,7 @@ Overfull \hbox (2.37952pt too wide) in paragraph at lines 98--117
  [][] 
  []
 
-[2] [3] [4] [5]
+[2] [3] [4] [5] [6]
 (/usr/local/texlive/2014/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2014/03/04 1.5c listings language file
 )
@@ -505,30 +505,31 @@ File: lstlang1.sty 2014/03/04 1.5c listings language file
 )
 (/usr/local/texlive/2014/texmf-dist/tex/latex/listings/lstmisc.sty
 File: lstmisc.sty 2014/03/04 1.5c (Carsten Heinz)
-) [6]
-[7] [8] [9] (./Tech-report.aux)
+) [7]
+[8]
+Overfull \vbox (192.65532pt too high) has occurred while \output is active []
 
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 
- ) 
+[9] [10] (./Tech-report.aux) ) 
 Here is how much of TeX's memory you used:
  12790 strings out of 493117
  254019 string characters out of 6135433
- 317924 words of memory out of 5000000
+ 323379 words of memory out of 5000000
  16034 multiletter control sequences out of 15000+600000
  8808 words of font info for 31 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 55i,10n,58p,732b,626s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb
-></usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb>
-</usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></
-usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></us
-r/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/l
-ocal/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb>
-Output written on Tech-report.pdf (9 pages, 89642 bytes).
+ 55i,10n,58p,914b,626s stack positions out of 5000i,500n,10000p,200000b,80000s
+</usr/local/texlive/2014/texmf-dist/fonts/type1/p
+ublic/amsfonts/cm/cmbx12.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/pu
+blic/amsfonts/cm/cmmi12.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/pub
+lic/amsfonts/cm/cmr12.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/publi
+c/amsfonts/cm/cmr17.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/public/
+amsfonts/cm/cmr8.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/public/ams
+fonts/cm/cmsy8.pfb>
+Output written on Tech-report.pdf (10 pages, 91954 bytes).
 PDF statistics:
- 61 PDF objects out of 1000 (max. 8388607)
- 43 compressed objects within 1 object stream
+ 64 PDF objects out of 1000 (max. 8388607)
+ 45 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  13 words of extra memory for PDF output out of 10000 (max. 10000000)
 
