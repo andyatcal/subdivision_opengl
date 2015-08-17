@@ -160,8 +160,10 @@ void init(int level, string inputSIF){
         meshes.push_back(glNegMesh);
         meshes.push_back(glSideMesh);
     }
+    /*
     STL stl;
     stl.STLOutput(meshes, "debug/STL/Example.stl");
+    */
     //cout<< glMesh.faceVect.size()<<" "<<glMesh.edgeVect.size()<<" "<<glMesh.vertVect.size();
 }
 //************************************************************

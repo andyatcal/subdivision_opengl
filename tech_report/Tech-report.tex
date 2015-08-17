@@ -533,6 +533,8 @@ $$v_f = \frac{v_1 + v_2 + ... + v_n}{n}$$
 
 Therefore, in order to get the face point position, we can do a traversal around a face, find all vertices and get the average of their positions.
 
+This step takes O(E) running time, where E is the number of halfedges in the kth level subdivision mesh.
+
 \subsubsection{Edge Points}
 Edge points are related with halfedges from the mesh. In this project, we used the idea from (Reference) and define the sharpness of a halfedge as either infinite sharp or smooth. Depends on the position and sharpness of the edge, we have two ways to calculate the edge point. 
 
@@ -544,8 +546,10 @@ If a halfedge lie on the boundary or it is marked as sharp, the position of the 
 
 $$v_e = \frac{v_1 + v_2}{2}$$
 
+This step takes O(E) running time, where E is the number of halfedges in the kth level subdivision mesh.
+
 \subsubsection{Vertex Points}
-Vertex points are related with vertices from the mesh. Depends on the number of sharp halfedge linking with this vertex, we have three ways to calculate vertex points.
+Vertex points are related with vertices from the mesh. In order to find the vertex point, we traverse around an oringal vertex in the mesh, find the information we need from adjacent faces and halfedges and count the nuber of sharp halfedges we cross in the traversal. The number of sharp halfedges linking with this vertex determines methods to calculate vertex points.
 
 1) A vertex with three or more incident sharp edges is called a corner, the new vertex point has same position with the original vertex. If we label the vertex point as $v_p$, the original vertex as $v_1$, the equation to calcuate vertex point is,
 
@@ -555,19 +559,124 @@ $$v_p = v_1$$
 
 $$v_p=\frac{v_2 + 6v_1 + v_3}{8}$$
 
-3) A vertex with less than two sharp edges is a normal vertex. There are two different approaches in calculating the vertex point for a normal vertex. We label the vertex point as $v_p$, the original vertex point as $v_1$, the average for all midpoints of edges that contains the original vertex is $v_2$, the average for all edge points of edges that contains the original vertex is $v_2'$, the average of the face points of all faces adjacent to the old vertex point as $v_3$, and the valance of the vertex (the number of edges adjacent) as n. Catmull-Clark (Reference) defined vertex point as 
+3) A vertex with less than two sharp edges is a normal vertex. There are two different approaches in calculating the vertex point for a normal vertex. We label the vertex point as $v_p$, the original vertex point as $v_1$, the average for all midpoints of edges that contains the original vertex is $v_2$, the average for all edge points of edges that contains the original vertex is $v_2'$, the average of the face points of all faces adjacent to the old vertex point as $v_3$, and the number of faces adjacent to the vertex as $n$, and the number of edges adjacent as $n'$. Catmull-Clark (Reference) defined vertex point as 
 
 $$v_p=\frac{(n - 3)v_1 + 2v_2 + v_3}{n}$$
 
 While DeRose (Reference) defined vertex point as
 
-$$v_p=\frac{(n - 2)v_1 + v_2' + v_3}{n}$$
+$$v_p=\frac{(n' - 2)v_1 + v_2' + v_3}{n'}$$
 
-The difference between these two equations is very small. On one hand, with Catmull-Clark's equation, when we meet a vertex of valance 3, e.g. a corner of a cube, the weight for the original point becomes zero. This does not produce a good subdivision. Therefore, we apply $n = 4$ when the valance equal to 3. On the contrary, DeRose's equation is applicatable to all vertices. On the other hand, compared to DeRose's equation, Catmull-Clark's equation has one more weight on the edge point average and one less weight on the original vertex, meaning that vertex points are more related with the neighbours of the original vertex.
+Catmull-Clark's equation used the average of all midpoints of incident edges and has one more weight on it and one less weight on the original vertex. DeRose's equation used the average of all edge points incident to the vertex. Meanwhile, in a mesh with boundary, $n$ and $n'$ would be be difference by 1. However, the actual difference between these two equations is very small. 
 
-In this project, we used DeRose's equation to calcuate vertex point for a normal vertex.
+In the example of Figure \ref{figure:differenceCandD}, if we do one more level of calculation and represent the new vertex point only with the original vertices, the results from Catmull-Clark and DeRose equations are,
+
+$$v_p=\frac{18}{32}v_0 + \frac{6}{64}(v_2 + v_4 + v_5 + v_7) + \frac{2}{128}(v_1 + v_3 + v_6 + v_8)$$
+
+and,
+
+$$v_p=\frac{27}{32}v_0 + \frac{3}{64}(v_2 + v_4 + v_5 + v_7) + \frac{3}{128}(v_1 + v_3 + v_6 + v_8)$$
+
+respectively. We can see that Catmull-Clark has more weights on the immediate neighbour vertices $v_2$, $v_4$, $v_5$, and $v_7$, while DeRose has much more on the original vertex. In this project, we used DeRose's equation to calcuate vertex point for a normal vertex.
+
+This step takes O(E) running time, where E is the number of halfedges in the kth level subdivision mesh.
+
+\begin{figure}[ht]
+  \centering
+  \begin{tikzpicture}
+    \coordinate (A0) at (0,0);
+    \coordinate (A1) at (2,0);
+    \coordinate (A2) at (2,2);
+    \coordinate (A3) at (0,2);
+    \coordinate (A4) at (4,0);
+    \coordinate (A5) at (4,2);
+    \coordinate (A6) at (4,4);
+    \coordinate (A7) at (2,4);
+    \coordinate (A8) at (0,4);
+
+    \draw (A0) -- (A1);
+    \draw (A1) -- (A2);
+    \draw (A2) -- (A3);
+    \draw (A3) -- (A0);
+    \draw (A1) -- (A4);
+    \draw (A4) -- (A5);
+    \draw (A5) -- (A2);
+    \draw (A3) -- (A8);
+    \draw (A8) -- (A7);
+    \draw (A7) -- (A6);
+    \draw (A6) -- (A5);
+    \draw (A7) -- (A2);
+    \node [left] at (0, 2) {$v_2$};
+    \node [right] at (4, 2) {$v_7$};
+    \node [above left] at (0, 4) {$v_1$};
+    \node [above right] at (4, 4) {$v_6$};
+    \node [below left] at (0, 0) {$v_3$};
+    \node [above] at (2, 4) {$v_4$};
+    \node [below] at (2, 0) {$v_5$};
+    \node [above right] at (2, 2) {$v_0$};
+    \node [below right] at (4, 0) {$v_8$};
+  \end{tikzpicture}
+  \caption{Example of difference of Catmull-Clark and DeRose Equation}
+  \label{figure:differenceCandD}
+\end{figure}
 
 \subsection{Compile a New Mesh}
+The newly generated vertices also need to be linked with each other. We compile the new mesh with traversal around face for every face from the original mesh.
+
+For every halfedge $v_iv_j$ in the face, we create four new halfedges. If we denote its edge point of the current halfedge as $v_e$ and the face point of its face as $v_f$, the four new halfedges are $v_iv_e$, $v_ev_j$, $v_ev_f$, and $v_fv_e$. An example in shown in Figure \ref{figure:compileNewMesh}. The halfedge $v_1v_2$ generated $v_1v_e$, $v_ev_2$, $v_ev_f$, $v_fv_e$. We also add the following adjacency information while generating sub-halfedges: 
+
+1) Add one outgoing halfedge pointer to every new vertex. If the new halfedge is on mobius connection, mark the new vertex on mobius connection.
+
+2) Add previous and next pointers to the sub-halfedges. 
+
+3) Add sibling pointers to every pair of $v_ev_f$ and $v_fv_e$.
+
+4) $v_iv_e$ and $v_ev_j$ need to inherit the sharpness and boundary feature from their parent halfedge, 
+
+5) If $v_iv_j$ is not on boundary, we add sibling links between $v_iv_e$ and the corresponding sub-halfedge of its parent's sibling and add sibling links between $v_ev_j$ and the corresponding sub-halfedge of its parent's sibling.
+
+6) If $v_iv_j$ is on the boundary and has boundary links with its boundary neighbour halfedges, we add boundary links for $v_iv_e$ and the corresponding sub-halfedge of its parent's boundary neighbour. We also add boundary links for $v_iv_e$ and the corresponding sub-halfedge of its parent's boundary neighbour.
+
+\begin{figure}[ht]
+  \centering
+  \begin{tikzpicture}
+    \coordinate (A0) at (0,0);
+    \coordinate (A1) at (2,0);
+    \coordinate (A2) at (2,2);
+    \coordinate (A21) at (2, 2.05);
+    \coordinate (A22) at (2, 1.95);
+    \coordinate (A3) at (0,2);
+    \coordinate (A4) at (4,0);
+    \coordinate (A5) at (4,2);
+    \coordinate (A51) at (4, 2.05);
+    \coordinate (A52) at (4, 1.95);
+    \coordinate (A6) at (4,4);
+    \coordinate (A7) at (2,4);
+    \coordinate (A8) at (0,4);
+
+    \draw (A0) -- (A4);
+    \draw [thick, -latex](A4) -- (A5);
+    \draw [thick, -latex](A5) -- (A6);
+    \draw [thick, -latex](A52) -- (A22);
+    \draw [thick, -latex](A21) -- (A51);    
+    \draw (A6) -- (A8);
+    \draw (A8) -- (A0);
+    \node [right] at (4, 0) {$v_1$};
+    \node [above left] at (0, 4) {$v_3$};
+    \node [above right] at (4, 4) {$v_2$};
+    \node [below left] at (0, 0) {$v_0$};
+    \node [above right] at (2, 2) {$v_f$};
+    \node [below right] at (4, 2) {$v_e$};
+  \end{tikzpicture}
+  \caption{Create four sub-halfedges for one halfedge in subdivision.}
+  \label{figure:compileNewMesh}
+\end{figure}
+
+When the traversal around face is done for every face in the level k subdivision mesh, the level k + 1 subdivision mesh would be created.
+
+This step takes O(E') running time, where E' is the number of halfedges in the (k + 1)th level subdivision mesh.
+
+As a summary, the Catmull-Clark at kth level takes O(E') running time, where E' is the number of halfedges in the (k + 1)th level subdivision mesh.
 
 \section{Offset Surface} \label{sec:offset}
 
