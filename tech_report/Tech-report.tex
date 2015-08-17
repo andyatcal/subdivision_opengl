@@ -2,6 +2,7 @@
 
 \usepackage{tikz}
 \usetikzlibrary{calc}
+\usetikzlibrary{shapes,arrows}
 \usepackage{listings}
 \usepackage[utf8]{inputenc}
 
@@ -682,7 +683,7 @@ As a summary, the Catmull-Clark at kth level takes O(E') running time, where E' 
 
 \section{Offset Mesh} \label{sec:offset}
 
-The offset with value offVal for a mesh M contains three parts: 1) Positive offset, where we translate every vertex of M by offVal along the direction of its vertex normal, 2) Negative offset, where we translate every vertex of M by offVal along the opposite direction of its vertex normal, and 3) the cover mesh between positive offset and negative offset, which is the extrusion for M's boundaries along positive and negative vertex normal direction.
+The offset with value offVal for a mesh M contains three parts: 1) Positive offset, where we translate every vertex of M by offVal along the direction of its vertex normal, 2) Negative offset, where we translate every vertex of M by offVal along the opposite direction of its vertex normal, and 3) the cover mesh between positive offset and negative offset, which is the extrusion for M's boundaries along positive and negative vertex normal direction. This offset mesh is a two-sided surface with no mobius connections.
 
 In two-sided surfaces, the positive offset mesh is always seperated from the negative mesh. However, in single-sided surfaces, the positive offset mesh will be connected with the negative mesh at the mobius connection of the original mesh.
 
@@ -731,10 +732,59 @@ This step takes O(E) running time, where E is the number of boundary halfedges i
 
 The offset mesh will be the combination of the positive offset, negative offset and cover mesh that we build above. In total, it takes O(E) running time to build the offset mesh.
 
+\subsection{Offset vs. Subdivision}
+A question was raised on whether we do offset first or subdivision first. The answer depends on our expectation for the sharpness between the cover mesh and positive/negative offest mesh of the final product. If we want a smooth curve, then offset should be done first. If we want it as a sharp edge, then subdivision should be done first. A combination of pre-subdivision, post-subdivision and offset (e.g. 2 levels of subdivision, offset, another 2 levels of subdivision) can lead to a smooth curve between the two above.
+
+If we do offset first, the initial mesh for subdivision will be a two-sided surface with no mobius connection. The down side of doing offset first, however, is that we have more than twice of amount of elements in the offset mesh. It will take double running time to get the final result.
+
 \section{Input and Output}
+The input and output of subdivision or offset is polygon meshes. Figure \ref{figure:birdView} shows a broader view of this subdivision/offset machine.
 
-\section{Test Cases and Discussions}
+\tikzstyle{block} = [rectangle, draw, 
+    text width=6.5em, text centered, rounded corners, minimum height=1em]
+\tikzstyle{line} = [draw, -latex']
 
-\section{Future Works}
+\begin{figure}[ht]
+  \centering    
+  \begin{tikzpicture}[node distance = 3.5cm, auto]
+      % Place nodes
+      \node [block] (GUIINPUT) {GUI INPUT};
+      \node [block, below right of=GUIINPUT] (INITMESH) {INITIAL MESH};
+      \node [block, below left of=INITMESH] (FILEINPUT) {FILE INPUT};
+      \node [block, right of=INITMESH] (SDOFF) {SUBDIVISION MACHINE};
+      \node [block, right of=SDOFF] (NEWMESH) {NEW MESH};
+      \node [block, above right of=NEWMESH] (GUIOUTPUT) {GUI OUTPUT};
+      \node [block, below right of=NEWMESH] (FILEOUTPUT) {FILE OUTPUT};
+      % Draw edges
+      \path [line] (GUIINPUT) -- (INITMESH);
+      \path [line] (FILEINPUT) -- (INITMESH);
+      \path [line] (INITMESH) -- (SDOFF);
+      \path [line] (SDOFF) -- (NEWMESH);
+      \path [line] (NEWMESH) -- (GUIOUTPUT);
+      \path [line] (NEWMESH) -- (FILEOUTPUT);
+  \end{tikzpicture}
+    \caption{A broader view of the subdivision machine}
+    \label{figure:birdView}
+\end{figure}
+
+\subsection{Input}
+The basic information we need to build an initial mesh is: 1) the position for all vertices in the mesh, and 2) the polygon defined with these vertices.
+This information can be retrived in two ways. It can come from the graphical user interface. Or it reads from a file contains vertex and polygon information.
+\subsubsection{Graphical User Interface}
+Users can draw their 
+\subsubsection{Input File Parser}
+
+\subsection{Output}
+\subsubsection{Graphical User Interface}
+In this project, we display the output of the subdivision machine in OpenGL with GLUT (The OpenGL utility toolkit). 
+Arcball feature is applied so the user can rotate the mesh with mouse control and view it from different directions. 
+Keyboard controls are also applied so the user can 1) zoom in and out, 2) switch between flat shading and smooth shading, and 3) switch between the polygon mode and wireframe mode.
+\subsubsection{Output Files}
+
+\section{Cases and Discussions}
+\subsection{Tetra}
+\subsection{Continuum}
+
+\section{Conclusion and Future Works}
 
 \end{document}

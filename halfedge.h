@@ -119,8 +119,8 @@ void Halfedge::addToHashTable(unordered_map<unsigned long long, Halfedge*> & edg
             <<" and end at ID "<<end -> ID<<" has already got a mobiusSibling!"<<endl;
             exit(0);
         }
-        //cout<<"ADDING MOBIUS: Edge start from ID "<<myMobiusSibling -> start -> ID
-        //    <<" and end at ID "<<myMobiusSibling -> end -> ID<<endl;        
+        cout<<"ADDING MOBIUS: Edge start from ID "<<myMobiusSibling -> start -> ID
+            <<" and end at ID "<<myMobiusSibling -> end -> ID<<endl;        
         mobiusSibling = myMobiusSibling;
         myMobiusSibling -> mobiusSibling = this;
         start -> onMobiusSibling = true;

@@ -66,6 +66,8 @@ bool smoothShading = false;
 bool lightOn = false; 
 //Initial Rotation Angle
 float angle = 0.0; 
+//The distance of camera and orgin.
+float cameraDistance = 4.0;
 // The mesh to subdivide and display.
 Mesh glMesh;
 // Three meshes for offests display.
@@ -73,6 +75,7 @@ Mesh glPosMesh;
 Mesh glNegMesh;
 Mesh glSideMesh;
 Mesh glOffMesh;
+
 
 // ArcBall feature.
 int last_mx = 0, last_my = 0, cur_mx = 0, cur_my = 0;
@@ -148,7 +151,7 @@ void init(int level, string inputSIF){
         offset.makeFullOffset();
         glOffMesh = offset.offsetMesh;
         Subdivision myOffCC(glOffMesh);
-        glOffMesh = myOffCC.ccSubdivision(1);
+        glOffMesh = myOffCC.ccSubdivision(3);
         computeNormals(glOffMesh);
         meshes.push_back(glOffMesh);
     } else {
@@ -279,13 +282,13 @@ void render(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
-    gluLookAt(0, 0, 4, 0, 0, 0, 0, 1, 0);
+    gluLookAt(0, 0, cameraDistance, 0, 0, 0, 0, 1, 0);
 
     glMultMatrixf(&glMesh.object2world[0][0]);
-
+/*
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, YELLOW);
     drawMesh(glMesh);
-/*
+
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, GREEN);
     drawMesh(glPosMesh);
     
@@ -359,11 +362,24 @@ void keyboard(unsigned char key, int x, int y) {
             lightOn = true;
         }
     }
+    if (key == 'i') {
+        if(cameraDistance > 0.1) {
+            cameraDistance -= 0.1;
+        }
+    }
+    if (key == 'o') {
+        if(cameraDistance < 20) {
+            cameraDistance += 0.1;
+        }
+    }
     glutPostRedisplay();
 }
 
 void keySpecial(int key, int x, int y) {
     bool shiftDown = (glutGetModifiers() == GLUT_ACTIVE_SHIFT);
+    if (key == 27) {
+        exit(0);
+    }
     glutPostRedisplay();
 }
 
