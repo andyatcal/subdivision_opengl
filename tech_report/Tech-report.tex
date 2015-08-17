@@ -3,6 +3,7 @@
 \usepackage{tikz}
 \usetikzlibrary{calc}
 \usepackage{listings}
+\usepackage[utf8]{inputenc}
 
 \title{An Implementation of Halfedge Data Structure in Catmull-Clark 
 Subdivision for 2-Manifold Single-sided Surface}
@@ -20,6 +21,7 @@ Subdivision for 2-Manifold Single-sided Surface}
 %\begin{abstract} A place for abstract later
 % Contents of abstract
 %\end{abstract}
+\tableofcontents
 
 \section{Introduction}
 Catmull-Clark subdivision is widely applied to construct a smooth surface from an initial mesh of polygons. It is independent of the topology of initial mesh.
@@ -678,23 +680,61 @@ This step takes O(E') running time, where E' is the number of halfedges in the (
 
 As a summary, the Catmull-Clark at kth level takes O(E') running time, where E' is the number of halfedges in the (k + 1)th level subdivision mesh.
 
-\section{Offset Surface} \label{sec:offset}
+\section{Offset Mesh} \label{sec:offset}
+
+The offset with value offVal for a mesh M contains three parts: 1) Positive offset, where we translate every vertex of M by offVal along the direction of its vertex normal, 2) Negative offset, where we translate every vertex of M by offVal along the opposite direction of its vertex normal, and 3) the cover mesh between positive offset and negative offset, which is the extrusion for M's boundaries along positive and negative vertex normal direction.
+
+In two-sided surfaces, the positive offset mesh is always seperated from the negative mesh. However, in single-sided surfaces, the positive offset mesh will be connected with the negative mesh at the mobius connection of the original mesh.
+
+In order to get the offset mesh, we need two steps: 1) calculate vertex normals for all vertices from the original mesh, 2) build positive and negative offset meshes, and 3) build cover mesh between positive and negative offsets.
 
 \subsection{Compute Vertex Normals}
+The vertex normal for a vertex is commonly defined as the average for the surface normals of all faces adjacent to the vertex. To get the surface normal for a face of N polygon, we use Newell's Method.
 
 \subsubsection{Newell's Method and Surface Normals}
+Newell's method defines the surface normal as the normalized average for cross products of all consecutive halfedges in the face. For a polygon face with n halfedges, we denote them as $v_0v_1$, $v_1v_2$, ...,$v_{n-1}v_0$, where $ n \ge 3$. The surface normal $N_{f}$ is,
+
+$$N_{f} = normalize(\sum\limits_{i=1}^{n-2} (v_i - v_{i - 1}) \times (v_{i + 1} - v_{i}) + (v_{n - 1} - v_{n - 2}) \times (v_0 - v_{n - 1}) + (v_0 - v_{n - 1}) \times (v_1 - v_0))$$
+
+Therefore, we calculate surface normals for every face in the mesh by traversal around face. It takes O(E) running time, where E is the number of halfedges in the mesh.
 
 \subsubsection{Vertex normals}
+We calculate vertex normals by traversal around vertex. If a vertex $v$ is not on a mobius connction, we denote the m faces adjacent to vertex $v$ are $f_0, f_1, ..., f_m$, the vertex normal $N_v$ is,
 
-\subsection{Positive and Negative Offsets}
+$$N_{v} = normalize(\sum\limits_{i=1}^{m-1} N_{f_i})$$
 
-\subsection{Mobius Connection Issue}
+However, when $v$ is on mobius connection, the halfedge flows for some adjacent faces are in opposite directions (clockwise vs counter clockwise). It leads to surface normals in oppsite directions. We need to fix this issue by introducing a mobius counter. In the vertex traversal, we start by adding the surfaces normals when we find a face. When we cross a mobius connection, we add the negative surface normals for the upcoming faces until we cross another mobius connection.
+
+Another way to address this mobius vertex issue is to check the dot product of every surface normal with the sum that we have got. If the dot product is positive, we add this surface normal, if not, we add its negative surface normal.
+
+Calculating all vertex normals takes O(E) running time, where E is the number of halfedges in the mesh.
+
+\subsection{Positive and Negative Offset Meshes}
+
+For a mesh with no mobius connection, the positive and negative offset meshes will have no connection with each other. We get the positive offset by copy the mesh, and translate every vertex along its normal with an offset value. 
+
+For negative offset, we still want to copy the mesh but the halfedge flow in the faces is in opposite directions. We then translate every vertex along the opposite direction of its normal with an offset value.
+
+When there is a mobius connection, positive offset mesh and negative offset will join each other at the mobius connection. Normals of vertices on mobius connection may not reflect the direction for its positive translation. 
+
+In this project, we make the translations of vertex positions with traversal around face. If a vertex is on mobius connection, we can check the dot product of its normal and the face normal for the face it belongs to. If the dot product is positive, we translate along this vertex normal for its positive offset and the opposite for its negative offset. If the dot product is negative, we translate along this vertex normal for its negative offset and the opposite for its positive offset.
+
+This step takes O(E) running time, where E is the number of halfedges in the mesh.
+
+\subsection{Cover Mesh}
+
+We also need to build the cover mesh to connect positive offset with negative offset. For a mesh with no mobius connection, we traverse along its boundary. For every halfedge $v_iv_j$ on the boundary, we build a quadrilateral face $v_{posJ}v_{posI}v_{negI}v_{negJ}$, where $v_{posI}$ and $v_{posJ}$ are the positive offset for $v_i$ and $v_j$, and $v_{negI}$ and $v_{negJ}$ are the negative offset for $v_i$ and $v_j$.
+
+As we mentioned before, normals of vertices on mobius connection may not reflect the direction for its positive translation. For a vertex $v_i$ on mobius connection, we need to check the dot product of its normal with the surface normal that this boundary halfedge belongs to. If the dot product is positive, we use $v_i$'s vertex normal to calcuate $v_{posI}$ and negative vertex normal to calculate $v_{negI}$. If the dot prodcuct is negative, we use $v_i$'s vertex normal to calcuate $v_{negI}$ and negative vertex normal to calculate $v_{posI}$. After this check for $v_i$ and $v_j$, we build the quadrilateral face $v_{posJ}v_{posI}v_{negI}v_{negJ}$.
+
+This step takes O(E) running time, where E is the number of boundary halfedges in the mesh.
+
+The offset mesh will be the combination of the positive offset, negative offset and cover mesh that we build above. In total, it takes O(E) running time to build the offset mesh.
 
 \section{Input and Output}
 
 \section{Test Cases and Discussions}
 
-\section{Future Researches}
-
+\section{Future Works}
 
 \end{document}
