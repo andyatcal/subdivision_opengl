@@ -144,9 +144,9 @@ void init(int level, string inputSIF){
     Subdivision myCC(glMesh);
     glMesh = myCC.ccSubdivision(level);
     computeNormals(glMesh);
-    Offset offset(glMesh, 0.013);
+    Offset offset(glMesh, 0.03);
     vector<Mesh> meshes;
-    bool full = true;
+    bool full = false;
     if(full) {
         offset.makeFullOffset();
         glOffMesh = offset.offsetMesh;
@@ -283,12 +283,12 @@ void render(void) {
     glLoadIdentity();
 
     gluLookAt(0, 0, cameraDistance, 0, 0, 0, 0, 1, 0);
-
-    glMultMatrixf(&glMesh.object2world[0][0]);
 /*
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, YELLOW);
-    drawMesh(glMesh);
+    glMultMatrixf(&glMesh.object2world[0][0]);
 
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, RED);
+    drawMesh(glMesh);
+*/
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, GREEN);
     drawMesh(glPosMesh);
     
@@ -297,11 +297,11 @@ void render(void) {
 
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, CYAN);
     drawMesh(glSideMesh);
-*/
 
+/*
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, BLUE);
     drawMesh(glOffMesh);
-
+*/
     glutSwapBuffers();
 
 }
