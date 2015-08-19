@@ -30,7 +30,9 @@ Many abstract geometrical sculptures have the shape of a (thickened) 2D surface 
 
 Researchers have developed multiple ways in order to build smooth surfaces with parametric initial inputs, including NURBS, Catmull-Clark subdivision and Loop subdivision. Catmull-Clark subdivision is widely applied to construct a smooth surface from an initial mesh of polygons. It is independent of the topology of initial mesh.
 
-When working with Berkeley SLIDE Environment (Reference: http://www.cs.berkeley.edu/~ug/slide/), an issue of Catmull-Clark Subdivision occurs. The subdivision result breaks apart at Mobius connection of the geometry. In order to address this issue, we developed a machine that uses an extended definition of halfedge data structure to generate Catmull-Clark subdivsion and offset for single-sided surfaces.
+When working with Berkeley SLIDE Environment (Reference: http://www.cs.berkeley.edu/~ug/slide/), an issue of Catmull-Clark subdivision occurs. The result breaks apart at Mobius connection of the geometry. In order to address this issue, we developed a machine that uses an extended definition of halfedge data structure to generate Catmull-Clark subdivsion and offset for single-sided surfaces.
+
+
 
 \newpage
 \section{Halfedge Data Structure} \label{sec:halfedge}
@@ -51,14 +53,14 @@ The definitions and assumptions of vertex, halfedge and face follow the assumpti
 \begin{tabular}{| l | p{0.4\textwidth} | p{0.4\textwidth}|}
 
 \hline
-		&	Definition	& Assumption	\\
+    & Definition  & Assumption  \\
 \hline
-Vertex	&	A 3-dimensional point.		&	No overlapping vertices exits in a mesh. But overlapping vertices can exist in different meshes.\\
+Vertex  & A 3-dimensional point.    & No vertices share same position in a mesh. But overlapping vertices can exist in different meshes.\\
 \hline
-Halfedge	&	An edge that starts from one vertex and ends at another vertex. & A halfedge connects exactly two non-overlapping vertices and it has a direction. 
+Halfedge  & An edge that starts from one vertex and ends at another vertex. & A halfedge connects exactly two non-overlapping vertices and it has a direction. 
 Less than two halfedges start from the same vertex and end at the same vertex in a single mesh.\\
 \hline
-Face		&	A polygon that contains a loop of vertices and halfedges.	& A face has at least three non-overlapping vertices so it makes a polygon. The face has to be constructed with a complete loop of halfedges with on openings.\\
+Face    & A polygon that contains a loop of vertices and halfedges. & A face has at least three non-overlapping vertices so it makes a polygon. The face has to be constructed with a complete loop of halfedges with on openings.\\
 \hline
 \end{tabular}
 \caption{Definitions and assumptions of vertex, halfedge, and face} 
@@ -138,7 +140,48 @@ The ID of a halfedge is related with the IDs of its start vertex and end vertex.
 A mesh also includes the adjacency and connectivity for elements within. They can be classified into three groups: 1) halfedge flow in a single face, 2) face connections, and 3) boundary connections.
 
 \subsubsection{Halfedge Flow in a Single Face}
-A face is constructed by a loop of consecutive halfedges. The start of one halfedge is the end of its previous halfedge, and the end is the start of its next halfedge. Every halfedge contains two pointers, pointing to its previous and next halfedge respectively. Every vertex in this face will also have a pointer to its outgoing halfedge.
+A face is constructed by a loop of consecutive halfedges. The start of one halfedge is the end of its previous halfedge, and the end is the start of its next halfedge. Every halfedge contains two pointers, pointing to its previous and next halfedge respectively. An example of halfedge pointers in a face in shown in Figure \ref{figure:aFacePointers} Every vertex in this face will also have a pointer to its outgoing halfedge.
+
+\begin{figure}[h]
+  \centering
+  \begin{tikzpicture}
+    \coordinate (A0) at (0,0);
+    \coordinate (A1) at (5,0);
+    \coordinate (A2) at (5,5);
+    \coordinate (A3) at (0,5);
+    \coordinate (B0) at (0.2,0.2);
+    \coordinate (B1) at (4.8,0.2);
+    \coordinate (B2) at (4.8,4.8);
+    \coordinate (B3) at (0.2,4.8);
+    \coordinate (B4) at (2.5,0.2);
+    \coordinate (B5) at (4.8,2.5);
+    \coordinate (B6) at (2.5,4.8);
+    \coordinate (B7) at (0.2,2.5);
+      \draw(A0) -- (A1);
+      \draw (A1) -- (A2);
+      \draw (A2) -- (A3);
+      \draw (A3) -- (A0);
+      \draw  (B0) edge[thick, -latex] (B1);
+      \draw  (B1) edge[thick, -latex] (B2);
+      \draw  (B2) edge[thick, -latex] (B3);
+      \draw  (B3) edge[thick, -latex] (B0);
+      \draw  (B4) edge[bend left, thick, -latex] node [label={[xshift=1.0cm, yshift=0.3cm]}] {next} (B5);
+      \draw  (B5) edge[bend left, thick, -latex] node {next} (B6);
+      \draw  (B6) edge[bend left, thick, -latex] node {next} (B7);
+      \draw  (B7) edge[bend left, thick, -latex] node {next} (B4);
+      \draw  (B4) edge[bend left, thick, -latex] node {prev} (B7);
+      \draw  (B5) edge[bend left, thick, -latex] node {prev} (B4);
+      \draw  (B6) edge[bend left, thick, -latex] node {prev} (B5);
+      \draw  (B7) edge[bend left, thick, -latex] node {prev} (B6);
+
+      \node [left] at (0, 2.5) {$e_3$};
+      \node [below] at (2.5, 0) {$e_0$};
+      \node [right] at (5, 2.5) {$e_1$};
+      \node [above] at (2.5, 5) {$e_2$};
+  \end{tikzpicture}
+  \caption{Pointers of halfedges in a single face}
+  \label{figure:aFacePointers}
+\end{figure}
 
 \subsubsection{Face Connections and Sibling Links}
 
@@ -154,25 +197,29 @@ With the extension of mobius connection, there can be three different adjacent s
   %Normal Junction
   \begin{tikzpicture}
     \coordinate (A0) at (0,0);
-    \coordinate (A1) at (2,0);
-    \coordinate (A2) at (2,2);
-    \coordinate (A3) at (0,2);
-    \coordinate (A4) at (4,0);
-    \coordinate (A5) at (4,2);
-    \coordinate (B0) at (0.2,0.2);
-    \coordinate (B1) at (1.8,0.2);
-    \coordinate (B2) at (1.8,1.8);
-    \coordinate (B3) at (0.2,1.8);
-    \coordinate (B4) at (2.2,0.2);
-    \coordinate (B5) at (3.8,0.2);
-    \coordinate (B6) at (3.8,1.8);
-    \coordinate (B7) at (2.2,1.8);
-      \draw(A0) -- (A1) node [below] {$A_1$};
-      \draw [ultra thick] (A1) -- (A2) node [above] {$A_2$};
-      \draw (A2) -- (A3) node [above left] {$A_3$};
-      \draw (A3) -- (A0) node [below left] {$A_0$};
-      \draw (A1) -- (A4) node [below right] {$A_4$};
-      \draw (A4) -- (A5) node [above right] {$A_5$};
+    \coordinate (A1) at (4,0);
+    \coordinate (A2) at (4,4);
+    \coordinate (A3) at (0,4);
+    \coordinate (A4) at (8,0);
+    \coordinate (A5) at (8,4);
+    \coordinate (C1) at (3.6, 2.2);
+    \coordinate (C2) at (3.6, 1.8);
+    \coordinate (C3) at (4.4, 2.2);
+    \coordinate (C4) at (4.4, 1.8);
+    \coordinate (B0) at (0.4,0.4);
+    \coordinate (B1) at (3.6,0.4);
+    \coordinate (B2) at (3.6,3.6);
+    \coordinate (B3) at (0.4,3.6);
+    \coordinate (B4) at (4.4,0.4);
+    \coordinate (B5) at (7.6,0.4);
+    \coordinate (B6) at (7.6,3.6);
+    \coordinate (B7) at (4.4,3.6);
+      \draw(A0) -- (A1);
+      \draw [ultra thick] (A1) -- (A2) node [above] {Normal Connection};
+      \draw (A2) -- (A3);
+
+      \draw (A1) -- (A4);
+
       \draw (A5) -- (A2);
       \draw  [thick,-latex] (B0)
         -- (B1);
@@ -180,63 +227,74 @@ With the extension of mobius connection, there can be three different adjacent s
         -- (B2);
       \draw [thick,-latex,] (B2)
         -- (B3);
-      \draw [thick,-latex,] (B3)
-        -- (B0);
-      \draw  [thick,-latex] (B4)
-        -- (B5);
-      \draw [thick,-latex,] (B5)
-        -- (B6);
-      \draw [thick,-latex,] (B6)
-        -- (B7);
-      \draw [thick,-latex,] (B7)
-        -- (B4);
-      \node [left] at (1.8, 1) {$e_1$};
-      \node [right] at (2.2, 1) {$e_1'$};
-  \end{tikzpicture}
-  
-  %Mobius Junction
-  \begin{tikzpicture}
-    \coordinate (A0) at (0,0);
-    \coordinate (A1) at (2,0);
-    \coordinate (A2) at (2,2);
-    \coordinate (A3) at (0,2);
-    \coordinate (A4) at (4,0);
-    \coordinate (A5) at (4,2);
-    \coordinate (B0) at (0.2,0.2);
-    \coordinate (B1) at (1.8,0.2);
-    \coordinate (B2) at (1.8,1.8);
-    \coordinate (B3) at (0.2,1.8);
-    \coordinate (B4) at (2.2,0.2);
-    \coordinate (B5) at (3.8,0.2);
-    \coordinate (B6) at (3.8,1.8);
-    \coordinate (B7) at (2.2,1.8);
-      \draw(A0) -- (A1) node [below] {$A_1$};
-      \draw [ultra thick] (A1) -- (A2) node [above] {$A_2$};
-      \draw (A2) -- (A3) node [above left] {$A_3$};
-      \draw (A3) -- (A0) node [below left] {$A_0$};
-      \draw (A1) -- (A4) node [below right] {$A_4$};
-      \draw (A4) -- (A5) node [above right] {$A_5$};
-      \draw (A5) -- (A2);
-      \draw  [thick,-latex] (B0)
-        -- (B1);
-      \draw [thick,-latex,] (B1)
-        -- (B2);
-      \draw [thick,-latex,] (B2)
-        -- (B3);
-      \draw [thick,-latex,] (B3)
-        -- (B0);
+
       \draw  [thick,-latex] (B5)
         -- (B4);
       \draw [thick,-latex,] (B4)
         -- (B7);
       \draw [thick,-latex,] (B7)
         -- (B6);
-      \draw [thick,-latex,] (B6)
-        -- (B5);
-      \node [left] at (1.8, 1) {$e_1$};
-      \node [right] at (2.2, 1) {$e_1'$};
+
+
+      \draw [thick,-latex,] (C1)
+        -- (C3);
+      \draw [thick,-latex,] (C4)
+        -- (C2);
+
+      \node [left] at (3.6, 2) {$e_1$};
+      \node [right] at (4.4, 2) {$e_1'$};
   \end{tikzpicture}
-  \caption{Normal connection (up) and mobius connection (down) between two faces}
+  
+  %Mobius Junction
+  \begin{tikzpicture}
+    \coordinate (A0) at (0,0);
+    \coordinate (A1) at (4,0);
+    \coordinate (A2) at (4,4);
+    \coordinate (A3) at (0,4);
+    \coordinate (A4) at (8,0);
+    \coordinate (A5) at (8,4);
+    \coordinate (C1) at (3.6, 2.2);
+    \coordinate (C2) at (3.6, 1.8);
+    \coordinate (C3) at (4.4, 2.2);
+    \coordinate (C4) at (4.4, 1.8);
+    \coordinate (B0) at (0.4,0.4);
+    \coordinate (B1) at (3.6,0.4);
+    \coordinate (B2) at (3.6,3.6);
+    \coordinate (B3) at (0.4,3.6);
+    \coordinate (B4) at (4.4,0.4);
+    \coordinate (B5) at (7.6,0.4);
+    \coordinate (B6) at (7.6,3.6);
+    \coordinate (B7) at (4.4,3.6);
+      \draw(A0) -- (A1);
+      \draw [ultra thick] (A1) -- (A2) node [above] {Mobius Connection};
+      \draw (A2) -- (A3);
+
+      \draw (A1) -- (A4);
+
+      \draw (A5) -- (A2);
+      \draw  [thick,-latex] (B0)
+        -- (B1);
+      \draw [thick,-latex,] (B1)
+        -- (B2);
+      \draw [thick,-latex,] (B2)
+        -- (B3);
+
+      \draw  [thick,-latex] (B5)
+        -- (B4);
+      \draw [thick,-latex,] (B4)
+        -- (B7);
+      \draw [thick,-latex,] (B7)
+        -- (B6);
+
+      \draw [thick,-latex,] (C1)
+        -- (C3);
+      \draw [thick,-latex,] (C4)
+        -- (C2);
+
+      \node [left] at (3.6, 2) {$e_1$};
+      \node [right] at (4.4, 2) {$e_1'$};
+  \end{tikzpicture}
+  \caption{Normal connection and mobius connection between two faces}
   \label{figure:faceConnections}
 \end{figure}
 
