@@ -7,8 +7,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
 
-\title{An Implementation of Halfedge Data Structure in Catmull-Clark 
-Subdivision for 2-Manifold Single-sided Surface}
+\title{A Geometry Kernel for Catmull-Clark Subdivision of Non-orientable 2-Mainfold}
 \author{Yu Wang}
 \date{August 2015}
 
@@ -26,13 +25,15 @@ Subdivision for 2-Manifold Single-sided Surface}
 \tableofcontents
 \newpage
 \section{Introduction}
-Many abstract geometrical sculptures have the shape of a (thickened) 2D surface embedded in 3D space. (Reference: 2-manifold sculpture). According to Surface Classification Theorem, All 2-manifolds (thin surfaces with borders) can be uniquely classified by their orientability (double-sided or single-sided), by the number b of their borders (loops of 1-dimensional rim lines), and their genus g (the number of independent closed loop cuts that can be made on such a surface, leaving all its pieces still connected to one another).
+For the last two decades, Berkeley SLIDE (Scene Language for Interactive Dynamic Environments) [ref] has been the default geometrical modeling tool for professor Séquin and his students for making mathematical visualization models and abstract geometrical sculptures.  On one hand, SLIDE offers powerful sweep generators, a variety of subdivision techniques and offset surface functions, and convenient hierarchical scene composition tools.  On the other hand, no serious maintenance has been performed on this poorly organized code, cobbled together by dozens of students in the period between the 1990’s and 2004.  With every new issue of an operating system for Windows machines of Macintosh computers, it gets more difficult to install SLIDE and the Tcl [ref] components that are required for providing interactive change of the parameter that define a geometric shape.
 
-Researchers have developed multiple ways in order to build smooth surfaces with parametric initial inputs, including NURBS, Catmull-Clark subdivision and Loop subdivision. Catmull-Clark subdivision is widely applied to construct a smooth surface from an initial mesh of polygons. It is independent of the topology of initial mesh.
+The existing SLIDE code also has some technical shortcomings.  It cannot provide smooth subdivision and offset surface generation for non-orientable 2-manifolds such as Möbius bands.  This report describes the development of a new geometry kernel that fixes these problems.
 
-When working with Berkeley SLIDE Environment (Reference: http://www.cs.berkeley.edu/~ug/slide/), an issue of Catmull-Clark subdivision occurs. The result breaks apart at Mobius connection of the geometry. In order to address this issue, we developed a machine that uses an extended definition of halfedge data structure to generate Catmull-Clark subdivsion and offset for single-sided surfaces.
+This new kernel works on the subidvivion of 2-manifolds (i.e., thin surfaces with borders), because many abstract geometrical sculptures have the shape of a (thickened) 2D surface embedded in 3D space [Reference: 2-manifold sculpture]. According to Surface Classification Theorem [ref], All 2-manifolds can be uniquely classified by their topology characteristics, includingorientability (double-sided or single-sided), by the number b of their borders (loops of 1-dimensional rim lines), and their genus g (the number of independent closed loop cuts that can be made on such a surface, leaving all its pieces still connected to one another) [ref]. 
 
+Catmull-Clark subivision, regradless of topology of the 2-manifold, can 
 
+The input and output of this kernel is mesh made of polygon faces. 
 
 \newpage
 \section{Halfedge Data Structure} \label{sec:halfedge}

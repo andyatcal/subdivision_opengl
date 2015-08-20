@@ -1,39 +1,39 @@
 \contentsline {section}{\numberline {1}Introduction}{4}
-\contentsline {section}{\numberline {2}Halfedge Data Structure}{5}
-\contentsline {subsection}{\numberline {2.1}Vertex, Halfedge, and Face}{5}
-\contentsline {subsection}{\numberline {2.2}Mesh}{6}
-\contentsline {subsubsection}{\numberline {2.2.1}Halfedge Flow in a Single Face}{7}
-\contentsline {subsubsection}{\numberline {2.2.2}Face Connections and Sibling Links}{7}
-\contentsline {subsubsection}{\numberline {2.2.3}Boundary and Boundary Links}{8}
-\contentsline {subsubsection}{\numberline {2.2.4}Build Mesh from Elements}{9}
-\contentsline {subsection}{\numberline {2.3}Mesh Operations}{10}
-\contentsline {subsubsection}{\numberline {2.3.1}Copy a Mesh}{11}
-\contentsline {subsubsection}{\numberline {2.3.2}Mesh Transformation}{11}
-\contentsline {subsubsection}{\numberline {2.3.3}Merging Meshes}{11}
-\contentsline {subsection}{\numberline {2.4}Mesh Traversals}{12}
-\contentsline {subsubsection}{\numberline {2.4.1}Traversal Around Face}{12}
-\contentsline {subsubsection}{\numberline {2.4.2}Traversal Around Vertex}{12}
-\contentsline {section}{\numberline {3}Catumll-Clark Subdivision}{14}
-\contentsline {subsection}{\numberline {3.1}Compute New Vertex Positions}{14}
-\contentsline {subsubsection}{\numberline {3.1.1}Face Points}{15}
-\contentsline {subsubsection}{\numberline {3.1.2}Edge Points}{15}
-\contentsline {subsubsection}{\numberline {3.1.3}Vertex Points}{16}
-\contentsline {subsection}{\numberline {3.2}Compile a New Mesh}{17}
-\contentsline {section}{\numberline {4}Offset Mesh}{19}
-\contentsline {subsection}{\numberline {4.1}Compute Vertex Normal}{19}
-\contentsline {subsubsection}{\numberline {4.1.1}Newell's Method and Surface Normal}{20}
-\contentsline {subsubsection}{\numberline {4.1.2}Vertex normal}{20}
-\contentsline {subsection}{\numberline {4.2}Positive and Negative Offset Meshes}{21}
-\contentsline {subsection}{\numberline {4.3}Cover Mesh}{21}
-\contentsline {subsection}{\numberline {4.4}Offset vs. Subdivision}{22}
-\contentsline {section}{\numberline {5}Input and Output}{23}
-\contentsline {subsection}{\numberline {5.1}Input}{23}
-\contentsline {subsubsection}{\numberline {5.1.1}Input File Parser}{23}
-\contentsline {subsubsection}{\numberline {5.1.2}Graphical User Interface}{24}
-\contentsline {subsection}{\numberline {5.2}Output}{25}
-\contentsline {subsubsection}{\numberline {5.2.1}Graphical User Interface}{25}
-\contentsline {subsubsection}{\numberline {5.2.2}Output Files}{25}
-\contentsline {section}{\numberline {6}Test Cases}{26}
-\contentsline {subsection}{\numberline {6.1}Hild Sculpture}{26}
-\contentsline {subsection}{\numberline {6.2}Tetra Sculpture}{26}
-\contentsline {section}{\numberline {7}Conclusion and Future Works}{27}
+\contentsline {section}{\numberline {2}Halfedge Data Structure}{6}
+\contentsline {subsection}{\numberline {2.1}Vertex, Halfedge, and Face}{6}
+\contentsline {subsection}{\numberline {2.2}Mesh}{7}
+\contentsline {subsubsection}{\numberline {2.2.1}Halfedge Flow in a Single Face}{8}
+\contentsline {subsubsection}{\numberline {2.2.2}Face Connections and Sibling Links}{8}
+\contentsline {subsubsection}{\numberline {2.2.3}Boundary and Boundary Links}{9}
+\contentsline {subsubsection}{\numberline {2.2.4}Build Mesh from Elements}{10}
+\contentsline {subsection}{\numberline {2.3}Mesh Operations}{11}
+\contentsline {subsubsection}{\numberline {2.3.1}Copy a Mesh}{12}
+\contentsline {subsubsection}{\numberline {2.3.2}Mesh Transformation}{12}
+\contentsline {subsubsection}{\numberline {2.3.3}Merging Meshes}{12}
+\contentsline {subsection}{\numberline {2.4}Mesh Traversals}{13}
+\contentsline {subsubsection}{\numberline {2.4.1}Traversal Around Face}{13}
+\contentsline {subsubsection}{\numberline {2.4.2}Traversal Around Vertex}{13}
+\contentsline {section}{\numberline {3}Catumll-Clark Subdivision}{15}
+\contentsline {subsection}{\numberline {3.1}Compute New Vertex Positions}{15}
+\contentsline {subsubsection}{\numberline {3.1.1}Face Points}{16}
+\contentsline {subsubsection}{\numberline {3.1.2}Edge Points}{16}
+\contentsline {subsubsection}{\numberline {3.1.3}Vertex Points}{17}
+\contentsline {subsection}{\numberline {3.2}Compile a New Mesh}{18}
+\contentsline {section}{\numberline {4}Offset Mesh}{20}
+\contentsline {subsection}{\numberline {4.1}Compute Vertex Normal}{20}
+\contentsline {subsubsection}{\numberline {4.1.1}Newell's Method and Surface Normal}{21}
+\contentsline {subsubsection}{\numberline {4.1.2}Vertex normal}{21}
+\contentsline {subsection}{\numberline {4.2}Positive and Negative Offset Meshes}{22}
+\contentsline {subsection}{\numberline {4.3}Cover Mesh}{22}
+\contentsline {subsection}{\numberline {4.4}Offset vs. Subdivision}{23}
+\contentsline {section}{\numberline {5}Input and Output}{24}
+\contentsline {subsection}{\numberline {5.1}Input}{24}
+\contentsline {subsubsection}{\numberline {5.1.1}Input File Parser}{24}
+\contentsline {subsubsection}{\numberline {5.1.2}Graphical User Interface}{25}
+\contentsline {subsection}{\numberline {5.2}Output}{26}
+\contentsline {subsubsection}{\numberline {5.2.1}Graphical User Interface}{26}
+\contentsline {subsubsection}{\numberline {5.2.2}Output Files}{26}
+\contentsline {section}{\numberline {6}Test Cases}{27}
+\contentsline {subsection}{\numberline {6.1}Hild Sculpture}{27}
+\contentsline {subsection}{\numberline {6.2}Tetra Sculpture}{27}
+\contentsline {section}{\numberline {7}Conclusion and Future Works}{28}
