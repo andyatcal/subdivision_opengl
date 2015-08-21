@@ -66,15 +66,15 @@ Offset::Offset(Mesh & mesh, float val) {
 
 void Offset::makeSeperateOffset() {
     unordered_map<unsigned long, Vertex*>::iterator vIt;
-    unordered_map<uint, Face*>::iterator fIt;
+    vector<Face*>::iterator fIt;
     unordered_map<unsigned long long, Halfedge*>::iterator eIt;
     for(vIt = startMesh.vertTable.begin(); vIt != startMesh.vertTable.end(); vIt++) {
         calcVertexOffset(vIt -> second, false);
     }
-    for(fIt = startMesh.faceTable.begin(); fIt != startMesh.faceTable.end(); fIt++) {
+    for(fIt = startMesh.faceVect.begin(); fIt < startMesh.faceVect.end(); fIt++) {
         vector<Vertex*> posOffsetVertices;
         vector<Vertex*> negOffsetVertices;
-        Face * currFace = fIt -> second;
+        Face * currFace = (*fIt);
         Halfedge * firstSideEdge = currFace -> oneSideEdge;
         if(firstSideEdge == NULL) {
             cout<<"ERROR: This face (with ID) does not have a sideEdge."<<endl;
@@ -102,85 +102,85 @@ void Offset::makeSeperateOffset() {
             }
             nextSideEdge = nextSideEdge -> next;
         } while(nextSideEdge != firstSideEdge);
-        makePolygonFace(posOffsetVertices, posOffsetMesh.faceTable, posOffsetMesh.edgeTable);
-        makePolygonFace(negOffsetVertices, negOffsetMesh.faceTable, negOffsetMesh.edgeTable, true);
-    }
-    for(eIt = startMesh.edgeTable.begin(); eIt != startMesh.edgeTable.end(); eIt++) {
-        Halfedge * currEdge = eIt -> second;
-        if(currEdge -> sibling == NULL && currEdge -> mobiusSibling == NULL) {
-            vector<Vertex*> offsetSideVertices1;
-            vector<Vertex*> offsetSideVertices2;
-            if(currEdge -> start -> onMobiusSibling) {
-                vec3 oneOption = currEdge -> start -> posOffset -> position - currEdge -> start -> position;
-                if(dot(oneOption, currEdge -> heFace -> faceNormal) >= 0) {
-                    offsetSideVertices1.push_back(currEdge -> start -> posOffset);
-                    offsetSideVertices1.push_back(currEdge -> start);
-                    offsetSideVertices1.push_back(currEdge -> end);
-                    offsetSideVertices1.push_back(currEdge -> end -> posOffset);
-                    offsetSideVertices2.push_back(currEdge -> start);
-                    offsetSideVertices2.push_back(currEdge -> start -> negOffset);
-                    offsetSideVertices2.push_back(currEdge -> end -> negOffset);
-                    offsetSideVertices2.push_back(currEdge -> end);
+        addPolygonFaceToMesh(posOffsetVertices, posOffsetMesh);
+        addPolygonFaceToMesh(negOffsetVertices, negOffsetMesh, true);
+
+        firstSideEdge = (*fIt) -> oneSideEdge;
+        Halfedge * currEdge = firstSideEdge; 
+        do {
+            if(currEdge -> sibling == NULL && currEdge -> mobiusSibling == NULL) {
+                vector<Vertex*> sideOffsetVertices1;
+                vector<Vertex*> sideOffsetVertices2;
+                if(currEdge -> start -> onMobiusSibling) {
+                    vec3 oneOption = currEdge -> start -> posOffset -> position - currEdge -> start -> position;
+                    if(dot(oneOption, currEdge -> heFace -> faceNormal) >= 0) {
+                        sideOffsetVertices1.push_back(currEdge -> start -> posOffset);
+                        sideOffsetVertices1.push_back(currEdge -> start);
+                        sideOffsetVertices1.push_back(currEdge -> end);
+                        sideOffsetVertices1.push_back(currEdge -> end -> posOffset);
+                        sideOffsetVertices2.push_back(currEdge -> start);
+                        sideOffsetVertices2.push_back(currEdge -> start -> negOffset);
+                        sideOffsetVertices2.push_back(currEdge -> end -> negOffset);
+                        sideOffsetVertices2.push_back(currEdge -> end);
+                    } else {
+                        sideOffsetVertices1.push_back(currEdge -> start -> negOffset);
+                        sideOffsetVertices1.push_back(currEdge -> start);
+                        sideOffsetVertices1.push_back(currEdge -> end);
+                        sideOffsetVertices1.push_back(currEdge -> end -> posOffset);
+                        sideOffsetVertices2.push_back(currEdge -> start);
+                        sideOffsetVertices2.push_back(currEdge -> start -> posOffset);
+                        sideOffsetVertices2.push_back(currEdge -> end -> negOffset);
+                        sideOffsetVertices2.push_back(currEdge -> end);
+                    }
+                } else if(currEdge -> end -> onMobiusSibling) {
+                    vec3 oneOption = currEdge -> end -> posOffset -> position - currEdge -> end -> position;
+                    if(dot(oneOption, currEdge -> heFace -> faceNormal) >= 0) {
+                        sideOffsetVertices1.push_back(currEdge -> start -> posOffset);
+                        sideOffsetVertices1.push_back(currEdge -> start);
+                        sideOffsetVertices1.push_back(currEdge -> end);
+                        sideOffsetVertices1.push_back(currEdge -> end -> posOffset);
+                        sideOffsetVertices2.push_back(currEdge -> start);
+                        sideOffsetVertices2.push_back(currEdge -> start -> negOffset);
+                        sideOffsetVertices2.push_back(currEdge -> end -> negOffset);
+                        sideOffsetVertices2.push_back(currEdge -> end);
+                    } else {
+                        sideOffsetVertices1.push_back(currEdge -> start -> posOffset);
+                        sideOffsetVertices1.push_back(currEdge -> start);
+                        sideOffsetVertices1.push_back(currEdge -> end);
+                        sideOffsetVertices1.push_back(currEdge -> end -> negOffset);
+                        sideOffsetVertices2.push_back(currEdge -> start -> negOffset);
+                        sideOffsetVertices2.push_back(currEdge -> end -> posOffset);
+                        sideOffsetVertices2.push_back(currEdge -> end);
+                        sideOffsetVertices2.push_back(currEdge -> start);
+                    }
                 } else {
-                    offsetSideVertices1.push_back(currEdge -> start -> negOffset);
-                    offsetSideVertices1.push_back(currEdge -> start);
-                    offsetSideVertices1.push_back(currEdge -> end);
-                    offsetSideVertices1.push_back(currEdge -> end -> posOffset);
-                    offsetSideVertices2.push_back(currEdge -> start);
-                    offsetSideVertices2.push_back(currEdge -> start -> posOffset);
-                    offsetSideVertices2.push_back(currEdge -> end -> negOffset);
-                    offsetSideVertices2.push_back(currEdge -> end);
+                    sideOffsetVertices1.push_back(currEdge -> start -> posOffset);
+                    sideOffsetVertices1.push_back(currEdge -> start);
+                    sideOffsetVertices1.push_back(currEdge -> end);
+                    sideOffsetVertices1.push_back(currEdge -> end -> posOffset);
+                    sideOffsetVertices2.push_back(currEdge -> start);
+                    sideOffsetVertices2.push_back(currEdge -> start -> negOffset);
+                    sideOffsetVertices2.push_back(currEdge -> end -> negOffset);
+                    sideOffsetVertices2.push_back(currEdge -> end);
                 }
-            } else if(currEdge -> end -> onMobiusSibling) {
-                vec3 oneOption = currEdge -> end -> posOffset -> position - currEdge -> end -> position;
-                if(dot(oneOption, currEdge -> heFace -> faceNormal) >= 0) {
-                    offsetSideVertices1.push_back(currEdge -> start -> posOffset);
-                    offsetSideVertices1.push_back(currEdge -> start);
-                    offsetSideVertices1.push_back(currEdge -> end);
-                    offsetSideVertices1.push_back(currEdge -> end -> posOffset);
-                    offsetSideVertices2.push_back(currEdge -> start);
-                    offsetSideVertices2.push_back(currEdge -> start -> negOffset);
-                    offsetSideVertices2.push_back(currEdge -> end -> negOffset);
-                    offsetSideVertices2.push_back(currEdge -> end);
-                } else {
-                    offsetSideVertices1.push_back(currEdge -> start -> posOffset);
-                    offsetSideVertices1.push_back(currEdge -> start);
-                    offsetSideVertices1.push_back(currEdge -> end);
-                    offsetSideVertices1.push_back(currEdge -> end -> negOffset);
-                    offsetSideVertices2.push_back(currEdge -> start -> negOffset);
-                    offsetSideVertices2.push_back(currEdge -> end -> posOffset);
-                    offsetSideVertices2.push_back(currEdge -> end);
-                    offsetSideVertices2.push_back(currEdge -> start);
-                }
-            } else {
-                offsetSideVertices1.push_back(currEdge -> start -> posOffset);
-                offsetSideVertices1.push_back(currEdge -> start);
-                offsetSideVertices1.push_back(currEdge -> end);
-                offsetSideVertices1.push_back(currEdge -> end -> posOffset);
-                offsetSideVertices2.push_back(currEdge -> start);
-                offsetSideVertices2.push_back(currEdge -> start -> negOffset);
-                offsetSideVertices2.push_back(currEdge -> end -> negOffset);
-                offsetSideVertices2.push_back(currEdge -> end);
+                addPolygonFaceToMesh(sideOffsetVertices1, sideOffsetMesh);
+                addPolygonFaceToMesh(sideOffsetVertices2, sideOffsetMesh);
             }
-            makePolygonFace(offsetSideVertices1, sideOffsetMesh.faceTable, sideOffsetMesh.edgeTable);
-            makePolygonFace(offsetSideVertices2, sideOffsetMesh.faceTable, sideOffsetMesh.edgeTable);
-        }
+            currEdge = currEdge -> next;
+        } while (currEdge != firstSideEdge);
     }
-    buildConnections(sideOffsetMesh);
-    computeNormals(sideOffsetMesh);
 }
 
 void Offset::makeFullOffset() {
     unordered_map<unsigned long, Vertex*>::iterator vIt;
-    unordered_map<uint, Face*>::iterator fIt;
-    unordered_map<unsigned long long, Halfedge*>::iterator eIt;
+    vector<Face*>::iterator fIt;
     for(vIt = startMesh.vertTable.begin(); vIt != startMesh.vertTable.end(); vIt++) {
         calcVertexOffset(vIt -> second, true);
     }
-    for(fIt = startMesh.faceTable.begin(); fIt != startMesh.faceTable.end(); fIt++) {
+    for(fIt = startMesh.faceVect.begin(); fIt < startMesh.faceVect.end(); fIt++) {
         vector<Vertex*> posOffsetVertices;
         vector<Vertex*> negOffsetVertices;
-        Face * currFace = fIt -> second;
+        Face * currFace = (*fIt);
         Halfedge * firstSideEdge = currFace -> oneSideEdge;
         if(firstSideEdge == NULL) {
             cout<<"ERROR: This face (with ID) does not have a sideEdge."<<endl;
@@ -208,52 +208,53 @@ void Offset::makeFullOffset() {
             }
             nextSideEdge = nextSideEdge -> next;
         } while(nextSideEdge != firstSideEdge);
-        makePolygonFace(posOffsetVertices, offsetMesh.faceTable, offsetMesh.edgeTable);
-        makePolygonFace(negOffsetVertices, offsetMesh.faceTable, offsetMesh.edgeTable, true);
-    }
+        addPolygonFaceToMesh(posOffsetVertices, offsetMesh);
+        addPolygonFaceToMesh(negOffsetVertices, offsetMesh, true);
 
-    for(eIt = startMesh.edgeTable.begin(); eIt != startMesh.edgeTable.end(); eIt++) {
-        Halfedge * currEdge = eIt -> second;
-        if(currEdge -> sibling == NULL && currEdge -> mobiusSibling == NULL) {
-            vector<Vertex*> offsetSideVertices;
-            if(currEdge -> start -> onMobiusSibling) {
-                vec3 oneOption = currEdge -> start -> posOffset -> position - currEdge -> start -> position;
-                if(dot(oneOption, currEdge -> heFace -> faceNormal) >= 0) {
-                    offsetSideVertices.push_back(currEdge -> start -> posOffset);
-                    offsetSideVertices.push_back(currEdge -> start -> negOffset);
-                    offsetSideVertices.push_back(currEdge -> end -> negOffset);
-                    offsetSideVertices.push_back(currEdge -> end -> posOffset);
+        firstSideEdge = currFace -> oneSideEdge;
+        Halfedge * currEdge = firstSideEdge;
+        do {
+            if(currEdge -> sibling == NULL && currEdge -> mobiusSibling == NULL) {
+                vector<Vertex*> sideOffsetVertices;
+                if(currEdge -> start -> onMobiusSibling) {
+                    vec3 oneOption = currEdge -> start -> posOffset -> position - currEdge -> start -> position;
+                    if(dot(oneOption, currEdge -> heFace -> faceNormal) >= 0) {
+                        sideOffsetVertices.push_back(currEdge -> start -> posOffset);
+                        sideOffsetVertices.push_back(currEdge -> start -> negOffset);
+                        sideOffsetVertices.push_back(currEdge -> end -> negOffset);
+                        sideOffsetVertices.push_back(currEdge -> end -> posOffset);
+                    } else {
+                        sideOffsetVertices.push_back(currEdge -> start -> negOffset);
+                        sideOffsetVertices.push_back(currEdge -> start -> posOffset);
+                        sideOffsetVertices.push_back(currEdge -> end -> negOffset);
+                        sideOffsetVertices.push_back(currEdge -> end -> posOffset);
+                    }
+                } else if(currEdge -> end -> onMobiusSibling) {
+                    vec3 oneOption = currEdge -> end -> posOffset -> position - currEdge -> end -> position;
+                    if(dot(oneOption, currEdge -> heFace -> faceNormal) >= 0) {
+                        sideOffsetVertices.push_back(currEdge -> start -> posOffset);
+                        sideOffsetVertices.push_back(currEdge -> start -> negOffset);
+                        sideOffsetVertices.push_back(currEdge -> end -> negOffset);
+                        sideOffsetVertices.push_back(currEdge -> end -> posOffset);
+                    } else {
+                        sideOffsetVertices.push_back(currEdge -> start -> posOffset);
+                        sideOffsetVertices.push_back(currEdge -> start -> negOffset);
+                        sideOffsetVertices.push_back(currEdge -> end -> posOffset);
+                        sideOffsetVertices.push_back(currEdge -> end -> negOffset);
+                    }
                 } else {
-                    offsetSideVertices.push_back(currEdge -> start -> negOffset);
-                    offsetSideVertices.push_back(currEdge -> start -> posOffset);
-                    offsetSideVertices.push_back(currEdge -> end -> negOffset);
-                    offsetSideVertices.push_back(currEdge -> end -> posOffset);
+                    sideOffsetVertices.push_back(currEdge -> start -> posOffset);
+                    sideOffsetVertices.push_back(currEdge -> start -> negOffset);
+                    sideOffsetVertices.push_back(currEdge -> end -> negOffset);
+                    sideOffsetVertices.push_back(currEdge -> end -> posOffset);
                 }
-            } else if(currEdge -> end -> onMobiusSibling) {
-                vec3 oneOption = currEdge -> end -> posOffset -> position - currEdge -> end -> position;
-                if(dot(oneOption, currEdge -> heFace -> faceNormal) >= 0) {
-                    offsetSideVertices.push_back(currEdge -> start -> posOffset);
-                    offsetSideVertices.push_back(currEdge -> start -> negOffset);
-                    offsetSideVertices.push_back(currEdge -> end -> negOffset);
-                    offsetSideVertices.push_back(currEdge -> end -> posOffset);
-                } else {
-                    offsetSideVertices.push_back(currEdge -> start -> posOffset);
-                    offsetSideVertices.push_back(currEdge -> start -> negOffset);
-                    offsetSideVertices.push_back(currEdge -> end -> posOffset);
-                    offsetSideVertices.push_back(currEdge -> end -> negOffset);
-                }
-            } else {
-                offsetSideVertices.push_back(currEdge -> start -> posOffset);
-                offsetSideVertices.push_back(currEdge -> start -> negOffset);
-                offsetSideVertices.push_back(currEdge -> end -> negOffset);
-                offsetSideVertices.push_back(currEdge -> end -> posOffset);
+                addPolygonFaceToMesh(sideOffsetVertices, offsetMesh);
             }
-            makePolygonFace(offsetSideVertices, offsetMesh.faceTable, offsetMesh.edgeTable);
-        }
+            currEdge = currEdge -> next;
+        } while (currEdge != firstSideEdge);
     }
     buildConnections(offsetMesh);
     computeNormals(offsetMesh);
-
 }
 
 void Offset::calcVertexOffset(Vertex * v, bool full) {
@@ -268,11 +269,16 @@ void Offset::calcVertexOffset(Vertex * v, bool full) {
     v -> posOffset = posOffset;
     v -> negOffset = negOffset;
     if(!full) {
-        posOffset -> addToHashTable(posOffsetMesh.vertTable);
-        negOffset -> addToHashTable(negOffsetMesh.vertTable);
+        addVertexToMesh(posOffset, posOffsetMesh);
+        addVertexToMesh(negOffset, negOffsetMesh);
+        addVertexToMesh(posOffset, negOffsetMesh);
+        addVertexToMesh(negOffset, posOffsetMesh);
+        addVertexToMesh(posOffset, sideOffsetMesh);
+        addVertexToMesh(negOffset, sideOffsetMesh);
+        addVertexToMesh(v, sideOffsetMesh);
     } else {
-        posOffset -> addToHashTable(offsetMesh.vertTable);
-        negOffset -> addToHashTable(offsetMesh.vertTable);
+        addVertexToMesh(posOffset, offsetMesh);
+        addVertexToMesh(negOffset, offsetMesh);
     }
 }
 

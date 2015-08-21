@@ -69,13 +69,4 @@ void Vertex::makeCopy() {
     copy = position;
 }
 
-void Vertex::addToHashTable(unordered_map<unsigned long, Vertex*> & vertTable) {
-    if(vertTable.find(ID) == vertTable.end()) {
-        vertTable[ID] = this;
-    } else {
-        cout<<"HEY, YOU ARE ADDING ANOTHER VERTEX WITH SAME ID!"<<endl;
-        exit(0);
-    }
-}
-
 #endif // __VERTEX_H__

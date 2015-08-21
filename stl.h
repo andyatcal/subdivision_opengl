@@ -39,30 +39,24 @@ void STL::STLOutput(vector<Mesh> &meshes, string outputSTL){
         file << "solid\n";
         for(mIt = meshes.begin(); mIt < meshes.end(); mIt++) {
             Mesh & currMesh = (*mIt);
-            unordered_map<uint, Face*> &faceTable = currMesh.faceTable;
-            unordered_map<uint, Face*>::iterator fIt;
-            for(fIt = faceTable.begin(); fIt != faceTable.end(); fIt++) {
-                Halfedge * firstSideEdge = fIt -> second -> oneSideEdge;
+            vector<Face*> &faceVect = currMesh.faceVect;
+            vector<Face*>::iterator fIt;
+            for(fIt = faceVect.begin(); fIt < faceVect.end(); fIt++) {
+                Halfedge * firstSideEdge = (*fIt) -> oneSideEdge;
                 if(firstSideEdge == NULL) {
-                    cout<<"ERROR: This face (with ID)" <<fIt -> second -> ID
-                     << "does not have a sideEdge."<<endl;
+                    cout<<"ERROR: This face does not have a sideEdge."<<endl;
                     exit(0);
                 }
                 Vertex * v0 = firstSideEdge -> start;
                 vec3 p0 = v0 -> position;
                 Halfedge * nextSideEdge = firstSideEdge -> next;
                 if(nextSideEdge == NULL) {
-                    cout<<"ERROR: This face (with ID)" <<fIt -> second -> ID
-                     << "contains only one edge and can not be drawn."<<endl;
+                    cout<<"ERROR: This face contains only one edge and can not be drawn."<<endl;
                 }
                 do {
                     Vertex * v1 = nextSideEdge -> start;
                     Vertex * v2 = nextSideEdge -> end;
-                    Mesh tempMesh;
-                    makeTriFace(v0, v1, v2, tempMesh.faceTable, tempMesh.edgeTable);
-                    Face * tempFace = tempMesh.faceTable.begin() -> second;
-                    getFaceNormal(tempFace);
-                    vec3 faceNormal = tempFace -> faceNormal;
+                    vec3 faceNormal = getTriFaceNormal(v0, v1, v2);
                     file << "  facet normal "<<faceNormal[0]<<" "<<faceNormal[1]<<" "<<faceNormal[2]<<"\n";
                     file << "    outer loop\n";
                     vec3 p1 = v1 -> position;

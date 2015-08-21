@@ -55,8 +55,6 @@ public:
     // The mobius boundary edge immediately connected to this edge.
     // For boundary and mobius feature.
     Halfedge * mobiusBoundary;
-    // Tracking ID;
-    unsigned long long ID;
     // Constructor.
     Halfedge();
     // Constructor with start and end vertex.
@@ -70,7 +68,6 @@ public:
 Halfedge::Halfedge() {
     start = end = NULL;
     sibling = NULL;
-    ID = 0;
     next = previous = NULL;
     heFace = NULL;
     edgePoint = NULL;
@@ -83,15 +80,10 @@ Halfedge::Halfedge() {
     sibling = mobiusSibling = NULL;
 }
 
-unsigned long hashKey(uint vID1, uint vID2) {
-    return vID1 * 4294967295 + vID2;
-}
-
 Halfedge::Halfedge(Vertex * v1, Vertex * v2) {
     start = v1;
     start -> oneOutEdge = this;
     end = v2;
-    ID = hashKey(v1 -> ID, v2 -> ID);
     sibling = NULL;
     next = previous = NULL;
     heFace = NULL;
@@ -105,26 +97,4 @@ Halfedge::Halfedge(Vertex * v1, Vertex * v2) {
     sibling = mobiusSibling = NULL;
 }
 
-void Halfedge::addToHashTable(unordered_map<unsigned long long, Halfedge*> & edgeTable) {
-    if(edgeTable.find(ID) == edgeTable.end()) {
-        edgeTable[ID] = this;
-    } else {
-        Halfedge * myMobiusSibling = edgeTable[ID];
-        if(myMobiusSibling -> mobiusSibling != NULL) {
-            cout<<"ERROR: Edge start from ID "<<myMobiusSibling -> start -> ID
-            <<" and end at ID "<<myMobiusSibling -> end -> ID<<" has already got a mobiusSibling!"<<endl;
-            exit(0);
-        } else if(this -> mobiusSibling != NULL) {
-            cout<<"ERROR: Edge start from ID "<<start -> ID
-            <<" and end at ID "<<end -> ID<<" has already got a mobiusSibling!"<<endl;
-            exit(0);
-        }
-        //cout<<"ADDING MOBIUS: Edge start from ID "<<myMobiusSibling -> start -> ID
-        //    <<" and end at ID "<<myMobiusSibling -> end -> ID<<endl;        
-        mobiusSibling = myMobiusSibling;
-        myMobiusSibling -> mobiusSibling = this;
-        start -> onMobiusSibling = true;
-        end -> onMobiusSibling = true;
-    }
-}
 #endif // __HALFEDGE_H__

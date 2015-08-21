@@ -23,8 +23,6 @@ class Halfedge;
 // MeshUtils Class -- Utility Functions with Mesh.
 void makeSquare(Mesh &mesh) {
     flushMesh(mesh);
-    unordered_map<uint, Face*> &faceTable = mesh.faceTable;
-    unordered_map<unsigned long long, Halfedge*> &edgeTable = mesh.edgeTable;
     unordered_map<unsigned long, Vertex*> &vertTable = mesh.vertTable;
 
     //make new mesh
@@ -44,19 +42,17 @@ void makeSquare(Mesh &mesh) {
     v4 -> ID = 3;
 
     //push on all new verts
-    v1 -> addToHashTable(vertTable);
-    v2 -> addToHashTable(vertTable);
-    v3 -> addToHashTable(vertTable);
-    v4 -> addToHashTable(vertTable);
-    makeRectFace(v1, v2, v3, v4, faceTable, edgeTable);
+    addVertexToMesh(v1, mesh);
+    addVertexToMesh(v2, mesh);
+    addVertexToMesh(v3, mesh);
+    addVertexToMesh(v4, mesh);
+    addQuadFaceToMesh(v1, v2, v3, v4, mesh);
     buildConnections(mesh);
 
 }
 
 void makePyramid(Mesh &mesh){
     flushMesh(mesh);
-    unordered_map<uint, Face*> &faceTable = mesh.faceTable;
-    unordered_map<unsigned long long, Halfedge*> &edgeTable = mesh.edgeTable;
     unordered_map<unsigned long, Vertex*> &vertTable = mesh.vertTable;
 
     //make new mesh
@@ -79,37 +75,40 @@ void makePyramid(Mesh &mesh){
     v5 -> ID = 4;
 
     //push on all new verts
-    v1 -> addToHashTable(vertTable);
-    v2 -> addToHashTable(vertTable);
-    v3 -> addToHashTable(vertTable);
-    v4 -> addToHashTable(vertTable);
-    v5 -> addToHashTable(vertTable);
+    addVertexToMesh(v1, mesh);
+    addVertexToMesh(v2, mesh);
+    addVertexToMesh(v3, mesh);
+    addVertexToMesh(v4, mesh);
+    addVertexToMesh(v5, mesh);
 
     vector<Vertex*> bottomFace;
-
+    vector<Vertex*> bottomFaceR;
     bottomFace.push_back(v3);
     bottomFace.push_back(v2);
     bottomFace.push_back(v5);
     bottomFace.push_back(v4);
+
+    bottomFaceR.push_back(v4);
+    bottomFaceR.push_back(v5);
+    bottomFaceR.push_back(v2);
+    bottomFaceR.push_back(v3);
+
     //bottomFace
-    makeRectFace(v3, v2, v5, v4, faceTable, edgeTable);
-    //makeRectFace(v3, v2, v5, v4, faceTable, edgeTable);
+    addPolygonFaceToMesh(bottomFace, mesh);
     //topfrontFace
-    makeTriFace(v1, v2, v3, faceTable, edgeTable);
+    addTriFaceToMesh(v1, v2, v3, mesh);
     //topbackFace
-    makeTriFace(v1, v3, v4, faceTable, edgeTable);
+    addTriFaceToMesh(v1, v3, v4, mesh);
     //topleftFace
-    makeTriFace(v1, v4, v5, faceTable, edgeTable);
+    addTriFaceToMesh(v1, v4, v5, mesh);
     //toprightFace
-    makeTriFace(v1, v5, v2, faceTable, edgeTable);
+    addTriFaceToMesh(v1, v5, v2, mesh);
 
     buildConnections(mesh);
 }
 
 void makeCube(Mesh &mesh){
     flushMesh(mesh);
-    unordered_map<uint, Face*> &faceTable = mesh.faceTable;
-    unordered_map<unsigned long long, Halfedge*> &edgeTable = mesh.edgeTable;
     unordered_map<unsigned long, Vertex*> &vertTable = mesh.vertTable;
 
     //make new mesh
@@ -141,35 +140,33 @@ void makeCube(Mesh &mesh){
     v8 -> ID = 7;
 
     //push on all new verts
-    v1 -> addToHashTable(vertTable);
-    v2 -> addToHashTable(vertTable);
-    v3 -> addToHashTable(vertTable);
-    v4 -> addToHashTable(vertTable);
-    v5 -> addToHashTable(vertTable);
-    v6 -> addToHashTable(vertTable);
-    v7 -> addToHashTable(vertTable);
-    v8 -> addToHashTable(vertTable);
+    addVertexToMesh(v1, mesh);
+    addVertexToMesh(v2, mesh);
+    addVertexToMesh(v3, mesh);
+    addVertexToMesh(v4, mesh);
+    addVertexToMesh(v5, mesh);
+    addVertexToMesh(v6, mesh);
+    addVertexToMesh(v7, mesh);
+    addVertexToMesh(v8, mesh);
  
     //topFace
-    makeRectFace(v1, v2, v3, v4, faceTable, edgeTable);
+    addQuadFaceToMesh(v1, v2, v3, v4, mesh);
     //bottomFace
-    makeRectFace(v6, v5, v8, v7, faceTable, edgeTable);
+    addQuadFaceToMesh(v6, v5, v8, v7, mesh);
     //leftFace
-    makeRectFace(v3, v2, v6, v7, faceTable, edgeTable);
+    addQuadFaceToMesh(v3, v2, v6, v7, mesh);
     //rightFace
-    makeRectFace(v1, v4, v8, v5, faceTable, edgeTable);
+    addQuadFaceToMesh(v1, v4, v8, v5, mesh);
     //frontFace
-    makeRectFace(v2, v1, v5, v6, faceTable, edgeTable);
+    addQuadFaceToMesh(v2, v1, v5, v6, mesh);
     //baceFace
-    makeRectFace(v4, v3, v7, v8, faceTable, edgeTable);
+    addQuadFaceToMesh(v4, v3, v7, v8, mesh);
 
     buildConnections(mesh);
 }
 
 void makeOpenCube(Mesh &mesh){
     flushMesh(mesh);
-    unordered_map<uint, Face*> &faceTable = mesh.faceTable;
-    unordered_map<unsigned long long, Halfedge*> &edgeTable = mesh.edgeTable;
     unordered_map<unsigned long, Vertex*> &vertTable = mesh.vertTable;
 
     //make new mesh
@@ -201,27 +198,27 @@ void makeOpenCube(Mesh &mesh){
     v8 -> position = vec3(-1, 1, -1);
 
     //push on all new verts
-    v1 -> addToHashTable(vertTable);
-    v2 -> addToHashTable(vertTable);
-    v3 -> addToHashTable(vertTable);
-    v4 -> addToHashTable(vertTable);
-    v5 -> addToHashTable(vertTable);
-    v6 -> addToHashTable(vertTable);
-    v7 -> addToHashTable(vertTable);
-    v8 -> addToHashTable(vertTable);
+    addVertexToMesh(v1, mesh);
+    addVertexToMesh(v2, mesh);
+    addVertexToMesh(v3, mesh);
+    addVertexToMesh(v4, mesh);
+    addVertexToMesh(v5, mesh);
+    addVertexToMesh(v6, mesh);
+    addVertexToMesh(v7, mesh);
+    addVertexToMesh(v8, mesh);
 
     //without the topFace
-    //makeRectFace(v1, v2, v3, v4, faceTable, edgeTable);
+    //addQuadFaceToMesh(v1, v2, v3, v4, mesh);
     //bottomFace
-    makeRectFace(v6, v5, v8, v7, faceTable, edgeTable);
+    addQuadFaceToMesh(v6, v5, v8, v7, mesh);
     //leftFace
-    makeRectFace(v3, v2, v6, v7, faceTable, edgeTable);
+    addQuadFaceToMesh(v3, v2, v6, v7, mesh);
     //rightFace
-    makeRectFace(v1, v4, v8, v5, faceTable, edgeTable);
+    addQuadFaceToMesh(v1, v4, v8, v5, mesh);
     //frontFace
-    makeRectFace(v2, v1, v5, v6, faceTable, edgeTable);
+    addQuadFaceToMesh(v2, v1, v5, v6, mesh);
     //baceFace
-    makeRectFace(v4, v3, v7, v8, faceTable, edgeTable);
+    addQuadFaceToMesh(v4, v3, v7, v8, mesh);
 
     //Boundaries
     buildConnections(mesh);
@@ -229,8 +226,6 @@ void makeOpenCube(Mesh &mesh){
 
 void makeRing(Mesh &mesh){
     flushMesh(mesh);
-    unordered_map<uint, Face*> &faceTable = mesh.faceTable;
-    unordered_map<unsigned long long, Halfedge*> &edgeTable = mesh.edgeTable;
     unordered_map<unsigned long, Vertex*> &vertTable = mesh.vertTable;
 
     //make new mesh
@@ -262,31 +257,29 @@ void makeRing(Mesh &mesh){
     v8 -> position = vec3(-1, 1, -1);
 
     //push on all new verts
-    v1 -> addToHashTable(vertTable);
-    v2 -> addToHashTable(vertTable);
-    v3 -> addToHashTable(vertTable);
-    v4 -> addToHashTable(vertTable);
-    v5 -> addToHashTable(vertTable);
-    v6 -> addToHashTable(vertTable);
-    v7 -> addToHashTable(vertTable);
-    v8 -> addToHashTable(vertTable);
+    addVertexToMesh(v1, mesh);
+    addVertexToMesh(v2, mesh);
+    addVertexToMesh(v3, mesh);
+    addVertexToMesh(v4, mesh);
+    addVertexToMesh(v5, mesh);
+    addVertexToMesh(v6, mesh);
+    addVertexToMesh(v7, mesh);
+    addVertexToMesh(v8, mesh);
 
     //leftFace
-    makeRectFace(v3, v2, v6, v7, faceTable, edgeTable);
+    addQuadFaceToMesh(v3, v2, v6, v7, mesh);
     //rightFace
-    makeRectFace(v1, v4, v8, v5, faceTable, edgeTable);
+    addQuadFaceToMesh(v1, v4, v8, v5, mesh);
     //frontFace
-    makeRectFace(v2, v1, v5, v6, faceTable, edgeTable);
+    addQuadFaceToMesh(v2, v1, v5, v6, mesh);
     //baceFace
-    makeRectFace(v4, v3, v7, v8, faceTable, edgeTable);
+    addQuadFaceToMesh(v4, v3, v7, v8, mesh);
 
     buildConnections(mesh);
 }
 
 void makeSharpCube(Mesh &mesh){
     flushMesh(mesh);
-    unordered_map<uint, Face*> &faceTable = mesh.faceTable;
-    unordered_map<unsigned long long, Halfedge*> &edgeTable = mesh.edgeTable;
     unordered_map<unsigned long, Vertex*> &vertTable = mesh.vertTable;
 
     //make new mesh
@@ -318,36 +311,36 @@ void makeSharpCube(Mesh &mesh){
     v8 -> position = vec3(-1, 1, -1);
 
     //push on all new verts
-    v1 -> addToHashTable(vertTable);
-    v2 -> addToHashTable(vertTable);
-    v3 -> addToHashTable(vertTable);
-    v4 -> addToHashTable(vertTable);
-    v5 -> addToHashTable(vertTable);
-    v6 -> addToHashTable(vertTable);
-    v7 -> addToHashTable(vertTable);
-    v8 -> addToHashTable(vertTable);
+    addVertexToMesh(v1, mesh);
+    addVertexToMesh(v2, mesh);
+    addVertexToMesh(v3, mesh);
+    addVertexToMesh(v4, mesh);
+    addVertexToMesh(v5, mesh);
+    addVertexToMesh(v6, mesh);
+    addVertexToMesh(v7, mesh);
+    addVertexToMesh(v8, mesh);
 
     //without the topFace
-    makeRectFace(v1, v2, v3, v4, faceTable, edgeTable);
+    addQuadFaceToMesh(v1, v2, v3, v4, mesh);
     //bottomFace
-    makeRectFace(v6, v5, v8, v7, faceTable, edgeTable);
+    addQuadFaceToMesh(v6, v5, v8, v7, mesh);
     //leftFace
-    makeRectFace(v3, v2, v6, v7, faceTable, edgeTable);
+    addQuadFaceToMesh(v3, v2, v6, v7, mesh);
     //rightFace
-    makeRectFace(v1, v4, v8, v5, faceTable, edgeTable);
+    addQuadFaceToMesh(v1, v4, v8, v5, mesh);
     //frontFace
-    makeRectFace(v2, v1, v5, v6, faceTable, edgeTable);
+    addQuadFaceToMesh(v2, v1, v5, v6, mesh);
     //baceFace
-    makeRectFace(v4, v3, v7, v8, faceTable, edgeTable);
+    addQuadFaceToMesh(v4, v3, v7, v8, mesh);
     
     buildConnections(mesh);
-
+    /*
     unordered_map<unsigned long long, Halfedge*>::iterator eIt;
     for(eIt = edgeTable.begin(); eIt != edgeTable.end(); eIt++) {
         if (eIt -> second -> start == v1 || eIt -> second -> end == v1) {
             eIt -> second -> isSharp = true;
         }
-        /* 
+
         else if(eIt -> second -> start == v2 && eIt -> second -> end == v1) {
             eIt -> second -> isSharp = true;
         } else if (eIt -> second -> start == v2 && eIt -> second -> end == v3) {
@@ -363,14 +356,13 @@ void makeSharpCube(Mesh &mesh){
         } else if(eIt -> second -> start == v4 && eIt -> second -> end == v1) {
             eIt -> second -> isSharp = true;
         }
-        */
+
     }
+    */
 }
 
 void makeOctahedron(Mesh &mesh){
     flushMesh(mesh);
-    unordered_map<uint, Face*> &faceTable = mesh.faceTable;
-    unordered_map<unsigned long long, Halfedge*> &edgeTable = mesh.edgeTable;
     unordered_map<unsigned long, Vertex*> &vertTable = mesh.vertTable;
 
     Vertex * v1 = new Vertex;
@@ -388,12 +380,12 @@ void makeOctahedron(Mesh &mesh){
     v6 -> ID = 5;
 
     //push on all new verts
-    v1 -> addToHashTable(vertTable);
-    v2 -> addToHashTable(vertTable);
-    v3 -> addToHashTable(vertTable);
-    v4 -> addToHashTable(vertTable);
-    v5 -> addToHashTable(vertTable);
-    v6 -> addToHashTable(vertTable);
+    addVertexToMesh(v1, mesh);
+    addVertexToMesh(v2, mesh);
+    addVertexToMesh(v3, mesh);
+    addVertexToMesh(v4, mesh);
+    addVertexToMesh(v5, mesh);
+    addVertexToMesh(v6, mesh);
  
     v1 -> position = vec3(0, 0, 1.414);
     v2 -> position = vec3(1, 1, 0);
@@ -402,24 +394,22 @@ void makeOctahedron(Mesh &mesh){
     v5 -> position = vec3(-1, 1, 0);
     v6 -> position = vec3(0, 0, -1.414);
 
-    makeTriFace(v1, v2, v3, faceTable, edgeTable);
-    makeTriFace(v1, v3, v4, faceTable, edgeTable);
-    makeTriFace(v1, v4, v5, faceTable, edgeTable);
-    makeTriFace(v1, v5, v2, faceTable, edgeTable);
-    makeTriFace(v6, v3, v2, faceTable, edgeTable);
-    makeTriFace(v6, v4, v3, faceTable, edgeTable);
-    makeTriFace(v6, v5, v4, faceTable, edgeTable);
-    makeTriFace(v6, v2, v5, faceTable, edgeTable);
+    addTriFaceToMesh(v1, v2, v3, mesh);
+    addTriFaceToMesh(v1, v3, v4, mesh);
+    addTriFaceToMesh(v1, v4, v5, mesh);
+    addTriFaceToMesh(v1, v5, v2, mesh);
+    addTriFaceToMesh(v6, v3, v2, mesh);
+    addTriFaceToMesh(v6, v4, v3, mesh);
+    addTriFaceToMesh(v6, v5, v4, mesh);
+    addTriFaceToMesh(v6, v2, v5, mesh);
 
     buildConnections(mesh);
 }
 
 void makeSharpOctahedron(Mesh &mesh){
-    unordered_map<uint, Face*>::iterator faceIt;
-    unordered_map<unsigned long long, Halfedge*>::iterator edgeIt;
+    //unordered_map<uint, Face*>::iterator faceIt;
+    //unordered_map<unsigned long long, Halfedge*>::iterator edgeIt;
     flushMesh(mesh);
-    unordered_map<uint, Face*> &faceTable = mesh.faceTable;
-    unordered_map<unsigned long long, Halfedge*> &edgeTable = mesh.edgeTable;
     unordered_map<unsigned long, Vertex*> &vertTable = mesh.vertTable;
     //make new mesh
     Vertex * v1 = new Vertex;
@@ -437,12 +427,12 @@ void makeSharpOctahedron(Mesh &mesh){
     v6 -> ID = 5;
 
     //push on all new verts
-    v1 -> addToHashTable(vertTable);
-    v2 -> addToHashTable(vertTable);
-    v3 -> addToHashTable(vertTable);
-    v4 -> addToHashTable(vertTable);
-    v5 -> addToHashTable(vertTable);
-    v6 -> addToHashTable(vertTable);
+    addVertexToMesh(v1, mesh);
+    addVertexToMesh(v2, mesh);
+    addVertexToMesh(v3, mesh);
+    addVertexToMesh(v4, mesh);
+    addVertexToMesh(v5, mesh);
+    addVertexToMesh(v6, mesh);
  
     v1 -> position = vec3(0, 0, 1.414);
     v2 -> position = vec3(1, 1, 0);
@@ -451,14 +441,14 @@ void makeSharpOctahedron(Mesh &mesh){
     v5 -> position = vec3(-1, 1, 0);
     v6 -> position = vec3(0, 0, -1.414);
 
-    makeTriFace(v1, v2, v3, faceTable, edgeTable);
-    makeTriFace(v1, v3, v4, faceTable, edgeTable);
-    makeTriFace(v1, v4, v5, faceTable, edgeTable);
-    makeTriFace(v1, v5, v2, faceTable, edgeTable);
-    makeTriFace(v6, v3, v2, faceTable, edgeTable);
-    makeTriFace(v6, v4, v3, faceTable, edgeTable);
-    makeTriFace(v6, v5, v4, faceTable, edgeTable);
-    makeTriFace(v6, v2, v5, faceTable, edgeTable);
+    addTriFaceToMesh(v1, v2, v3, mesh);
+    addTriFaceToMesh(v1, v3, v4, mesh);
+    addTriFaceToMesh(v1, v4, v5, mesh);
+    addTriFaceToMesh(v1, v5, v2, mesh);
+    addTriFaceToMesh(v6, v3, v2, mesh);
+    addTriFaceToMesh(v6, v4, v3, mesh);
+    addTriFaceToMesh(v6, v5, v4, mesh);
+    addTriFaceToMesh(v6, v2, v5, mesh);
 
     buildConnections(mesh);
     //Should define sharp edge here.
@@ -466,8 +456,6 @@ void makeSharpOctahedron(Mesh &mesh){
 
 void makeNormalStrip(Mesh &mesh){
     flushMesh(mesh);
-    unordered_map<uint, Face*> &faceTable = mesh.faceTable;
-    unordered_map<unsigned long long, Halfedge*> &edgeTable = mesh.edgeTable;
     unordered_map<unsigned long, Vertex*> &vertTable = mesh.vertTable;
 
     //make new mesh
@@ -490,14 +478,14 @@ void makeNormalStrip(Mesh &mesh){
     v8 -> ID = 7;
 
     //push on all new verts
-    v1 -> addToHashTable(vertTable);
-    v2 -> addToHashTable(vertTable);
-    v3 -> addToHashTable(vertTable);
-    v4 -> addToHashTable(vertTable);
-    v5 -> addToHashTable(vertTable);
-    v6 -> addToHashTable(vertTable);
-    v7 -> addToHashTable(vertTable);
-    v8 -> addToHashTable(vertTable);
+    addVertexToMesh(v1, mesh);
+    addVertexToMesh(v2, mesh);
+    addVertexToMesh(v3, mesh);
+    addVertexToMesh(v4, mesh);
+    addVertexToMesh(v5, mesh);
+    addVertexToMesh(v6, mesh);
+    addVertexToMesh(v7, mesh);
+    addVertexToMesh(v8, mesh);
 
     v1 -> position = vec3(1.5, 1.5, 0);
     v2 -> position = vec3(1.5, -1.5, 0);
@@ -508,18 +496,16 @@ void makeNormalStrip(Mesh &mesh){
     v7 -> position = vec3(-0.5, -0.5, 0);
     v8 -> position = vec3(-0.5, 0.5, 0);
 
-    makeRectFace(v1, v5, v6, v2, faceTable, edgeTable);
-    makeRectFace(v3, v2, v6, v7, faceTable, edgeTable);
-    makeRectFace(v4, v3, v7, v8, faceTable, edgeTable);
-    makeRectFace(v1, v4, v8, v5, faceTable, edgeTable);
+    addQuadFaceToMesh(v1, v5, v6, v2, mesh);
+    addQuadFaceToMesh(v3, v2, v6, v7, mesh);
+    addQuadFaceToMesh(v4, v3, v7, v8, mesh);
+    addQuadFaceToMesh(v1, v4, v8, v5, mesh);
 
     buildConnections(mesh);
 }
 
 void makeMobius(Mesh &mesh){
     flushMesh(mesh);
-    unordered_map<uint, Face*> &faceTable = mesh.faceTable;
-    unordered_map<unsigned long long, Halfedge*> &edgeTable = mesh.edgeTable;
     unordered_map<unsigned long, Vertex*> &vertTable = mesh.vertTable;
 
     //make new mesh
@@ -557,30 +543,28 @@ void makeMobius(Mesh &mesh){
     vX -> ID = 9;
 
     //push on all new verts
-    v1 -> addToHashTable(vertTable);
-    v2 -> addToHashTable(vertTable);
-    v3 -> addToHashTable(vertTable);
-    v4 -> addToHashTable(vertTable);
-    v5 -> addToHashTable(vertTable);
-    v6 -> addToHashTable(vertTable);
-    v7 -> addToHashTable(vertTable);
-    v8 -> addToHashTable(vertTable);
-    v9 -> addToHashTable(vertTable);
-    vX -> addToHashTable(vertTable);
+    addVertexToMesh(v1, mesh);
+    addVertexToMesh(v2, mesh);
+    addVertexToMesh(v3, mesh);
+    addVertexToMesh(v4, mesh);
+    addVertexToMesh(v5, mesh);
+    addVertexToMesh(v6, mesh);
+    addVertexToMesh(v7, mesh);
+    addVertexToMesh(v8, mesh);
+    addVertexToMesh(v9, mesh);
+    addVertexToMesh(vX, mesh);
 
-    makeRectFace(v1, v5, vX, v9, faceTable, edgeTable);
-    makeRectFace(vX, v9, v6, v2, faceTable, edgeTable);
-    makeRectFace(v3, v2, v6, v7, faceTable, edgeTable);
-    makeRectFace(v4, v3, v7, v8, faceTable, edgeTable);
-    makeRectFace(v1, v4, v8, v5, faceTable, edgeTable);
+    addQuadFaceToMesh(v1, v5, vX, v9, mesh);
+    addQuadFaceToMesh(vX, v9, v6, v2, mesh);
+    addQuadFaceToMesh(v3, v2, v6, v7, mesh);
+    addQuadFaceToMesh(v4, v3, v7, v8, mesh);
+    addQuadFaceToMesh(v1, v4, v8, v5, mesh);
 
     buildConnections(mesh);
 }
 
 void makeCircleSweep(Mesh &mesh) {
     flushMesh(mesh);
-    unordered_map<uint, Face*> &faceTable = mesh.faceTable;
-    unordered_map<unsigned long long, Halfedge*> &edgeTable = mesh.edgeTable;
     unordered_map<unsigned long, Vertex*> &vertTable = mesh.vertTable;
 
     int loop_test = 0;
@@ -642,14 +626,13 @@ void makeCircleSweep(Mesh &mesh) {
         P3 -> position = v3;
         P4 -> position = v4;
         P1 -> ID = vertTable.size();
-        P1 -> addToHashTable(vertTable);
+        addVertexToMesh(P1, mesh);
         P2 -> ID = vertTable.size();
-        P2 -> addToHashTable(vertTable);
+        addVertexToMesh(P2, mesh);
         P3 -> ID = vertTable.size();
-        P3 -> addToHashTable(vertTable);
+        addVertexToMesh(P3, mesh);
         P4 -> ID = vertTable.size();
-        P4 -> addToHashTable(vertTable);
-
+        addVertexToMesh(P4, mesh);
         crossSection.push_back(P1);
         crossSection.push_back(P2);
         crossSection.push_back(P3);
@@ -662,7 +645,7 @@ void makeCircleSweep(Mesh &mesh) {
             Vertex * v2 = vertices[j + 1][k];
             Vertex * v3 = vertices[j + 1][k + 1];
             Vertex * v4 = vertices[j][k + 1];
-            makeRectFace(v1, v2, v3, v4, faceTable, edgeTable);
+            addQuadFaceToMesh(v1, v2, v3, v4, mesh);
         }
     }
     if(loop_test == 1) { //If it is a loop //allignment test
@@ -672,7 +655,7 @@ void makeCircleSweep(Mesh &mesh) {
             Vertex * v2 = vertices[0][k];
             Vertex * v3 = vertices[0][k + 1];
             Vertex * v4 = vertices[j][k + 1];
-            makeRectFace(v1, v2, v3, v4, faceTable, edgeTable);
+            addQuadFaceToMesh(v1, v2, v3, v4, mesh);
         }        
     }
     if(loop_test == 2) { //If it is a mobius loop
@@ -682,7 +665,7 @@ void makeCircleSweep(Mesh &mesh) {
             Vertex * v2 = vertices[j][3 - k];
             Vertex * v3 = vertices[0][k];
             Vertex * v4 = vertices[0][k + 1];
-            makeRectFace(v1, v2, v3, v4, faceTable, edgeTable);
+            addQuadFaceToMesh(v1, v2, v3, v4, mesh);
         }        
     }
     buildConnections(mesh);
@@ -692,8 +675,6 @@ void makeWithSIF(Mesh &mesh, string inputSIF){
     unordered_map<uint, Face*>::iterator faceIt;
     unordered_map<unsigned long long, Halfedge*>::iterator edgeIt;
     flushMesh(mesh);
-    unordered_map<uint, Face*> &faceTable = mesh.faceTable;
-    unordered_map<unsigned long long, Halfedge*> &edgeTable = mesh.edgeTable;
     unordered_map<unsigned long, Vertex*> &vertTable = mesh.vertTable;
 
     ifstream file(inputSIF);
@@ -746,7 +727,7 @@ void makeWithSIF(Mesh &mesh, string inputSIF){
 
             if(!alreadyAdded) {
                 newVert -> ID = vAfterMergeCounter;
-                newVert -> addToHashTable(vertTable);
+                addVertexToMesh(newVert, mesh);
                 mapBeforeMergeToAfter[vBeforeMergeCounter] = vAfterMergeCounter;
                 vAfterMergeCounter += 1;
             }
@@ -775,24 +756,11 @@ void makeWithSIF(Mesh &mesh, string inputSIF){
             a = mapBeforeMergeToAfter[a];
             b = mapBeforeMergeToAfter[b];
             c = mapBeforeMergeToAfter[c];
-            /*
-            if (it != mergeVertex.end()){
-                a = it -> second;
-            }
-            it = mergeVertex.find(b);
-            if (it != mergeVertex.end()) {
-                b = it -> second;
-            }
-            it = mergeVertex.find(c);
-            if (it != mergeVertex.end()){
-                c = it -> second;
-            }
-            */
             Vertex * va = vertTable[a];
             Vertex * vb = vertTable[b];
             Vertex * vc = vertTable[c];
             //cout<<va -> ID<<" "<<vb -> ID<<" "<<vc -> ID<<endl;
-            makeTriFace(va, vb, vc, faceTable, edgeTable);
+            addTriFaceToMesh(va, vb, vc, mesh);
         } else if(regex_match(nextLine, lRegex)){
             vector<int> oneBoundary;
             string temp;
@@ -834,9 +802,6 @@ void makeWithQuadSIF(Mesh &mesh, string inputSIF){
     unordered_map<unsigned long long, Halfedge*>::iterator edgeIt;
     //Flush the old mesh
     flushMesh(mesh);
-
-    unordered_map<uint, Face*> &faceTable = mesh.faceTable;
-    unordered_map<unsigned long long, Halfedge*> &edgeTable = mesh.edgeTable;
     unordered_map<unsigned long, Vertex*> &vertTable = mesh.vertTable;
 
     ifstream file(inputSIF);
@@ -893,7 +858,7 @@ void makeWithQuadSIF(Mesh &mesh, string inputSIF){
 
             if(!alreadyAdded) {
                 newVert -> ID = vAfterMergeCounter;
-                newVert -> addToHashTable(vertTable);
+                addVertexToMesh(newVert, mesh);
                 mapBeforeMergeToAfter[vBeforeMergeCounter] = vAfterMergeCounter;
                 vAfterMergeCounter += 1;
             }
@@ -931,7 +896,7 @@ void makeWithQuadSIF(Mesh &mesh, string inputSIF){
             } else {
                 vd = vertTable[c];
                 //cout<<vd -> ID<<endl;
-                makeRectFace(va, vb, vc, vd, faceTable, edgeTable);
+                addQuadFaceToMesh(va, vb, vc, vd, mesh);
             }
             tCounter += 1;
         } else if(regex_match(nextLine, lRegex)){

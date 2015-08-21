@@ -26,13 +26,13 @@ public:
     // Key = {Vertex ID}, Value = {pointer to the vertex}
     unordered_map<unsigned long, Vertex*> vertTable;
     // An Hashtable of all halfedges. 
-    // Key = {Edge ID}, Value = {pointer to the edge}
-    unordered_map<unsigned long long, Halfedge*> edgeTable;
-    // An Hashtable of all halfedges. 
     // Key = {Face ID}, Value = {pointer to the face}
-    unordered_map<uint, Face*> faceTable;
+    vector<Face*> faceVect;
     // Transfromation matrix of the object (mesh).
     mat4 object2world;
+    // An Hashtable of all halfedges. 
+    // Key = {Edge ID}, Value = {pointer to the edge}
+    unordered_map<Vertex*, vector<Halfedge*> > boundaryEdgeTable;
     // Constructor.
     Mesh();
 };

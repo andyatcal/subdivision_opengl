@@ -41,11 +41,10 @@
 #include "mesh.h"
 #include "meshUtils.h"
 #include "makeMesh.h"
-#include "subdivision.h"
 #include "viewport.h"
+#include "subdivision.h"
 #include "offset.h"
 #include "stl.h"
-
 
 using namespace std;
 using namespace glm;
@@ -67,7 +66,7 @@ bool lightOn = false;
 //Initial Rotation Angle
 float angle = 0.0; 
 //The distance of camera and orgin.
-float cameraDistance = 80.0;
+float cameraDistance = 4.0;
 // The mesh to subdivide and display.
 Mesh glMesh;
 // Three meshes for offests display.
@@ -108,14 +107,14 @@ void init(int level, string inputSIF);
 void init(int level){
     //makeSquare(glMesh);
     //makeCube(glMesh);
-    //makePyramid(glMesh);
+    makePyramid(glMesh);
     //makeSharpOctahedron(glMesh);
     //makeOctahedron(glMesh);
     //makeOpenCube(glMesh);
     //makeRing(glMesh);
     //makeSharpCube(glMesh);
     //makeNormalStrip(glMesh);
-    makeMobius(glMesh);
+    //makeMobius(glMesh);
     //makeHild(glMesh);
     //makeCircleSweep(glMesh);
     //cout<< glMesh.faceTable.size()<<" "<<glMesh.edgeVect.size()<<" "<<glMesh.vertVect.size();
@@ -132,12 +131,14 @@ void init(int level){
     meshes.push_back(glPosMesh);
     meshes.push_back(glNegMesh);
     meshes.push_back(glSideMesh);
+    
     STL stl;
     stl.STLOutput(meshes, "debug/STL/Example.stl");
     */
 }
 
 void init(int level, string inputSIF){
+
     //makeWithSIF(glMesh, inputSIF);
     makeWithQuadSIF(glMesh, inputSIF);
     //cout<<glMesh.faceVect.size()<<" "<< glMesh.vertVect.size()<<endl;
@@ -163,12 +164,14 @@ void init(int level, string inputSIF){
         meshes.push_back(glNegMesh);
         meshes.push_back(glSideMesh);
     }
-    
+
     STL stl;
     stl.STLOutput(meshes, "debug/STL/Example.stl");
-    
+
     //cout<< glMesh.faceVect.size()<<" "<<glMesh.edgeVect.size()<<" "<<glMesh.vertVect.size();
+
 }
+
 //************************************************************
 //          Arcball Functions
 //************************************************************
@@ -286,9 +289,9 @@ void render(void) {
 
     glMultMatrixf(&glMesh.object2world[0][0]);
 /*
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, RED);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, YELLOW);
     drawMesh(glMesh);
-
+*/
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, GREEN);
     drawMesh(glPosMesh);
     
@@ -297,7 +300,6 @@ void render(void) {
 
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, CYAN);
     drawMesh(glSideMesh);
-*/
 
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, BLUE);
     drawMesh(glOffMesh);
@@ -368,7 +370,7 @@ void keyboard(unsigned char key, int x, int y) {
         }
     }
     if (key == 'o') {
-        if(cameraDistance < 200) {
+        if(cameraDistance < 20) {
             cameraDistance += 0.1;
         }
     }
@@ -405,6 +407,7 @@ void onMotion(int x, int y){
 //************************************************************
 
 int main(int argc, char** argv) {
+
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
     viewport.width = 640;
@@ -424,6 +427,7 @@ int main(int argc, char** argv) {
         inputSIF = argv[2];
         init(level, inputSIF);
     }
+
     glutInitWindowSize(viewport.width, viewport.height);
     glutInitWindowPosition(100, 100);
     glutCreateWindow(argv[0]);
@@ -439,5 +443,6 @@ int main(int argc, char** argv) {
     glutMotionFunc(onMotion);
 
     glutMainLoop();
+
 }
 
