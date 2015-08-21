@@ -67,7 +67,7 @@ bool lightOn = false;
 //Initial Rotation Angle
 float angle = 0.0; 
 //The distance of camera and orgin.
-float cameraDistance = 4.0;
+float cameraDistance = 80.0;
 // The mesh to subdivide and display.
 Mesh glMesh;
 // Three meshes for offests display.
@@ -151,7 +151,7 @@ void init(int level, string inputSIF){
         offset.makeFullOffset();
         glOffMesh = offset.offsetMesh;
         Subdivision myOffCC(glOffMesh);
-        glOffMesh = myOffCC.ccSubdivision(0);
+        glOffMesh = myOffCC.ccSubdivision(1);
         computeNormals(glOffMesh);
         meshes.push_back(glOffMesh);
     } else {
@@ -163,10 +163,10 @@ void init(int level, string inputSIF){
         meshes.push_back(glNegMesh);
         meshes.push_back(glSideMesh);
     }
-    /*
+    
     STL stl;
     stl.STLOutput(meshes, "debug/STL/Example.stl");
-    */
+    
     //cout<< glMesh.faceVect.size()<<" "<<glMesh.edgeVect.size()<<" "<<glMesh.vertVect.size();
 }
 //************************************************************
@@ -368,7 +368,7 @@ void keyboard(unsigned char key, int x, int y) {
         }
     }
     if (key == 'o') {
-        if(cameraDistance < 20) {
+        if(cameraDistance < 200) {
             cameraDistance += 0.1;
         }
     }

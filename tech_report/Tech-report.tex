@@ -29,9 +29,9 @@ For the last two decades, Berkeley SLIDE (Scene Language for Interactive Dynamic
 
 The existing SLIDE code also has some technical shortcomings.  It cannot provide smooth subdivision and offset surface generation for non-orientable 2-manifolds such as Möbius bands.  This report describes the development of a new geometry kernel that fixes these problems.
 
-This new kernel works on the subidvivion of 2-manifolds (i.e., thin surfaces with borders), because many abstract geometrical sculptures have the shape of a (thickened) 2D surface embedded in 3D space [Reference: 2-manifold sculpture]. According to Surface Classification Theorem [ref], All 2-manifolds can be uniquely classified by their topology characteristics, includingorientability (double-sided or single-sided), by the number b of their borders (loops of 1-dimensional rim lines), and their genus g (the number of independent closed loop cuts that can be made on such a surface, leaving all its pieces still connected to one another) [ref]. 
+This new kernel works on the subidvivion of 2-manifolds (i.e., thin surfaces with borders), because many abstract geometrical sculptures have the shape of a (thickened) 2D surface embedded in 3D space [Reference: 2-manifold sculpture]. According to Surface Classification Theorem [ref], All 2-manifolds can be uniquely classified by their topology characteristics, including orientability (double-sided or single-sided), the number b of their borders (loops of 1-dimensional rim lines), and their genus g (the number of independent closed loop cuts that can be made on such a surface, leaving all its pieces still connected to one another) [ref]. 
 
-Catmull-Clark subivision, regradless of topology of the 2-manifold, can 
+Regradless of its topology characteristics, 2-manifold surface can be approximated by the Catmull-Clark subdivision of 
 
 The input and output of this kernel is mesh made of polygon faces. 
 
