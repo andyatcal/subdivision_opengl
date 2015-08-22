@@ -373,12 +373,12 @@ void keyboard(unsigned char key, int x, int y) {
     }
     if (key == 'i') {
         if(cameraDistance > 0.1) {
-            cameraDistance -= 0.1;
+            cameraDistance *= 0.5;
         }
     }
     if (key == 'o') {
-        if(cameraDistance < 20) {
-            cameraDistance += 0.1;
+        if(cameraDistance < 200) {
+            cameraDistance *= 1.1;
         }
     }
     glutPostRedisplay();
