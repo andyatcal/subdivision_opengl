@@ -59,7 +59,8 @@ Subdivision::Subdivision(Mesh & mesh){
 
 void Subdivision::makeFacePoints(vector<Face*> &faceVect,
  unordered_map<unsigned long, Vertex*> &vertTable){
-    unsigned long currID = vertTable.size();
+    unsigned long currID = vertTable.size() + 1000;
+    // Assume the maximum pair of vertices merged before subdivision is 1000.
     vector<Face*>::iterator fIt;
     for(fIt = faceVect.begin(); fIt < faceVect.end(); fIt++){
         // Facepoint is the average of vertices in this face
@@ -89,7 +90,8 @@ void Subdivision::makeFacePoints(vector<Face*> &faceVect,
 
 void Subdivision::makeEdgePoints(vector<Face*> &faceVect,
  unordered_map<unsigned long, Vertex*> &vertTable) {
-    unsigned long currID = vertTable.size();
+    unsigned long currID = vertTable.size() + 1000;
+    // Assume the maximum pair of vertices merged before subdivision is 1000.
     vector<Face*>::iterator fIt;
     for(fIt = faceVect.begin(); fIt < faceVect.end(); fIt++){
         Face * currFace = (*fIt);
@@ -161,7 +163,8 @@ void Subdivision::makeVertexPointsC(unordered_map<unsigned long, Vertex*> &vertT
         int fn = 0;
         do {
             //cout<<"here"<<endl<<nextOutEdge -> end -> ID<<endl;
-            newEdgePointAvgPoistion += (nextOutEdge -> start -> position + nextOutEdge -> end -> position) / 2.0f;
+            newEdgePointAvgPoistion += (nextOutEdge -> start
+             -> position + nextOutEdge -> end -> position) / 2.0f;
             newFacePointAvgPosition += nextOutEdge -> heFace -> facePoint -> position;
             en += 1;
             fn += 1;
@@ -178,7 +181,8 @@ void Subdivision::makeVertexPointsC(unordered_map<unsigned long, Vertex*> &vertT
                     sharpEdgeCounter += 1;
                     if(!(currVert -> onMobiusSibling)) { // It is on a normal boundary!
                         //cout<<"A11"<<endl;
-                        newEdgePointAvgPoistion += (nextOutEdge -> previousBoundary -> start -> position + nextOutEdge -> previousBoundary -> end -> position)/2.0f;
+                        newEdgePointAvgPoistion += (nextOutEdge -> previousBoundary
+                         -> start -> position + nextOutEdge -> previousBoundary -> end -> position)/2.0f;
                         en += 1;
                         if(sharpEdgeCounter == 1) {
                             sharpEdgeI = nextOutEdge -> previousBoundary;
@@ -194,7 +198,8 @@ void Subdivision::makeVertexPointsC(unordered_map<unsigned long, Vertex*> &vertT
                         //cout<<"A12"<<endl;
                         mobiusCounter += 1;
 
-                        newEdgePointAvgPoistion += (nextOutEdge -> mobiusBoundary -> start -> position + nextOutEdge -> mobiusBoundary -> end -> position)/2.0f;
+                        newEdgePointAvgPoistion += (nextOutEdge -> mobiusBoundary
+                         -> start -> position + nextOutEdge -> mobiusBoundary -> end -> position)/2.0f;
                         en += 1;
                         if(sharpEdgeCounter == 1) {
                             sharpEdgeI = nextOutEdge -> mobiusBoundary;
@@ -389,7 +394,7 @@ void Subdivision::makeVertexPointsD(unordered_map<unsigned long, Vertex*> &vertT
                     }
                 }
             }
-        } while ( nextOutEdge != firstOutEdge); // Need to check if we can go back to the first when there are borders;
+        } while ( nextOutEdge != firstOutEdge);
         if(sharpEdgeCounter <= 1) {
             newFacePointAvgPosition /= fn;
             newEdgePointAvgPoistion /= en;
@@ -411,10 +416,12 @@ void Subdivision::makeVertexPointsD(unordered_map<unsigned long, Vertex*> &vertT
             } else {
                 pointK = sharpEdgeK -> end;
             }
-            currVert -> position = (pointI -> copy + pointK -> copy + 6.0f * currVert -> copy) / 8.0f;
+            currVert -> position = (pointI -> copy
+             + pointK -> copy + 6.0f * currVert -> copy) / 8.0f;
             //cout<<"this is a crease vertex!"<<currVert -> position<<endl;
         } else {
-            currVert -> position = currVert -> position; // Nothing happens when sharp edges is more than 3.
+            // Nothing happens when sharp edges is more than 3.
+            currVert -> position = currVert -> position; 
             //cout<<"this is a conner vertex!"<<currVert -> position<<endl;
         }
     }
@@ -452,15 +459,18 @@ void Subdivision::compileNewMesh(vector<Face*> &faceVect, vector<Face*> &newFace
                 if(currEdge -> sibling == NULL && currEdge -> mobiusSibling == NULL) {//It is on boundary!
                     edgeB -> previousBoundary = edgeA;
                     edgeA -> nextBoundary = edgeB;
-                    if(currEdge -> previousBoundary != NULL && currEdge -> previousBoundary -> secondHalf != NULL) {
+                    if(currEdge -> previousBoundary != NULL
+                     && currEdge -> previousBoundary -> secondHalf != NULL) {
                         currEdge -> previousBoundary -> secondHalf -> nextBoundary = edgeA;
                         edgeA -> previousBoundary = currEdge -> previousBoundary -> secondHalf;
                     }
-                    if(currEdge -> nextBoundary != NULL && currEdge -> nextBoundary -> firstHalf != NULL) {
+                    if(currEdge -> nextBoundary != NULL
+                     && currEdge -> nextBoundary -> firstHalf != NULL) {
                         currEdge -> nextBoundary -> firstHalf -> previousBoundary = edgeB;
                         edgeB -> nextBoundary = currEdge -> nextBoundary -> firstHalf;
                     }
-                    if(currEdge -> mobiusBoundary != NULL && currEdge -> mobiusBoundary -> firstHalf != NULL) {
+                    if(currEdge -> mobiusBoundary != NULL
+                     && currEdge -> mobiusBoundary -> firstHalf != NULL) {
                         if(currEdge -> start == currEdge -> mobiusBoundary -> start) { // They share the same start.
                             edgeA -> mobiusBoundary = currEdge -> mobiusBoundary -> firstHalf;
                             currEdge -> mobiusBoundary -> firstHalf -> mobiusBoundary = edgeA;
@@ -477,7 +487,8 @@ void Subdivision::compileNewMesh(vector<Face*> &faceVect, vector<Face*> &newFace
 
                 currEdge -> sibling -> firstHalf -> sibling = edgeB;
                 currEdge -> sibling -> secondHalf -> sibling = edgeA;
-            }  else if(currEdge -> mobiusSibling != NULL && currEdge -> mobiusSibling -> firstHalf != NULL) {
+            }  else if(currEdge -> mobiusSibling != NULL
+             && currEdge -> mobiusSibling -> firstHalf != NULL) {
                 edgeA -> mobiusSibling = currEdge -> mobiusSibling -> firstHalf;
                 edgeB -> mobiusSibling = currEdge -> mobiusSibling -> secondHalf;
 

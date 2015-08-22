@@ -671,9 +671,9 @@ void makeCircleSweep(Mesh &mesh) {
     buildConnections(mesh);
 }
 
+
 void makeWithSIF(Mesh &mesh, string inputSIF){
     unordered_map<uint, Face*>::iterator faceIt;
-    unordered_map<unsigned long long, Halfedge*>::iterator edgeIt;
     flushMesh(mesh);
     unordered_map<unsigned long, Vertex*> &vertTable = mesh.vertTable;
 
@@ -745,7 +745,8 @@ void makeWithSIF(Mesh &mesh, string inputSIF){
             if(shellNum > 0) {
                 vector<int>::iterator vertNumIt;
                 IDplusBecauseOfShells = 0;
-                for(vertNumIt = numberOfVerticesInShells.begin(); vertNumIt < numberOfVerticesInShells.end() - 1; vertNumIt ++) {
+                for(vertNumIt = numberOfVerticesInShells.begin();
+                 vertNumIt < numberOfVerticesInShells.end() - 1; vertNumIt ++) {
                     IDplusBecauseOfShells += *vertNumIt;
                 }
             }
@@ -768,11 +769,13 @@ void makeWithSIF(Mesh &mesh, string inputSIF){
             if(shellNum > 1) {
                 vector<int>::iterator vertNumIt;
                 IDplusBecauseOfShells = 0;
-                for(vertNumIt = numberOfVerticesInShells.begin(); vertNumIt < numberOfVerticesInShells.end(); vertNumIt ++) {
+                for(vertNumIt = numberOfVerticesInShells.begin();
+                 vertNumIt < numberOfVerticesInShells.end(); vertNumIt ++) {
                     IDplusBecauseOfShells += *vertNumIt;
                 }
             }
-            temp = nextLine.substr(nextLine.find("\("), nextLine.find("\)") - nextLine.find("\("));
+            temp = nextLine.substr(nextLine.find("\("),
+             nextLine.find("\)") - nextLine.find("\("));
             //cout<<temp<<endl;
             temp = temp.substr(temp.find(" ") + 1);
             while(temp.find(" ") != string::npos){
@@ -788,7 +791,8 @@ void makeWithSIF(Mesh &mesh, string inputSIF){
             shellNum += 1;
         } else if(regex_match(nextLine, verticesRegex)){
             string temp;
-            temp = nextLine.substr(nextLine.find("\("), nextLine.find("\)") - nextLine.find("\("));
+            temp = nextLine.substr(nextLine.find("\("),
+             nextLine.find("\)") - nextLine.find("\("));
             temp = temp.substr(temp.find(" ") + 1);
             int numberOfVerticesInThisShell = stoi(temp);
             numberOfVerticesInShells.push_back(numberOfVerticesInThisShell);
@@ -797,13 +801,12 @@ void makeWithSIF(Mesh &mesh, string inputSIF){
     buildConnections(mesh);
 }
 
+
 void makeWithQuadSIF(Mesh &mesh, string inputSIF){
+    unordered_map<unsigned long, Vertex*> &vertTable = mesh.vertTable;
     unordered_map<uint, Face*>::iterator faceIt;
-    unordered_map<unsigned long long, Halfedge*>::iterator edgeIt;
     //Flush the old mesh
     flushMesh(mesh);
-    unordered_map<unsigned long, Vertex*> &vertTable = mesh.vertTable;
-
     ifstream file(inputSIF);
     if (!file.good()) {
         exit(1); // exit if file not found
@@ -815,11 +818,8 @@ void makeWithQuadSIF(Mesh &mesh, string inputSIF){
     regex lRegex(".*\(loop .*\).*");
     regex shRegex(".*\\(shell.*\).*");
     regex verticesRegex(".*\\(vertices .*\).*");
-    int vBeforeMergeCounter = 0;
-    int vAfterMergeCounter = 0;
+    int vCounter = 0;
     int IDplusBecauseOfShells = 0;
-    vector<vector<int> > boundaries;
-    unordered_map<int, int> mapBeforeMergeToAfter;
     int shellNum = 0;
     vector<int> numberOfVerticesInShells;
     int tCounter = 0;
@@ -831,7 +831,8 @@ void makeWithQuadSIF(Mesh &mesh, string inputSIF){
         nextLine.pop_back();
         if(regex_match(nextLine, vRegex)){
             string temp;
-            temp = nextLine.substr(nextLine.find("\("), nextLine.find("\)") - nextLine.find("\("));
+            temp = nextLine.substr(nextLine.find("\("),
+             nextLine.find("\)") - nextLine.find("\("));
             temp = temp.substr(temp.find(" ") + 1);
             float x = stof(temp.substr(0, temp.find(" ")));
             temp = temp.substr(temp.find(" ") + 1);
@@ -840,32 +841,13 @@ void makeWithQuadSIF(Mesh &mesh, string inputSIF){
             float z = stof(temp);
             Vertex * newVert = new Vertex;
             newVert -> position = vec3(x, y, z) * 16.0f; // Can be modifed here to zoom in.
-            newVert -> ID = vAfterMergeCounter;
-            unordered_map<unsigned long, Vertex*>::iterator vIt;
-            bool alreadyAdded = false;
-            for (vIt = vertTable.begin(); vIt != vertTable.end(); vIt ++) {
-                if(distance(newVert -> position, vIt -> second -> position) < 0.001 ){
-                    //cout << "The distance between vertex "<<newVert -> ID<<" and vertex "<<vIt -> second -> ID<<" is: "<<endl;
-                    //cout << newVert -> position - (*vIt) -> position<<endl;
-                    alreadyAdded = true;
-                    mapBeforeMergeToAfter[vBeforeMergeCounter] = vIt -> second -> ID;
-                    break;
-                }
-            }
-            //cout<<newVert -> ID<<"Vertex added"<<endl;
-            //cout<<"I am mapping "<<vBeforeMergeCounter<<" to "<<vAfterMergeCounter<<endl;
-            //mapBeforeMergeToAfter[vBeforeMergeCounter] = vAfterMergeCounter;
-
-            if(!alreadyAdded) {
-                newVert -> ID = vAfterMergeCounter;
-                addVertexToMesh(newVert, mesh);
-                mapBeforeMergeToAfter[vBeforeMergeCounter] = vAfterMergeCounter;
-                vAfterMergeCounter += 1;
-            }
-            vBeforeMergeCounter += 1;
+            newVert -> ID = vCounter;
+            addVertexToMesh(newVert, mesh);
+            vCounter += 1;
         } else if(regex_match(nextLine, tRegex)){
             string temp;
-            temp = nextLine.substr(nextLine.find("\("), nextLine.find("\)") - nextLine.find("\("));
+            temp = nextLine.substr(nextLine.find("\("),
+             nextLine.find("\)") - nextLine.find("\("));
             //cout<<temp<<endl;
             temp = temp.substr(temp.find(" ") + 1);
             int a = stoi(temp.substr(0, temp.find(" ")));
@@ -876,63 +858,36 @@ void makeWithQuadSIF(Mesh &mesh, string inputSIF){
             if(shellNum > 0) {
                 vector<int>::iterator vertNumIt;
                 IDplusBecauseOfShells = 0;
-                for(vertNumIt = numberOfVerticesInShells.begin(); vertNumIt < numberOfVerticesInShells.end() - 1; vertNumIt ++) {
+                for(vertNumIt = numberOfVerticesInShells.begin();
+                 vertNumIt < numberOfVerticesInShells.end() - 1; vertNumIt ++) {
                     IDplusBecauseOfShells += *vertNumIt;
                 }
             }
             a += IDplusBecauseOfShells;
             b += IDplusBecauseOfShells;
             c += IDplusBecauseOfShells;
-            //cout<<"a: "<< a <<" b: "<<b<<" c: "<<c<<endl;
-            a = mapBeforeMergeToAfter[a];
-            b = mapBeforeMergeToAfter[b];
-            c = mapBeforeMergeToAfter[c];
-            //cout<<"tCounter: "<<tCounter<<endl;
             if(tCounter % 2 == 0) {
                 va = vertTable[a];
                 vb = vertTable[b];
                 vc = vertTable[c];
-                //cout<<va -> ID<<" "<<vb -> ID<<" "<<vc -> ID<<endl;
             } else {
                 vd = vertTable[c];
-                //cout<<vd -> ID<<endl;
                 addQuadFaceToMesh(va, vb, vc, vd, mesh);
             }
             tCounter += 1;
-        } else if(regex_match(nextLine, lRegex)){
-            vector<int> oneBoundary;
-            string temp;
-            int nextVert;
-            if(shellNum > 1) {
-                vector<int>::iterator vertNumIt;
-                IDplusBecauseOfShells = 0;
-                for(vertNumIt = numberOfVerticesInShells.begin(); vertNumIt < numberOfVerticesInShells.end(); vertNumIt ++) {
-                    IDplusBecauseOfShells += *vertNumIt;
-                }
-            }
-            temp = nextLine.substr(nextLine.find("\("), nextLine.find("\)") - nextLine.find("\("));
-            //cout<<temp<<endl;
-            temp = temp.substr(temp.find(" ") + 1);
-            while(temp.find(" ") != string::npos){
-                nextVert = stoi(temp.substr(0, temp.find(" ")));
-                oneBoundary.push_back(nextVert + IDplusBecauseOfShells);
-                temp = temp.substr(temp.find(" ") + 1);
-            }
-            nextVert = stoi(temp);
-            oneBoundary.push_back(nextVert + IDplusBecauseOfShells);
-            boundaries.push_back(oneBoundary);
-            //cout<<oneBoundary.size()<<endl;          
         } else if(regex_match(nextLine, shRegex)) {
             shellNum += 1;
         } else if(regex_match(nextLine, verticesRegex)){
             string temp;
-            temp = nextLine.substr(nextLine.find("\("), nextLine.find("\)") - nextLine.find("\("));
+            temp = nextLine.substr(nextLine.find("\("),
+             nextLine.find("\)") - nextLine.find("\("));
             temp = temp.substr(temp.find(" ") + 1);
             int numberOfVerticesInThisShell = stoi(temp);
             numberOfVerticesInShells.push_back(numberOfVerticesInThisShell);
         }
     }
+    mergeSelfBoundary(mesh);
     buildConnections(mesh);
+    //cout<<"Finish boundary!"<<endl;
 }
-
 #endif // __MAKEMESH_H__

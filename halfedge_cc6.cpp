@@ -107,34 +107,41 @@ void init(int level, string inputSIF);
 void init(int level){
     //makeSquare(glMesh);
     //makeCube(glMesh);
-    makePyramid(glMesh);
+    //makePyramid(glMesh);
     //makeSharpOctahedron(glMesh);
     //makeOctahedron(glMesh);
     //makeOpenCube(glMesh);
     //makeRing(glMesh);
     //makeSharpCube(glMesh);
     //makeNormalStrip(glMesh);
-    //makeMobius(glMesh);
+    makeMobius(glMesh);
     //makeHild(glMesh);
     //makeCircleSweep(glMesh);
     //cout<< glMesh.faceTable.size()<<" "<<glMesh.edgeVect.size()<<" "<<glMesh.vertVect.size();
     Subdivision myCC(glMesh);
     glMesh = myCC.ccSubdivision(level);
     computeNormals(glMesh);
-    /*
-    Offset offset(glMesh, 0.2);
-    glPosMesh = offset.posOffsetMesh;
-    glNegMesh = offset.negOffsetMesh;
-    glSideMesh = offset.sideOffsetMesh;
+    Offset offset(glMesh, 0.1);
     vector<Mesh> meshes;
-    meshes.push_back(glMesh);
-    meshes.push_back(glPosMesh);
-    meshes.push_back(glNegMesh);
-    meshes.push_back(glSideMesh);
-    
+    bool full = true;
+    if(full) {
+        offset.makeFullOffset();
+        glOffMesh = offset.offsetMesh;
+        Subdivision myOffCC(glOffMesh);
+        glOffMesh = myOffCC.ccSubdivision(1);
+        computeNormals(glOffMesh);
+        meshes.push_back(glOffMesh);
+    } else {
+        offset.makeSeperateOffset();
+        glPosMesh = offset.posOffsetMesh;
+        glNegMesh = offset.negOffsetMesh;
+        glSideMesh = offset.sideOffsetMesh;
+        meshes.push_back(glPosMesh);
+        meshes.push_back(glNegMesh);
+        meshes.push_back(glSideMesh);
+    }
     STL stl;
     stl.STLOutput(meshes, "debug/STL/Example.stl");
-    */
 }
 
 void init(int level, string inputSIF){

@@ -389,12 +389,13 @@ void computeNormals(Mesh & mesh){
     unordered_map<unsigned long, Vertex*>::iterator vIt;
     vector<Face*> & faceVect = mesh.faceVect;
     vector<Face*>::iterator fIt;
-    //cout<<"faceTable size: "<<faceTable.size()<<endl;
+    //cout<<"faceTable size: "<<faceVect.size()<<endl;
     for(fIt = faceVect.begin(); fIt < faceVect.end(); fIt++){
         getFaceNormal(*fIt);
     }
-    //cout<<"the vertTable size is"<<vertTable.size()<<endl;
+    //cout<<"the vertTable size is "<<vertTable.size()<<endl;
     for(vIt = vertTable.begin(); vIt != vertTable.end(); vIt++){
+        //cout<<"Now calculating vertex with ID: "<< vIt -> first <<endl;
         getVertexNormal(vIt -> second);
     }
 }
@@ -446,4 +447,210 @@ void drawMesh(Mesh & mesh) {
         glEnd();
     }
 }
+// merge edge 2 to edeg 1
+void mergeEdges(Halfedge * edge1, Halfedge * edge2, bool reverse = false) {
+    if(!reverse) {
+        edge2 -> start = edge1 -> start;
+        edge2 -> end = edge1 -> end;
+        edge2 -> previous -> end = edge1 -> start;
+        edge2 -> next -> start = edge1 -> end;
+        edge1 -> start -> onMobiusSibling = true;
+        edge1 -> end -> onMobiusSibling = true;
+    } else {
+        edge2 -> start = edge1 -> end;
+        edge2 -> end = edge1 -> start;
+        edge2 -> previous -> end = edge1 -> end;
+        edge2 -> next -> start = edge1 -> start;
+    }
+}
+
+// merge a sequnce of coinciding vertices on the boundary.
+void mergeSelfBoundary(Mesh &mesh) {
+    unordered_map<Vertex*, vector<Halfedge*> > &boundaryEdgeTable = mesh.boundaryEdgeTable;
+    unordered_map<Vertex*, vector<Halfedge*> >::iterator evIt;
+    vector<Halfedge*> boundaryEdgeVect;
+    vector<Halfedge*>::iterator eIt;
+    for(evIt = boundaryEdgeTable.begin(); evIt != boundaryEdgeTable.end(); evIt++) {
+        vector<Halfedge*> boundaryAtVertex = evIt -> second;
+        for(eIt = boundaryAtVertex.begin(); eIt < boundaryAtVertex.end(); eIt++) {
+            boundaryEdgeVect.push_back(*eIt);
+        }
+    }
+    vector<Halfedge*>::iterator eIt1;
+    vector<Halfedge*>::iterator eIt2;
+    unordered_map<Vertex *, Vertex *> replaceMap;
+    unordered_map<Vertex *, Vertex *>::iterator rpIt;
+    replaceMap.clear();
+    for(eIt1 = boundaryEdgeVect.begin(); eIt1 < boundaryEdgeVect.end(); eIt1++) {
+        Halfedge * edge1 = (*eIt1);
+        for(eIt2 = eIt1 + 1; eIt2 < boundaryEdgeVect.end(); eIt2++) {
+            Halfedge * edge2 = (*eIt2);
+            if(distance(edge1 -> start -> position, edge2 -> start -> position) < 0.0001
+             && distance(edge1 -> end -> position, edge2 -> end -> position) < 0.0001) {
+                evIt = boundaryEdgeTable.find(edge1 -> start);
+                vector<Halfedge*> & boundaryAtVertexA = evIt -> second;
+                for(eIt = boundaryAtVertexA.begin(); eIt < boundaryAtVertexA.end(); eIt++) {
+                    if((*eIt) == edge1) {
+                        boundaryAtVertexA.erase(eIt);
+                        break;
+                    }
+                }
+                evIt = boundaryEdgeTable.find(edge2 -> start);
+                vector<Halfedge*> & boundaryAtVertexB = evIt -> second;
+                for(eIt = boundaryAtVertexB.begin(); eIt < boundaryAtVertexB.end(); eIt++) {
+                    if((*eIt) == edge2) {
+                        boundaryAtVertexB.erase(eIt);
+                        break;
+                    }
+                }
+                edge2 -> mobiusSibling = edge1;
+                edge1 -> mobiusSibling = edge2;
+                rpIt = replaceMap.find(edge1 -> start);
+                if(rpIt != replaceMap.end()) {
+                    if(rpIt -> second != edge2 -> start) {
+                        cout<<"Error: Non manifold point found. Vertex ID: "
+                        << edge1 -> start -> ID<<" .";
+                        exit(0);
+                    } else {
+                        replaceMap[edge1 -> end] = edge2 -> end;
+                        mergeEdges(edge2, edge1);
+                        break;
+                    }
+                }
+                rpIt = replaceMap.find(edge1 -> end);
+                if(rpIt != replaceMap.end()) {
+                    if(rpIt -> second != edge2 -> end) {
+                        cout<<"Error: Non manifold point found. Vertex ID: "
+                        << edge1 -> start -> ID<<" .";
+                        exit(0);
+                    } else {
+                        replaceMap[edge1 -> start] = edge2 -> start;
+                        mergeEdges(edge2, edge1);
+                        break;
+                    }
+                }
+                rpIt = replaceMap.find(edge2 -> start);
+                if(rpIt != replaceMap.end()) {
+                    if(rpIt -> second != edge1 -> start) {
+                        cout<<"Error: Non manifold point found. Vertex ID: "
+                        << edge1 -> start -> ID<<" .";
+                        exit(0);
+                    } else {
+                        replaceMap[edge2 -> end] = edge1 -> end;
+                        mergeEdges(edge1, edge2);
+                        break;
+                    }
+                }
+                rpIt = replaceMap.find(edge2 -> end);
+                if(rpIt != replaceMap.end()) {
+                    if(rpIt -> second != edge1 -> end) {
+                        cout<<"Error: Non manifold point found. Vertex ID: "
+                        << edge1 -> start -> ID<<" .";
+                        exit(0);
+                    } else {
+                        replaceMap[edge2 -> start] = edge1 -> start;
+                        mergeEdges(edge1, edge2);
+                        break;
+                    }
+                }
+                if(edge1 -> start -> ID + edge1 -> end -> ID <
+                 edge2 -> start -> ID + edge2 -> end -> ID) {
+                    replaceMap[edge2 -> start] = edge1 -> start;
+                    replaceMap[edge2 -> end] = edge1 -> end;
+                    mergeEdges(edge1, edge2);
+                } else {
+                    replaceMap[edge1 -> start] = edge2 -> start;
+                    replaceMap[edge1 -> end] = edge2 -> end;
+                    mergeEdges(edge2, edge1);
+                }
+            } else if(distance(edge1 -> start -> position, edge2 -> end -> position) < 0.0001
+             && distance(edge1 -> end -> position, edge2 -> start -> position) < 0.0001) {
+                evIt = boundaryEdgeTable.find(edge1 -> start);
+                vector<Halfedge*> & boundaryAtVertexA = evIt -> second;
+                for(eIt = boundaryAtVertexA.begin(); eIt < boundaryAtVertexA.end(); eIt++) {
+                    if((*eIt) == edge1) {
+                        boundaryAtVertexA.erase(eIt);
+                        break;
+                    }
+                }
+                evIt = boundaryEdgeTable.find(edge2 -> start);
+                vector<Halfedge*> & boundaryAtVertexB = evIt -> second;
+                for(eIt = boundaryAtVertexB.begin(); eIt < boundaryAtVertexB.end(); eIt++) {
+                    if((*eIt) == edge2) {
+                        boundaryAtVertexB.erase(eIt);
+                        break;
+                    }
+                }
+                edge2 -> sibling = edge1;
+                edge1 -> sibling = edge2;
+                rpIt = replaceMap.find(edge1 -> start);
+                if(rpIt != replaceMap.end()) {
+                    if(rpIt -> second != edge2 -> end) {
+                        cout<<"Error: Non manifold point found. Vertex ID: "
+                        << edge1 -> start -> ID<<" .";
+                        exit(0);
+                    } else {
+                        replaceMap[edge1 -> end] = edge2 -> start;
+                        mergeEdges(edge2, edge1, true);
+                        break;
+                    }
+                }
+                rpIt = replaceMap.find(edge1 -> end);
+                if(rpIt != replaceMap.end()) {
+                    if(rpIt -> second != edge2 -> start) {
+                        cout<<"Error: Non manifold point found. Vertex ID: "
+                        << edge1 -> start -> ID<<" .";
+                        exit(0);
+                    } else {
+                        replaceMap[edge1 -> start] = edge2 -> end;
+                        mergeEdges(edge2, edge1, true);
+                        break;
+                    }
+                }
+                rpIt = replaceMap.find(edge2 -> start);
+                if(rpIt != replaceMap.end()) {
+                    if(rpIt -> second != edge1 -> end) {
+                        cout<<"Error: Non manifold point found. Vertex ID: "
+                        << edge1 -> start -> ID<<" .";
+                        exit(0);
+                    } else {
+                        replaceMap[edge2 -> end] = edge1 -> start;
+                        mergeEdges(edge1, edge2, true);
+                        break;
+                    }
+                }
+                rpIt = replaceMap.find(edge2 -> end);
+                if(rpIt != replaceMap.end()) {
+                    if(rpIt -> second != edge1 -> start) {
+                        cout<<"Error: Non manifold point found. Vertex ID: "
+                        << edge1 -> start -> ID<<" .";
+                        exit(0);
+                    } else {
+                        replaceMap[edge2 -> start] = edge1 -> end;
+                        mergeEdges(edge1, edge2, true);
+                        break;
+                    }
+                }
+                if(edge1 -> start -> ID + edge1 -> end -> ID <
+                 edge2 -> start -> ID + edge2 -> end -> ID) {
+                    replaceMap[edge2 -> start] = edge1 -> end;
+                    replaceMap[edge2 -> end] = edge1 -> start;
+                    mergeEdges(edge1, edge2, true);
+                } else {
+                    replaceMap[edge1 -> start] = edge2 -> end;
+                    replaceMap[edge1 -> end] = edge2 -> start;
+                    mergeEdges(edge2, edge1, true);
+                }
+            }
+        }
+
+    }
+    //Erase the merged vertices in vertable.
+    for(rpIt = replaceMap.begin(); rpIt != replaceMap.end(); rpIt++) {
+        //cout<<"size of vertable before erase: "<<mesh.vertTable.size()<<endl;
+        mesh.vertTable.erase(rpIt -> first -> ID);
+        //cout<<"size of vertable after erase: "<<mesh.vertTable.size()<<endl;
+    }
+}
+
 #endif // __MESHUTILS_H__
