@@ -373,7 +373,7 @@ void keyboard(unsigned char key, int x, int y) {
     }
     if (key == 'i') {
         if(cameraDistance > 0.1) {
-            cameraDistance *= 0.5;
+            cameraDistance *= 0.9;
         }
     }
     if (key == 'o') {
