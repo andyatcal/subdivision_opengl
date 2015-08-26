@@ -1,89 +1,99 @@
 \relax 
-\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{4}}
-\@writefile{toc}{\contentsline {section}{\numberline {2}Halfedge Data Structure}{6}}
-\newlabel{sec:halfedge}{{2}{6}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Vertex, Halfedge, and Face}{6}}
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces A quadrilateral face made with four halfedges}}{6}}
-\newlabel{figure:singleFace}{{1}{6}}
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Definitions and assumptions of vertex, halfedge, and face}}{7}}
-\newlabel{table:vhfdef}{{1}{7}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Mesh}{7}}
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Definitions and assumptions of vertex, halfedge, and face}}{8}}
-\newlabel{table:vhfInfo}{{2}{8}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.1}Halfedge Flow in a Single Face}{8}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.2}Face Connections and Sibling Links}{8}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Pointers of halfedges in a single face}}{9}}
-\newlabel{figure:aFacePointers}{{2}{9}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.3}Boundary and Boundary Links}{9}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Normal connection and mobius connection between two faces}}{10}}
-\newlabel{figure:faceConnections}{{3}{10}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.4}Build Mesh from Elements}{10}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Mesh Operations}{11}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.1}Copy a Mesh}{12}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.2}Mesh Transformation}{12}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.3}Merging Meshes}{12}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Mesh Traversals}{13}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.4.1}Traversal Around Face}{13}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.4.2}Traversal Around Vertex}{13}}
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Vertex traversal without boundary and without moibus connection}}{14}}
-\newlabel{figure:traversalAroundVertexNormal}{{4}{14}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Vertex traversal without boundary and with moibus connection}}{15}}
-\newlabel{figure:traversalAroundVertexMobius}{{5}{15}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Vertex traversal withboundary and without moibus connection}}{15}}
-\newlabel{figure:traversalAroundVertexNormalB}{{6}{15}}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{3}}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Half-edge Data Structure}{4}}
+\newlabel{sec:half-edge}{{2}{4}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Vertex}{4}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Edge}{4}}
+\newlabel{section:edge}{{2.2}{4}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Definitions and assumptions of vertex, half-edge, and face}}{5}}
+\newlabel{table:vhfdef}{{1}{5}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces A Regular Edge}}{5}}
+\newlabel{figure:regularEdge}{{1}{5}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces A Mobius Edge}}{6}}
+\newlabel{figure:mobiusEdge}{{2}{6}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Face}{6}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces A Boundary Edge}}{7}}
+\newlabel{figure:boundaryEdge}{{3}{7}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Mesh}{7}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.4.1}Face Connections and Sibling Links}{7}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces An example of boundary half-edges flow in orientable mesh}}{8}}
+\newlabel{figure:boundaryOrientable}{{4}{8}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.4.2}Boundary and Boundary Links}{8}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces An example of boundary half-edges flow in non-orientable mesh}}{9}}
+\newlabel{figure:boundaryNonOrientable}{{5}{9}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.4.3}Build Mesh from Elements}{9}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Pointers of half-edges in a single face}}{10}}
+\newlabel{figure:aFacePointers}{{6}{10}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Definitions and assumptions of vertex, half-edge, and face}}{11}}
+\newlabel{table:vhfInfo}{{2}{11}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.5}Mesh Operations}{11}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.5.1}Copy a Mesh}{11}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Normal connection and mobius connection between two faces}}{12}}
+\newlabel{figure:faceConnections}{{7}{12}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.5.2}Mesh Transformation}{12}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.5.3}Merging Meshes}{12}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.6}Mesh Traversals}{13}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.6.1}Traversal Around Face}{13}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.6.2}Traversal Around Vertex}{14}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Vertex traversal without boundary and without moibus connection}}{15}}
+\newlabel{figure:traversalAroundVertexNormal}{{8}{15}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Vertex traversal without boundary and with moibus connection}}{15}}
+\newlabel{figure:traversalAroundVertexMobius}{{9}{15}}
 \@writefile{toc}{\contentsline {section}{\numberline {3}Catumll-Clark Subdivision}{15}}
 \newlabel{sec:ccsd}{{3}{15}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Compute New Vertex Positions}{15}}
-\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Vertex traversal with boundary and with moibus connection}}{16}}
-\newlabel{figure:traversalAroundVertexMobiusB}{{7}{16}}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Vertex traversal withboundary and without moibus connection}}{16}}
+\newlabel{figure:traversalAroundVertexNormalB}{{10}{16}}
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Vertex traversal with boundary and with moibus connection}}{16}}
+\newlabel{figure:traversalAroundVertexMobiusB}{{11}{16}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {3.1.1}Face Points}{16}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {3.1.2}Edge Points}{16}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {3.1.3}Vertex Points}{17}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Compile a New Mesh}{18}}
-\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Example of difference of Catmull-Clark and DeRose Equation}}{19}}
-\newlabel{figure:differenceCandD}{{8}{19}}
-\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Create four sub-halfedges for one halfedge in subdivision.}}{20}}
-\newlabel{figure:compileNewMesh}{{9}{20}}
-\@writefile{toc}{\contentsline {section}{\numberline {4}Offset Mesh}{20}}
-\newlabel{sec:offset}{{4}{20}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Compute Vertex Normal}{20}}
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Example of difference of Catmull-Clark and DeRose Equation}}{19}}
+\newlabel{figure:differenceCandD}{{12}{19}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Compile a New Mesh}{19}}
+\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces Create four sub-half-edges for one half-edge in subdivision.}}{20}}
+\newlabel{figure:compileNewMesh}{{13}{20}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Offset Mesh}{21}}
+\newlabel{sec:offset}{{4}{21}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Compute Vertex Normal}{21}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {4.1.1}Newell's Method and Surface Normal}{21}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.1.2}Vertex normal}{21}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.1.2}Vertex normal}{22}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Positive and Negative Offset Meshes}{22}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Cover Mesh}{22}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Cover Mesh}{23}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Offset vs. Subdivision}{23}}
-\@writefile{toc}{\contentsline {section}{\numberline {5}Input and Output}{24}}
-\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces A broader view of the subdivision machine}}{24}}
-\newlabel{figure:birdView}{{10}{24}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Input}{24}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.1.1}Input File Parser}{24}}
-\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Problem of merging vertex immediately when parsing the file.}}{25}}
-\newlabel{figure:parserMerge}{{11}{25}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.1.2}Graphical User Interface}{25}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Output}{26}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.1}Graphical User Interface}{26}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.2}Output Files}{26}}
-\@writefile{toc}{\contentsline {section}{\numberline {6}Test Cases}{27}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Hild Sculpture}{27}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Tetra Sculpture}{27}}
-\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusion and Future Works}{28}}
-\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Initial Mesh of Hild Sculpture.}}{29}}
-\newlabel{figure:Hild0}{{12}{29}}
-\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces 1 Level Subdivision of Hild Sculpture.}}{30}}
-\newlabel{figure:Hild1}{{13}{30}}
-\@writefile{lof}{\contentsline {figure}{\numberline {14}{\ignorespaces 2 Levels Subdivision of Hild Sculpture.}}{31}}
-\newlabel{figure:Hild2}{{14}{31}}
-\@writefile{lof}{\contentsline {figure}{\numberline {15}{\ignorespaces 3 Levels of Subdivision of Hild Sculpture.}}{32}}
-\newlabel{figure:Hild3}{{15}{32}}
-\@writefile{lof}{\contentsline {figure}{\numberline {16}{\ignorespaces Offset after 3 Levels of Subdivision of Hild Sculpture.}}{33}}
-\newlabel{figure:HildOff}{{16}{33}}
-\@writefile{lof}{\contentsline {figure}{\numberline {17}{\ignorespaces Initial Mesh of Tetra Sculpture.}}{34}}
-\newlabel{figure:Tetra0}{{17}{34}}
-\@writefile{lof}{\contentsline {figure}{\numberline {18}{\ignorespaces 1 Level Subdivision of Tetra Sculpture.}}{35}}
-\newlabel{figure:Tetra1}{{18}{35}}
-\@writefile{lof}{\contentsline {figure}{\numberline {19}{\ignorespaces 2 Levels Subdivision of Tetra Sculpture.}}{36}}
-\newlabel{figure:Tetra2}{{19}{36}}
-\@writefile{lof}{\contentsline {figure}{\numberline {20}{\ignorespaces 3 Levels of Subdivision of Tetra Sculpture.}}{37}}
-\newlabel{figure:Tetra3}{{20}{37}}
-\@writefile{lof}{\contentsline {figure}{\numberline {21}{\ignorespaces Offset after 3 Levels of Subdivision of Tetra Sculpture.}}{38}}
-\newlabel{figure:TetraOff}{{21}{38}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Input and Output}{25}}
+\@writefile{lof}{\contentsline {figure}{\numberline {14}{\ignorespaces A broader view of the subdivision machine}}{25}}
+\newlabel{figure:birdView}{{14}{25}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Input}{25}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.1.1}Input File Parser}{25}}
+\@writefile{lof}{\contentsline {figure}{\numberline {15}{\ignorespaces Problem of merging vertex immediately when parsing the file.}}{26}}
+\newlabel{figure:parserMerge}{{15}{26}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.1.2}Graphical User Interface}{26}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Output}{27}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.1}Graphical User Interface}{27}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.2}Output Files}{27}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Test Cases}{28}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Hild Sculpture}{28}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Tetra Sculpture}{28}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusion and Future Works}{29}}
+\@writefile{lof}{\contentsline {figure}{\numberline {16}{\ignorespaces Initial Mesh of Hild Sculpture.}}{30}}
+\newlabel{figure:Hild0}{{16}{30}}
+\@writefile{lof}{\contentsline {figure}{\numberline {17}{\ignorespaces 1 Level Subdivision of Hild Sculpture.}}{31}}
+\newlabel{figure:Hild1}{{17}{31}}
+\@writefile{lof}{\contentsline {figure}{\numberline {18}{\ignorespaces 2 Levels Subdivision of Hild Sculpture.}}{32}}
+\newlabel{figure:Hild2}{{18}{32}}
+\@writefile{lof}{\contentsline {figure}{\numberline {19}{\ignorespaces 3 Levels of Subdivision of Hild Sculpture.}}{33}}
+\newlabel{figure:Hild3}{{19}{33}}
+\@writefile{lof}{\contentsline {figure}{\numberline {20}{\ignorespaces Offset after 3 Levels of Subdivision of Hild Sculpture.}}{34}}
+\newlabel{figure:HildOff}{{20}{34}}
+\@writefile{lof}{\contentsline {figure}{\numberline {21}{\ignorespaces Initial Mesh of Tetra Sculpture.}}{35}}
+\newlabel{figure:Tetra0}{{21}{35}}
+\@writefile{lof}{\contentsline {figure}{\numberline {22}{\ignorespaces 1 Level Subdivision of Tetra Sculpture.}}{36}}
+\newlabel{figure:Tetra1}{{22}{36}}
+\@writefile{lof}{\contentsline {figure}{\numberline {23}{\ignorespaces 2 Levels Subdivision of Tetra Sculpture.}}{37}}
+\newlabel{figure:Tetra2}{{23}{37}}
+\@writefile{lof}{\contentsline {figure}{\numberline {24}{\ignorespaces 3 Levels of Subdivision of Tetra Sculpture.}}{38}}
+\newlabel{figure:Tetra3}{{24}{38}}
+\@writefile{lof}{\contentsline {figure}{\numberline {25}{\ignorespaces Offset after 3 Levels of Subdivision of Tetra Sculpture.}}{39}}
+\newlabel{figure:TetraOff}{{25}{39}}

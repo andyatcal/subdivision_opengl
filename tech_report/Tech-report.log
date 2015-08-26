@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  19 AUG 2015 12:17
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  25 AUG 2015 14:01
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -754,63 +754,117 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 [1
 
 {/usr/local/texlive/2014/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-(./Tech-report.toc
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <12> on input line 3.
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 3.
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 3.
- [2])
+(./Tech-report.toc)
 \tf@toc=\write4
 \openout4 = `Tech-report.toc'.
 
- [3]
-Overfull \hbox (3.68202pt too wide) in paragraph at lines 46--47
-[]\OT1/cmr/m/n/12 and off-set sur-face gen-er-a-tion for non-orientable 2-manif
-olds such as M^^?obius
- []
+ [2] [3]
+
+LaTeX Warning: Reference `section:edge' on page 4 undefined on input line 46.
 
 
-Overfull \hbox (121.22816pt too wide) in paragraph at lines 54--55
-[]\OT1/cmr/m/n/12 When work-ing with Berke-ley SLIDE En-vi-ron-ment (Ref-er-enc
-e: http://www.cs.berkeley.edu/ ug/s-
- []
+LaTeX Warning: Reference `table:vhfdef' on page 4 undefined on input line 48.
 
-[4] [5]
-Underfull \hbox (badness 1077) in paragraph at lines 81--83
-[]\OT1/cmr/m/n/12 A halfedge con-nects ex-actly
- []
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <12> on input line 53.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <8> on input line 53.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <6> on input line 53.
 
-
-Underfull \hbox (badness 1371) in paragraph at lines 81--83
-\OT1/cmr/m/n/12 two non-overlapping ver-tices
- []
+LaTeX Warning: `h' float specifier changed to `ht'.
 
 
-Underfull \hbox (badness 3029) in paragraph at lines 84--85
-[]\OT1/cmr/m/n/12 A face has at least three
- []
+LaTeX Warning: Reference `figure:regularEdge' on page 4 undefined on input line
+ 79.
+
+[4]
+
+LaTeX Warning: Reference `figure:mobiusEdge' on page 5 undefined on input line 
+132.
+
+[5]
+
+LaTeX Warning: Reference `figure:boundaryEdge' on page 6 undefined on input lin
+e 185.
 
 
-Overfull \hbox (2.37952pt too wide) in paragraph at lines 74--87
- [][] 
- []
+LaTeX Warning: Reference `figure:boundaryOrientable' on page 6 undefined on inp
+ut line 185.
+
+
+LaTeX Warning: Reference `figure:boundaryNonOrientable' on page 6 undefined on 
+input line 185.
+
+
+LaTeX Warning: Reference `figure:aFacePointers' on page 6 undefined on input li
+ne 377.
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
 
-Overfull \hbox (2.37952pt too wide) in paragraph at lines 133--152
+LaTeX Warning: Reference `table:vhfInfo' on page 6 undefined on input line 420.
+
+
+
+Overfull \hbox (19.28325pt too wide) in paragraph at lines 420--421
+[]\OT1/cmr/m/n/12 As a sum-mary, ev-ery el-e-ment stores two types of in-for-ma
+-tion: self-information
+ []
+
+
+Overfull \hbox (2.37952pt too wide) in paragraph at lines 425--444
  [][] 
  []
 
-[6] [7]
+[6]
 
-LaTeX Warning: `h' float specifier changed to `ht'.
+LaTeX Warning: Reference `figure:faceConnections' on page 7 undefined on input 
+line 459.
 
-[8] [9] [10] [11] [12] [13] [14] [15] [16] [17] [18] [19] [20]
-Overfull \hbox (65.42758pt too wide) detected at line 789
+
+LaTeX Warning: Reference `figure:faceConnections' on page 7 undefined on input 
+line 459.
+
+[7] [8] [9] [10] [11] [12]
+
+LaTeX Warning: Reference `figure:traversalAroundVertexNormal' on page 13 undefi
+ned on input line 636.
+
+
+LaTeX Warning: Reference `figure:traversalAroundVertexMobiusB' on page 13 undef
+ined on input line 636.
+
+[13]
+
+LaTeX Warning: Reference `figure:traversalAroundVertexNormal' on page 14 undefi
+ned on input line 638.
+
+
+LaTeX Warning: Reference `figure:traversalAroundVertexNormalB' on page 14 undef
+ined on input line 640.
+
+
+LaTeX Warning: Reference `figure:traversalAroundVertexNormal' on page 14 undefi
+ned on input line 642.
+
+
+LaTeX Warning: Reference `figure:traversalAroundVertexNormal' on page 14 undefi
+ned on input line 644.
+
+[14] [15] [16] [17]
+
+LaTeX Warning: Reference `figure:differenceCandD' on page 18 undefined on input
+ line 915.
+
+[18]
+
+LaTeX Warning: Reference `figure:compileNewMesh' on page 19 undefined on input 
+line 969.
+
+[19] [20]
+Overfull \hbox (65.42758pt too wide) detected at line 1039
 \OML/cmm/m/it/12 N[] \OT1/cmr/m/n/12 = \OML/cmm/m/it/12 normalize\OT1/cmr/m/n/1
 2 ([](\OML/cmm/m/it/12 v[] \OMS/cmsy/m/n/12 ^^@ \OML/cmm/m/it/12 v[]\OT1/cmr/m/
 n/12 ) \OMS/cmsy/m/n/12 ^^B \OT1/cmr/m/n/12 (\OML/cmm/m/it/12 v[] \OMS/cmsy/m/n
@@ -822,195 +876,241 @@ n/12 ) \OMS/cmsy/m/n/12 ^^B \OT1/cmr/m/n/12 (\OML/cmm/m/it/12 v[] \OMS/cmsy/m/n
 msy/m/n/12 ^^@ \OML/cmm/m/it/12 v[]\OT1/cmr/m/n/12 ))
  []
 
-[21] [22] [23]
-Overfull \hbox (2.25555pt too wide) in paragraph at lines 846--846
+[21] [22] [23] [24]
+
+LaTeX Warning: Reference `figure:birdView' on page 25 undefined on input line 1
+083.
+
+
+Overfull \hbox (2.25555pt too wide) in paragraph at lines 1096--1096
  [][][][]\OT1/cmr/m/n/12 SUBDIVISION 
  []
 
 
-Overfull \hbox (34.60995pt too wide) in paragraph at lines 857--858
+Overfull \hbox (34.60995pt too wide) in paragraph at lines 1107--1108
  [][] 
  []
 
-[24] [25] [26] <Hild0.png, id=98, 641.39626pt x 483.8075pt>
+[25]
+
+LaTeX Warning: Reference `figure:parserMerge' on page 26 undefined on input lin
+e 1122.
+
+[26] [27]
+
+LaTeX Warning: Reference `figure:Hild0' on page 28 undefined on input line 1179
+.
+
+
+LaTeX Warning: Reference `figure:Hild1' on page 28 undefined on input line 1179
+.
+
+
+LaTeX Warning: Reference `figure:Hild3' on page 28 undefined on input line 1179
+.
+
+
+LaTeX Warning: Reference `figure:HildOff' on page 28 undefined on input line 11
+79.
+
+<Hild0.png, id=101, 641.39626pt x 483.8075pt>
 File: Hild0.png Graphic file (type png)
  <use Hild0.png>
-Package pdftex.def Info: Hild0.png used on input line 933.
+Package pdftex.def Info: Hild0.png used on input line 1183.
 (pdftex.def)             Requested size: 390.0pt x 294.18459pt.
 
-<Hild0w.png, id=100, 642.4pt x 482.80376pt>
+<Hild0w.png, id=103, 642.4pt x 482.80376pt>
 File: Hild0w.png Graphic file (type png)
  <use Hild0w.png>
-Package pdftex.def Info: Hild0w.png used on input line 934.
+Package pdftex.def Info: Hild0w.png used on input line 1184.
 (pdftex.def)             Requested size: 390.0pt x 293.11751pt.
 
 
-LaTeX Warning: Float too large for page by 66.6354pt on input line 936.
+LaTeX Warning: Float too large for page by 66.6354pt on input line 1186.
 
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-<Hild1.png, id=101, 644.4075pt x 481.8pt>
+<Hild1.png, id=104, 644.4075pt x 481.8pt>
 File: Hild1.png Graphic file (type png)
  <use Hild1.png>
-Package pdftex.def Info: Hild1.png used on input line 940.
+Package pdftex.def Info: Hild1.png used on input line 1190.
 (pdftex.def)             Requested size: 390.0pt x 291.5965pt.
 
-<Hild1w.png, id=102, 640.3925pt x 483.8075pt>
+<Hild1w.png, id=105, 640.3925pt x 483.8075pt>
 File: Hild1w.png Graphic file (type png)
  <use Hild1w.png>
-Package pdftex.def Info: Hild1w.png used on input line 941.
+Package pdftex.def Info: Hild1w.png used on input line 1191.
 (pdftex.def)             Requested size: 390.0pt x 294.64229pt.
 
 
-LaTeX Warning: Float too large for page by 65.5721pt on input line 943.
+LaTeX Warning: Float too large for page by 65.5721pt on input line 1193.
 
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-<Hild2.png, id=103, 641.39626pt x 483.8075pt>
+<Hild2.png, id=106, 641.39626pt x 483.8075pt>
 File: Hild2.png Graphic file (type png)
  <use Hild2.png>
-Package pdftex.def Info: Hild2.png used on input line 947.
+Package pdftex.def Info: Hild2.png used on input line 1197.
 (pdftex.def)             Requested size: 390.0pt x 294.18459pt.
 
-<Hild2w.png, id=104, 641.39626pt x 485.815pt>
+<Hild2w.png, id=107, 641.39626pt x 485.815pt>
 File: Hild2w.png Graphic file (type png)
  <use Hild2w.png>
-Package pdftex.def Info: Hild2w.png used on input line 948.
+Package pdftex.def Info: Hild2w.png used on input line 1198.
 (pdftex.def)             Requested size: 390.0pt x 295.40527pt.
 
 
-LaTeX Warning: Float too large for page by 68.92317pt on input line 950.
+LaTeX Warning: Float too large for page by 68.92317pt on input line 1200.
 
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-<Hild3.png, id=105, 641.39626pt x 481.8pt>
+<Hild3.png, id=108, 641.39626pt x 481.8pt>
 File: Hild3.png Graphic file (type png)
  <use Hild3.png>
-Package pdftex.def Info: Hild3.png used on input line 954.
+Package pdftex.def Info: Hild3.png used on input line 1204.
 (pdftex.def)             Requested size: 390.0pt x 292.9639pt.
 
-<Hild3w.png, id=106, 643.40375pt x 482.80376pt>
+<Hild3w.png, id=109, 643.40375pt x 482.80376pt>
 File: Hild3w.png Graphic file (type png)
  <use Hild3w.png>
-Package pdftex.def Info: Hild3w.png used on input line 955.
+Package pdftex.def Info: Hild3w.png used on input line 1205.
 (pdftex.def)             Requested size: 390.0pt x 292.66075pt.
 
 
-LaTeX Warning: Float too large for page by 64.95796pt on input line 957.
+LaTeX Warning: Float too large for page by 64.95796pt on input line 1207.
 
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-<HildOff.png, id=107, 641.39626pt x 482.80376pt>
+<HildOff.png, id=110, 641.39626pt x 482.80376pt>
 File: HildOff.png Graphic file (type png)
  <use HildOff.png>
-Package pdftex.def Info: HildOff.png used on input line 961.
+Package pdftex.def Info: HildOff.png used on input line 1211.
 (pdftex.def)             Requested size: 390.0pt x 293.57425pt.
 
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-<Tetra0.png, id=108, 641.39626pt x 482.80376pt>
+
+LaTeX Warning: Reference `figure:Tetra0' on page 28 undefined on input line 121
+6.
+
+
+LaTeX Warning: Reference `figure:Tetra1' on page 28 undefined on input line 121
+6.
+
+
+LaTeX Warning: Reference `figure:Tetra3' on page 28 undefined on input line 121
+6.
+
+
+LaTeX Warning: Reference `figure:TetraOff' on page 28 undefined on input line 1
+216.
+
+<Tetra0.png, id=111, 641.39626pt x 482.80376pt>
 File: Tetra0.png Graphic file (type png)
  <use Tetra0.png>
-Package pdftex.def Info: Tetra0.png used on input line 970.
+Package pdftex.def Info: Tetra0.png used on input line 1220.
 (pdftex.def)             Requested size: 390.0pt x 293.57425pt.
 
-<Tetra0w.png, id=109, 640.3925pt x 480.79625pt>
+<Tetra0w.png, id=112, 640.3925pt x 480.79625pt>
 File: Tetra0w.png Graphic file (type png)
  <use Tetra0w.png>
-Package pdftex.def Info: Tetra0w.png used on input line 971.
+Package pdftex.def Info: Tetra0w.png used on input line 1221.
 (pdftex.def)             Requested size: 390.0pt x 292.80841pt.
 
 
-LaTeX Warning: Float too large for page by 65.71597pt on input line 973.
+LaTeX Warning: Float too large for page by 65.71597pt on input line 1223.
 
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-<Tetra1.png, id=110, 642.4pt x 480.79625pt>
+<Tetra1.png, id=113, 642.4pt x 480.79625pt>
 File: Tetra1.png Graphic file (type png)
  <use Tetra1.png>
-Package pdftex.def Info: Tetra1.png used on input line 977.
+Package pdftex.def Info: Tetra1.png used on input line 1227.
 (pdftex.def)             Requested size: 390.0pt x 291.8987pt.
 
-<Tetra1w.png, id=111, 643.40375pt x 481.8pt>
+<Tetra1w.png, id=114, 643.40375pt x 481.8pt>
 File: Tetra1w.png Graphic file (type png)
  <use Tetra1w.png>
-Package pdftex.def Info: Tetra1w.png used on input line 978.
+Package pdftex.def Info: Tetra1w.png used on input line 1228.
 (pdftex.def)             Requested size: 390.0pt x 292.05229pt.
 
 
-LaTeX Warning: Float too large for page by 63.2843pt on input line 980.
+LaTeX Warning: Float too large for page by 63.2843pt on input line 1230.
 
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-<Tetra2.png, id=112, 643.40375pt x 483.8075pt>
+<Tetra2.png, id=115, 643.40375pt x 483.8075pt>
 File: Tetra2.png Graphic file (type png)
  <use Tetra2.png>
-Package pdftex.def Info: Tetra2.png used on input line 984.
+Package pdftex.def Info: Tetra2.png used on input line 1234.
 (pdftex.def)             Requested size: 390.0pt x 293.26918pt.
 
-<Tetra2w.png, id=113, 642.4pt x 483.8075pt>
+<Tetra2w.png, id=116, 642.4pt x 483.8075pt>
 File: Tetra2w.png Graphic file (type png)
  <use Tetra2w.png>
-Package pdftex.def Info: Tetra2w.png used on input line 985.
+Package pdftex.def Info: Tetra2w.png used on input line 1235.
 (pdftex.def)             Requested size: 390.0pt x 293.72688pt.
 
 
-LaTeX Warning: Float too large for page by 66.32938pt on input line 987.
+LaTeX Warning: Float too large for page by 66.32938pt on input line 1237.
 
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-<Tetra3.png, id=114, 641.39626pt x 482.80376pt>
+<Tetra3.png, id=117, 641.39626pt x 482.80376pt>
 File: Tetra3.png Graphic file (type png)
  <use Tetra3.png>
-Package pdftex.def Info: Tetra3.png used on input line 991.
+Package pdftex.def Info: Tetra3.png used on input line 1241.
 (pdftex.def)             Requested size: 390.0pt x 293.57425pt.
 
-<Tetra3w.png, id=115, 641.39626pt x 484.81125pt>
+<Tetra3w.png, id=118, 641.39626pt x 484.81125pt>
 File: Tetra3w.png Graphic file (type png)
  <use Tetra3w.png>
-Package pdftex.def Info: Tetra3w.png used on input line 992.
+Package pdftex.def Info: Tetra3w.png used on input line 1242.
 (pdftex.def)             Requested size: 390.0pt x 294.79492pt.
 
 
-LaTeX Warning: Float too large for page by 67.70248pt on input line 994.
+LaTeX Warning: Float too large for page by 67.70248pt on input line 1244.
 
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-<TetraOff.png, id=116, 640.3925pt x 483.8075pt>
+<TetraOff.png, id=119, 640.3925pt x 483.8075pt>
 File: TetraOff.png Graphic file (type png)
  <use TetraOff.png>
-Package pdftex.def Info: TetraOff.png used on input line 998.
+Package pdftex.def Info: TetraOff.png used on input line 1248.
 (pdftex.def)             Requested size: 390.0pt x 294.64229pt.
 
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-[27] [28] [29 <./Hild0.png> <./Hild0w.png>] [30 <./Hild1.png> <./Hild1w.png>]
-[31 <./Hild2.png> <./Hild2w.png>] [32 <./Hild3.png> <./Hild3w.png>] [33 <./Hild
-Off.png>] [34 <./Tetra0.png> <./Tetra0w.png>] [35 <./Tetra1.png> <./Tetra1w.png
->] [36 <./Tetra2.png> <./Tetra2w.png>] [37 <./Tetra3.png> <./Tetra3w.png>]
-[38 <./TetraOff.png>] (./Tech-report.aux)
+[28] [29] [30 <./Hild0.png> <./Hild0w.png>] [31 <./Hild1.png> <./Hild1w.png>]
+[32 <./Hild2.png> <./Hild2w.png>] [33 <./Hild3.png> <./Hild3w.png>] [34 <./Hild
+Off.png>] [35 <./Tetra0.png> <./Tetra0w.png>] [36 <./Tetra1.png> <./Tetra1w.png
+>] [37 <./Tetra2.png> <./Tetra2w.png>] [38 <./Tetra3.png> <./Tetra3w.png>]
+[39 <./TetraOff.png>] (./Tech-report.aux)
+
+LaTeX Warning: There were undefined references.
+
 
 LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 
  ) 
 Here is how much of TeX's memory you used:
- 15709 strings out of 493117
- 329133 string characters out of 6135433
- 392874 words of memory out of 5000000
- 18878 multiletter control sequences out of 15000+600000
+ 15759 strings out of 493117
+ 330079 string characters out of 6135433
+ 409343 words of memory out of 5000000
+ 18928 multiletter control sequences out of 15000+600000
  8808 words of font info for 31 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 55i,10n,67p,915b,895s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 55i,10n,67p,1086b,896s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb
 ></usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb>
 </usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb><
@@ -1021,10 +1121,10 @@ ocal/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/loc
 al/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/
 texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/t
 exlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb>
-Output written on Tech-report.pdf (38 pages, 979349 bytes).
+Output written on Tech-report.pdf (39 pages, 981981 bytes).
 PDF statistics:
- 209 PDF objects out of 1000 (max. 8388607)
- 121 compressed objects within 2 object streams
+ 212 PDF objects out of 1000 (max. 8388607)
+ 123 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
  103 words of extra memory for PDF output out of 10000 (max. 10000000)
 

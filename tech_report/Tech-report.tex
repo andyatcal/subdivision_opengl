@@ -26,28 +26,26 @@
 \tableofcontents
 \newpage
 \section{Introduction}
-For the last two decades, Berkeley SLIDE (Scene Language for Interactive Dynamic Environments) [ref] has been the default geometrical modeling tool for professor Séquin and his students for making mathematical visualization models and abstract geometrical sculptures.  On one hand, SLIDE offers powerful sweep generators, a variety of subdivision techniques and offset surface functions, and convenient hierarchical scene composition tools.  On the other hand, no serious maintenance has been performed on this poorly organized code, cobbled together by dozens of students in the period between the 1990’s and 2004.  With every new issue of an operating system for Windows machines of Macintosh computers, it gets more difficult to install SLIDE and the Tcl [ref] components that are required for providing interactive change of the parameter that define a geometric shape.
+For the last two decades, Berkeley SLIDE (Scene Language for Interactive Dynamic Environments) [ref] has been the default geometrical modeling tool for professor Séquin and his students for making mathematical visualization models and abstract geometrical sculptures.  On one hand, SLIDE offers powerful sweep generators, a variety of subdivision techniques and offset surface functions, and convenient hierarchical scene composition tools.  On the other hand, no serious maintenance has been performed on this poorly organized code, cobbled together by dozens of students in the period between the 1990’s and 2004.  With every new issue of an operating system for Windows machines of Macintosh computers, it gets more difficult to install SLIDE and the Tcl [ref] components that are required for providing interactive change of the parameter that define a geometric shape. The existing SLIDE code also has some technical shortcomings. It cannot provide smooth subdivision and offset surface generation for non-orientable 2-manifolds such as Möbius bands.  
 
-The existing SLIDE code also has some technical shortcomings.  It cannot provide smooth subdivision and offset surface generation for non-orientable 2-manifolds such as Möbius bands.  This report describes the development of a new geometry kernel that fixes these problems.
+This report describes the development of a new geometry kernel to resolve this problems. Many abstract geometrical sculptures have the shape of a (thickened) 2D surface embedded in 3D space [Reference: 2-manifold sculpture]. To emulate these sculptures, this geometry kernel works on the subidvivion of 2-manifolds (i.e., thin surfaces with borders). According to Surface Classification Theorem [ref], All 2-manifolds can be uniquely classified by their topology characteristics, including orientability (double-sided or single-sided), the number b of their borders (loops of 1-dimensional rim lines), and their genus g (the number of independent closed loop cuts that can be made on such a surface, leaving all its pieces still connected to one another) [ref]. Catmull-Clark subdivision, regardless of the topology characteristics of the mesh, works well to produce smooth surfaces.
 
-This new kernel works on the subidvivion of 2-manifolds (i.e., thin surfaces with borders), because many abstract geometrical sculptures have the shape of a (thickened) 2D surface embedded in 3D space [Reference: 2-manifold sculpture]. According to Surface Classification Theorem [ref], All 2-manifolds can be uniquely classified by their topology characteristics, including orientability (double-sided or single-sided), the number b of their borders (loops of 1-dimensional rim lines), and their genus g (the number of independent closed loop cuts that can be made on such a surface, leaving all its pieces still connected to one another) [ref]. 
-
-Regradless of its topology characteristics, 2-manifold surface can be approximated by the Catmull-Clark subdivision of 
-
-The input and output of this kernel is mesh made of polygon faces. 
+The input and output of this kernel are meshes of polygons. A SIF file parser and STL file writer are developed as an interface to inport the initial mesh input and export the subdivision mesh. Multiple initial meshes are tested on this geometry kernel. Two detailed test cases, Hild Sculpture and Tetra Sclupture, are described as examples of two-sided surface and one-sided surface in this report.
 
 \newpage
-\section{Halfedge Data Structure} \label{sec:halfedge}
+\section{Half-edge Data Structure} \label{sec:half-edge}
 
-An object in the 3D Euclid space can be modeled as several meshes of polygons. For a single mesh, it comprises three types of geometry elements: vertex, edge, and face. Adjacency data structure is need to store the topological information (adjacency and connectivity) between these elements.
+We can model an 3D object as several meshes of polygons. A mesh comprises three types of elements: vertex, edge, and face. Adjacency data structure is need to store the topological information (adjacency and connectivity) between these elements.
 
-Several adjacency structures have been fully developed, including simple data structure, winged edge data structure (Baumgart, 1975), halfedge data structure (Eastman, 1982), QuadEdge Data structure (Guibas and Stolfi), and FaceEdge Data Structure (Dobkin and Laszlo, 1987).
+Several adjacency structures have been fully developed, including simple data structure, winged edge data structure (Baumgart, 1975), half-edge data structure (Eastman, 1982), QuadEdge Data structure (Guibas and Stolfi), and FaceEdge Data Structure (Dobkin and Laszlo, 1987). Among all adjacency data structures, the author chooses half-edge data structure in this project to support Catmull-Clark subdivision, because of the following reasons.
 
-Among all these data structures, the author chooses halfedge data structure in this project to realize Catmull-Clark subdivision, because 1) the storage size is independent of the mesh topology, and 2) it has a simple implementation. The author also extends its definition to add the ability in dealing with single-sided surfaces (or non-orientable object).
+1) The storage size of half-edge data structure is porpotional to the number of edges in the mesh, independent of mesh topology. The construction time of a mesh is also porpotional to the number of edges.
 
-\subsection{Vertex, Halfedge, and Face}
+2) The edges and faces in half-edge data structure have orientations. This reduced the time of searching edges and faces in a mesh traversal.
 
-The definitions and assumptions of vertex, halfedge and face follow the assumption of 2-manifold, as shown in Table \ref{table:vhfdef}. Element IDs are unique. When two elements fall into the same group of element, they can not have same ID. (Mobius sibling halfedges are exceptions as we discuss later). A quadrilateral face made with four halfedges and four vertices is shown in Figure \ref{figure:singleFace}.
+The typical definition of edge in half-edge data structure is a pair of halfedges in opposite directions. The author extends this definition (as explained in section \ref{section:edge}) in this project to enable mesh traversals and subdivsion for single-sided surfaces.
+
+The definition and assumption for vertex, edge, face, and mesh is shown in Table \ref{table:vhfdef}.
 
 %Table1
 \begin{table}[h]
@@ -57,92 +55,326 @@ The definitions and assumptions of vertex, halfedge and face follow the assumpti
 \hline
     & Definition  & Assumption  \\
 \hline
-Vertex  & A 3-dimensional point.    & No vertices share same position in a mesh. But overlapping vertices can exist in different meshes.\\
+Vertex  & A 3-dimensional point. & The position of a vertex is determined by its x, y, and z coordinate. No two vertices share same ID\\
 \hline
-Halfedge  & An edge that starts from one vertex and ends at another vertex. & A halfedge connects exactly two non-overlapping vertices and it has a direction. 
-Less than two halfedges start from the same vertex and end at the same vertex in a single mesh.\\
+Edge  & A line segements connecting two vertices. & An edge connects exactly two non-coinciding vertices.\\
 \hline
-Face    & A polygon that contains a loop of vertices and halfedges. & A face has at least three non-overlapping vertices so it makes a polygon. The face has to be constructed with a complete loop of halfedges with on openings.\\
+Face  & A polygon containing a loop of and edges and corresponding vertices. & A face has at least three non-coinciding vertices. It is constructed with a complete loop of consecutive edges with no openings.\\
+\hline
+Mesh & A collection of polygon faces. &\\
 \hline
 \end{tabular}
-\caption{Definitions and assumptions of vertex, halfedge, and face} 
+\caption{Definitions and assumptions of vertex, half-edge, and face} 
 \label{table:vhfdef}
 \end{table}
 
-%Figure1
-\begin{figure}[h]
+\subsection{Vertex}
+
+A vertex is a 3-dimensional point. The position of a vertex is defined by its x, y, and z coordinates. Every vertex has a vertex normal and a unique tracking ID. Coninciding vertices in a mesh are allowed. However, they will never share the same ID.
+
+\subsection{Edge} \label{section:edge}
+
+An edge is a line segement that connects two vertices. An edge can be shared by two faces or it lies on the boundary of the mesh. The orientation of the two adjacenct faces can be same or different. Therefore, three types of edges are defined in this project: regular edge, mobius edge, and boundary edge. 
+
+A regular edge is a pair of halfedges with opposite directions, as shown in Figure \ref{figure:regularEdge}. A regular edge is not on the boundary of the mesh and it is shared by two faces with same orientation. The two halfedges contain sibling pointers to find each other.
+
+\begin{figure}[ht]
   \centering
+  %Normal Junction
   \begin{tikzpicture}
     \coordinate (A0) at (0,0);
-    \coordinate (A1) at (2,0);
-    \coordinate (A2) at (2,2);
-    \coordinate (A3) at (0,2);
-    \coordinate (B0) at (0.2,0.2);
-    \coordinate (B1) at (1.8,0.2);
-    \coordinate (B2) at (1.8,1.8);
-    \coordinate (B3) at (0.2,1.8);
-      \draw(A0)
-        -- (A1) node [below right] {$A_1$};
-      \draw (A1)
-        -- (A2) node [above right] {$A_2$};
-      \draw (A2)
-        -- (A3) node [above left] {$A_3$};
-      \draw (A3)
-        -- (A0) node [below left] {$A_0$};
-      \draw  [thick,-latex] (B0)
-        -- (B1);
-      \draw [thick,-latex,] (B1)
-        -- (B2);
-      \draw [thick,-latex,] (B2)
-        -- (B3);
-      \draw [thick,-latex,] (B3)
-        -- (B0);
-      \node [right] at (0.2, 1) {$e_3$};
-      \node [above] at (1, 0.2) {$e_0$};
-      \node [left] at (1.8, 1) {$e_1$};
-      \node [below] at (1, 1.8) {$e_2$};
+    \coordinate (A1) at (3,1);
+    \coordinate (A2) at (3,5);
+    \coordinate (A3) at (0,6);
+    \coordinate (A4) at (6,0);
+    \coordinate (A5) at (6,6);
+    \coordinate (A6) at (2.5,0);
+    \coordinate (A7) at (3.5,0);
+    \coordinate (A8) at (2.5,6);
+    \coordinate (A9) at (3.5,6);
+    \coordinate (B0) at (2.8, 1.1);
+    \coordinate (B1) at (2.8, 4.9);
+    \coordinate (B2) at (3.2, 1.1);
+    \coordinate (B3) at (3.2, 4.9);
+    \coordinate (B4) at (0, 0.15);
+    \coordinate (B5) at (6, 0.15);
+    \coordinate (B6) at (0, 5.85);
+    \coordinate (B7) at (6, 5.85);
+    \coordinate (C1) at (2.8, 2.8);
+    \coordinate (C2) at (2.8, 3.2);
+    \coordinate (C3) at (3.2, 2.8);
+    \coordinate (C4) at (3.2, 3.2);
+
+    \draw(A0) -- (A1);
+    \draw [ultra thick] (A1) -- (A2);
+    \draw (A2) -- (A3);
+    \draw (A1) -- (A4);
+    \draw (A5) -- (A2);
+    \draw [dotted] (A6) -- (A1);
+    \draw [dotted] (A7) -- (A1);
+    \draw [dotted] (A8) -- (A2);
+    \draw [dotted] (A9) -- (A2);
+    \draw [ultra thick, -latex] (B0) -- (B1);
+    \draw [ultra thick, -latex] (B3) -- (B2);
+    \draw [thick, -latex] (B4) -- (B0);
+    \draw [thick, -latex] (B1) -- (B6);
+    \draw [thick, -latex] (B7) -- (B3);
+    \draw [thick, -latex] (B2) -- (B5);
+    \draw [thick, -latex] (C1) -- (C3);
+    \draw [thick, -latex] (C4) -- (C2);
+    \node [right] at (3.3, 3) {Sibling Pointers};
+
   \end{tikzpicture}
-  \caption{A quadrilateral face made with four halfedges}
-  \label{figure:singleFace}
+  \caption{A Regular Edge}
+  \label{figure:regularEdge}
 \end{figure}
 
-Every element stores two types of information: self-information and adjacency information. As shown in Table \ref{table:vhfInfo}. The adjacency information includes adjacency in a face and adjacency between faces. The adjacency between faces include sibling links and boundary links. (And we will discussion more in the mesh section.) 
+A mobius edge is a pair of halfedges with same directions, as shown in Figure \ref{figure:mobiusEdge}. It is not on the boundary of the mesh and it is shared by two faces with different orientations. The two halfedges contain mobius sibling pointers to find each other. Vertices on a mobius edge are also marked with a mobius flag.
 
-%Table2
-\begin{table}[ht]
-\centering
-\begin{tabular}{| l | p{0.4\textwidth} | p{0.4\textwidth}|}
+\begin{figure}[ht]
+  \centering
+  %Normal Junction
+  \begin{tikzpicture}
+    \coordinate (A0) at (0,0);
+    \coordinate (A1) at (3,1);
+    \coordinate (A2) at (3,5);
+    \coordinate (A3) at (0,6);
+    \coordinate (A4) at (6,0);
+    \coordinate (A5) at (6,6);
+    \coordinate (A6) at (2.5,0);
+    \coordinate (A7) at (3.5,0);
+    \coordinate (A8) at (2.5,6);
+    \coordinate (A9) at (3.5,6);
+    \coordinate (B0) at (2.8, 1.1);
+    \coordinate (B1) at (2.8, 4.9);
+    \coordinate (B2) at (3.2, 1.1);
+    \coordinate (B3) at (3.2, 4.9);
+    \coordinate (B4) at (0, 0.15);
+    \coordinate (B5) at (6, 0.15);
+    \coordinate (B6) at (0, 5.85);
+    \coordinate (B7) at (6, 5.85);
+    \coordinate (C1) at (2.8, 2.8);
+    \coordinate (C2) at (2.8, 3.2);
+    \coordinate (C3) at (3.2, 2.8);
+    \coordinate (C4) at (3.2, 3.2);
 
-\hline
-Element & Self-Information & Adjacency Information  \\
-\hline
-Vertex  & 1. vertex ID & 1. one outgoing halfedge   \\
-& 2. vertex position & 2. mobius indicator \\
-& 3. vertex normal & \\
-\hline
-Halfedge & 1. edge ID & 1. start and end vertex\\
-& & 2. link to parent face\\
-& & 3. predecessor and successor in the parent face\\
-& & 4. sibling links to adjacent face\\
-& & 5. boundary links to adjacent face \\
-\hline
-Face    &  1. face ID & 1. one side halfedge\\
-& 2. face normal &\\
-\hline
-\end{tabular}
-\caption{Definitions and assumptions of vertex, halfedge, and face} 
-\label{table:vhfInfo}
-\end{table}
+    \draw(A0) -- (A1);
+    \draw [ultra thick] (A1) -- (A2);
+    \draw (A2) -- (A3);
+    \draw (A1) -- (A4);
+    \draw (A5) -- (A2);
+    \draw [dotted] (A6) -- (A1);
+    \draw [dotted] (A7) -- (A1);
+    \draw [dotted] (A8) -- (A2);
+    \draw [dotted] (A9) -- (A2);
+    \draw [ultra thick, -latex] (B0) -- (B1);
+    \draw [ultra thick, -latex] (B2) -- (B3);
+    \draw [thick, -latex] (B4) -- (B0);
+    \draw [thick, -latex] (B1) -- (B6);
+    \draw [thick, -latex] (B3) -- (B7);
+    \draw [thick, -latex] (B5) -- (B2);
+    \draw [thick, -latex] (C1) -- (C3);
+    \draw [thick, -latex] (C4) -- (C2);
+    \node [right] at (3.3, 3) {Mobius Sibling Pointers};
 
-\subsection{Mesh}
-We define a mesh as a collection of basic elements (i.e. vertex, halfedge, and face). Hashtable is implemented to represent the collection in this project, because of its constant serach time for element. We construct three hashtables for all vertices, halfedges, and faces in the mesh respectively. The keys for these hashtable are element IDs and the contents are the element pointers.
+  \end{tikzpicture}
+  \caption{A Mobius Edge}
+  \label{figure:mobiusEdge}
+\end{figure}
 
-The ID of a halfedge is related with the IDs of its start vertex and end vertex. In this project, we define the ID of a halfedge as start vertex ID * maximum number of vertices in a mesh + end vertex ID. This definition will guarantee a unique ID for every halfedge when they have a different start or different end vertex from other halfedges. 
+A boundary edge is one half-edge on the boundary of a mesh, as shown in Figure \ref{figure:boundaryEdge}. It is only adjacent to one face in the mesh and adjacent to another two boundaries half-edges. In an orientable mesh, where all faces have the same orientation, the boundary half-edges flow in the same orientation, as shown by an example is shown in Figure \ref{figure:boundaryOrientable}. However, in a non-orientable surface, the flow direction is reversed at the connection of mobius edge and boundary, as shown by an example in Figure \ref{figure:boundaryNonOrientable}
 
-A mesh also includes the adjacency and connectivity for elements within. They can be classified into three groups: 1) halfedge flow in a single face, 2) face connections, and 3) boundary connections.
+\begin{figure}[ht]
+  \centering
+  %Normal Junction
+  \begin{tikzpicture}
+    \coordinate (A0) at (0,0);
+    \coordinate (A1) at (3,1);
+    \coordinate (A2) at (3,5);
+    \coordinate (A3) at (0,6);
+    \coordinate (A4) at (6,0);
+    \coordinate (A5) at (6,6);
+    \coordinate (A6) at (2.5,0);
+    \coordinate (A7) at (3.5,0);
+    \coordinate (A8) at (2.5,6);
+    \coordinate (A9) at (3.5,6);
+    \coordinate (B0) at (2.8, 1.1);
+    \coordinate (B1) at (2.8, 4.9);
+    \coordinate (B4) at (0, 0.15);
+    \coordinate (B5) at (6, 0.15);
+    \coordinate (B6) at (0, 5.85);
+    \coordinate (B7) at (6, 5.85);
+    \coordinate (B8) at (0, -0.15);
+    \coordinate (B9) at (6, -0.15);
+    \coordinate (B10) at (0, 6.15);
+    \coordinate (B11) at (6, 6.15);
+    \coordinate (B12) at (3, 0.85);
+    \coordinate (B13) at (3, 5.15);
+    \coordinate (C1) at (2.8, 2.8);
+    \coordinate (C2) at (4.5, 5.65);
+    \coordinate (C3) at (4.5, 0.35);
 
-\subsubsection{Halfedge Flow in a Single Face}
-A face is constructed by a loop of consecutive halfedges. The start of one halfedge is the end of its previous halfedge, and the end is the start of its next halfedge. Every halfedge contains two pointers, pointing to its previous and next halfedge respectively. An example of halfedge pointers in a face in shown in Figure \ref{figure:aFacePointers} Every vertex in this face will also have a pointer to its outgoing halfedge.
+    \draw (A0) -- (A1);
+    \draw [ultra thick] (A1) -- (A2);
+    \draw (A2) -- (A3);
+    \draw (A1) -- (A4);
+    \draw (A5) -- (A2);
+    \draw [ultra thick, -latex] (B0) -- (B1);
+    \draw [thick, -latex] (B4) -- (B0);
+    \draw [thick, -latex] (B1) -- (B6);
+    \draw [thick, -latex] (B8) -- (B12);
+    \draw [thick, -latex] (B12) -- (B9);
+    \draw [thick, -latex] (B10) -- (B13);
+    \draw [thick, -latex] (B13) -- (B11);
+    \node [right] at (4.3, 3) {Outside of Mesh};
+    \draw (C1) edge[bend right, thick, -latex] node [right] {next-boundary} (C2);
+    \draw (C1) edge[bend left, thick, -latex] node [right] {previous-boundary} (C3);
+  \end{tikzpicture}
+  \caption{A Boundary Edge}
+  \label{figure:boundaryEdge}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  %Normal Junction
+  \begin{tikzpicture}
+    \coordinate (A0) at (0,0);
+    \coordinate (A1) at (3,0);
+    \coordinate (A2) at (3,3);
+    \coordinate (A3) at (0,3);
+    \coordinate (A4) at (6,0);
+    \coordinate (A5) at (6,3);
+    \coordinate (A6) at (6,6);
+    \coordinate (A7) at (3,6);
+    \coordinate (A8) at (0,6);
+    
+    \coordinate (B0) at (0.2,0.2);
+    \coordinate (B1) at (2.8,0.2);
+    \coordinate (B2) at (2.8,2.8);
+    \coordinate (B3) at (0.2,2.8);
+    \coordinate (B4) at (3.2,0.2);
+    \coordinate (B5) at (5.8,0.2);
+    \coordinate (B6) at (5.8,2.8);
+    \coordinate (B7) at (3.2,2.8);
+    \coordinate (B8) at (0.2,3.2);
+    \coordinate (B9) at (2.8,3.2);
+    \coordinate (B10) at (2.8,5.8);
+    \coordinate (B11) at (0.2,5.8);
+    \coordinate (B12) at (3.2,3.2);
+    \coordinate (B13) at (5.8,3.2);
+    \coordinate (B14) at (5.8,5.8);
+    \coordinate (B15) at (3.2,5.8);
+
+    \draw (A0) -- (A1);
+    \draw (A1) -- (A2);
+    \draw (A2) -- (A3);
+    \draw (A3) -- (A0);
+    \draw (A1) -- (A4);
+    \draw (A4) -- (A5);
+    \draw (A5) -- (A2);
+    \draw (A3) -- (A8);
+    \draw (A8) -- (A7);
+    \draw (A7) -- (A6);
+    \draw (A6) -- (A5);
+    \draw (A7) -- (A2);
+
+    \draw [thick,-latex,] (B0) -- (B1);
+    \draw [thick,-latex,] (B1) -- (B2);
+    \draw [thick,-latex,] (B2) -- (B3);
+    \draw [thick,-latex,] (B3) -- (B0);
+
+    \draw [thick,-latex,] (B4) -- (B5);
+    \draw [thick,-latex,] (B5) -- (B6);
+    \draw [thick,-latex,] (B6) -- (B7);
+    \draw [thick,-latex,] (B7) -- (B4);
+
+    \draw [thick,-latex] (B8) -- (B9);
+    \draw [thick,-latex] (B9) -- (B10);
+    \draw [thick,-latex,] (B10) -- (B11);
+    \draw [thick,-latex,] (B11) -- (B8);
+
+    \draw [thick,-latex,] (B12) -- (B13);
+    \draw [thick,-latex,] (B13) -- (B14);
+    \draw [thick,-latex,] (B14) -- (B15);
+    \draw [thick,-latex,] (B15) -- (B12);
+
+  \end{tikzpicture}
+  \caption{An example of boundary half-edges flow in orientable mesh}
+  \label{figure:boundaryOrientable}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  %Normal Junction
+  \begin{tikzpicture}
+    \coordinate (A0) at (0,0);
+    \coordinate (A1) at (3,0);
+    \coordinate (A2) at (3,3);
+    \coordinate (A3) at (0,3);
+    \coordinate (A4) at (6,0);
+    \coordinate (A5) at (6,3);
+    \coordinate (A6) at (6,6);
+    \coordinate (A7) at (3,6);
+    \coordinate (A8) at (0,6);
+    
+    \coordinate (B0) at (0.2,0.2);
+    \coordinate (B1) at (2.8,0.2);
+    \coordinate (B2) at (2.8,2.8);
+    \coordinate (B3) at (0.2,2.8);
+    \coordinate (B4) at (3.2,0.2);
+    \coordinate (B5) at (5.8,0.2);
+    \coordinate (B6) at (5.8,2.8);
+    \coordinate (B7) at (3.2,2.8);
+    \coordinate (B8) at (0.2,3.2);
+    \coordinate (B9) at (2.8,3.2);
+    \coordinate (B10) at (2.8,5.8);
+    \coordinate (B11) at (0.2,5.8);
+    \coordinate (B12) at (3.2,3.2);
+    \coordinate (B13) at (5.8,3.2);
+    \coordinate (B14) at (5.8,5.8);
+    \coordinate (B15) at (3.2,5.8);
+
+    \draw (A0) -- (A1);
+    \draw (A1) -- (A2);
+    \draw (A2) -- (A3);
+    \draw (A3) -- (A0);
+    \draw (A1) -- (A4);
+    \draw (A4) -- (A5);
+    \draw (A5) -- (A2);
+    \draw (A3) -- (A8);
+    \draw (A8) -- (A7);
+    \draw (A7) -- (A6);
+    \draw (A6) -- (A5);
+    \draw (A7) -- (A2);
+
+    \draw [thick,-latex,] (B0) -- (B1);
+    \draw [thick,-latex,] (B1) -- (B2);
+    \draw [thick,-latex,] (B2) -- (B3);
+    \draw [thick,-latex,] (B3) -- (B0);
+
+    \draw [thick,-latex,] (B5) -- (B4);
+    \draw [thick,-latex,] (B6) -- (B5);
+    \draw [thick,-latex,] (B7) -- (B6);
+    \draw [thick,-latex,] (B4) -- (B7);
+
+    \draw [thick,-latex] (B8) -- (B9);
+    \draw [thick,-latex] (B9) -- (B10);
+    \draw [thick,-latex,] (B10) -- (B11);
+    \draw [thick,-latex,] (B11) -- (B8);
+
+    \draw [thick,-latex,] (B13) -- (B12);
+    \draw [thick,-latex,] (B14) -- (B13);
+    \draw [thick,-latex,] (B15) -- (B14);
+    \draw [thick,-latex,] (B12) -- (B15);
+
+  \end{tikzpicture}
+  \caption{An example of boundary half-edges flow in non-orientable mesh}
+  \label{figure:boundaryNonOrientable}
+\end{figure}
+
+\subsection{Face}
+
+A face is defined as a polygon made by a loop consecutive of half-edges. The start of an half-edge is the end of its previous half-edge, and the end is the start of its next half-edge. Every half-edge contains two pointers, pointing to its previous and next half-edge respectively. An example of half-edge pointers in a face in shown in Figure \ref{figure:aFacePointers} Every vertex in this face will also have a pointer to its outgoing half-edge.
 
 \begin{figure}[h]
   \centering
@@ -181,17 +413,54 @@ A face is constructed by a loop of consecutive halfedges. The start of one halfe
       \node [right] at (5, 2.5) {$e_1$};
       \node [above] at (2.5, 5) {$e_2$};
   \end{tikzpicture}
-  \caption{Pointers of halfedges in a single face}
+  \caption{Pointers of half-edges in a single face}
   \label{figure:aFacePointers}
 \end{figure}
 
+As a summary, every element stores two types of information: self-information and adjacency information. As shown in Table \ref{table:vhfInfo}. The adjacency information includes adjacency in a face and adjacency between faces. The adjacency between faces include sibling links and boundary links. (And we will discussion more in the mesh section.) 
+
+%Table2
+\begin{table}[ht]
+\centering
+\begin{tabular}{| l | p{0.4\textwidth} | p{0.4\textwidth}|}
+
+\hline
+Element & Self-Information & Adjacency Information  \\
+\hline
+Vertex  & 1. vertex ID & 1. one outgoing half-edge   \\
+& 2. vertex position & 2. mobius indicator \\
+& 3. vertex normal & \\
+\hline
+Halfedge & 1. edge ID & 1. start and end vertex\\
+& & 2. link to parent face\\
+& & 3. predecessor and successor in the parent face\\
+& & 4. sibling links to adjacent face\\
+& & 5. boundary links to adjacent face \\
+\hline
+Face    &  1. face ID & 1. one side half-edge\\
+& 2. face normal &\\
+\hline
+\end{tabular}
+\caption{Definitions and assumptions of vertex, half-edge, and face} 
+\label{table:vhfInfo}
+\end{table}
+
+\subsection{Mesh}
+We define a mesh as a collection of basic elements (i.e. vertex, half-edge, and face). Hashtable is implemented to represent the collection in this project, because of its constant serach time for element. We construct three hashtables for all vertices, half-edges, and faces in the mesh respectively. The keys for these hashtable are element IDs and the contents are the element pointers.
+
+The ID of a half-edge is related with the IDs of its start vertex and end vertex. In this project, we define the ID of a half-edge as start vertex ID * maximum number of vertices in a mesh + end vertex ID. This definition will guarantee a unique ID for every half-edge when they have a different start or different end vertex from other half-edges. 
+
+A mesh also includes the adjacency and connectivity for elements within. They can be classified into three groups: 1) half-edge flow in a single face, 2) face connections, and 3) boundary connections.
+
+
+
 \subsubsection{Face Connections and Sibling Links}
 
-There are two types of face connections, the normal connection and the mobius connection, as shown in Figure \ref{figure:faceConnections}. In a typical halfedge data structure, with the assumption of double-sided surface, a pair of halfedges between two faces is defined with opposite direction. We extends this idea to represent single-sided surface by adding another type of connection, named as mobius connection. In a mobius connection, a pair of halfedges are in same direction. The vertex on a mobius connection will also be marked for the purpose of vertex traversal in the future. In the example of Figure \ref{figure:faceConnections}, on the top, $e_1$ and $e_1'$ are siblings to each other. On the bottom, $e_1$ and $e_1'$ are mobius siblings to each other. 
+There are two types of face connections, the normal connection and the mobius connection, as shown in Figure \ref{figure:faceConnections}. In a typical half-edge data structure, with the assumption of double-sided surface, a pair of half-edges between two faces is defined with opposite direction. We extends this idea to represent single-sided surface by adding another type of connection, named as mobius connection. In a mobius connection, a pair of half-edges are in same direction. The vertex on a mobius connection will also be marked for the purpose of vertex traversal in the future. In the example of Figure \ref{figure:faceConnections}, on the top, $e_1$ and $e_1'$ are siblings to each other. On the bottom, $e_1$ and $e_1'$ are mobius siblings to each other. 
 
-One thing to point out is that mobius sibling halfedges have the same element ID. Because they have the same start vertex and end vertex. However, we could check for the mobius sibling pointers in order to find all halfedges in the edge traversal of a mesh.
+One thing to point out is that mobius sibling half-edges have the same element ID. Because they have the same start vertex and end vertex. However, we could check for the mobius sibling pointers in order to find all half-edges in the edge traversal of a mesh.
 
-With the extension of mobius connection, there can be three different adjacent situations for a halfedge in a mesh: 1) it is on a normal connection and has a normal sibling, 2) it is on a mobius connection and has a mobius pointer, and 3) it lies on the boundary of the surface and does not have a sibling pointer nor a mobius pointer.
+With the extension of mobius connection, there can be three different adjacent situations for a half-edge in a mesh: 1) it is on a normal connection and has a normal sibling, 2) it is on a mobius connection and has a mobius pointer, and 3) it lies on the boundary of the surface and does not have a sibling pointer nor a mobius pointer.
 
 %Figure2
 \begin{figure}[ht]
@@ -302,7 +571,7 @@ With the extension of mobius connection, there can be three different adjacent s
 
 \subsubsection{Boundary and Boundary Links}
 
-For halfedges on the boundary of a mesh, we connect them with boundary links. In a surface with no mobius connection, the boundary halfedges follow a continuous flow. We can traverse the boundary when starting at one vertex, following the natural flow on the boundary, and ending at the starting vertex. Previous boundary pointers and next boundary pointers are created to link these halfedges. When mobius connection occurs in a mesh, however, some adjacent boundary halfedges will start or end at same vertex, which blocks the natural flow of boundary halfedges. If this happens, we build mobius boundary pointers to link these halfedges. Figure X shows an example of boundary halfedges with and without mobius connections.
+For half-edges on the boundary of a mesh, we connect them with boundary links. In a surface with no mobius connection, the boundary half-edges follow a continuous flow. We can traverse the boundary when starting at one vertex, following the natural flow on the boundary, and ending at the starting vertex. Previous boundary pointers and next boundary pointers are created to link these half-edges. When mobius connection occurs in a mesh, however, some adjacent boundary half-edges will start or end at same vertex, which blocks the natural flow of boundary half-edges. If this happens, we build mobius boundary pointers to link these half-edges. Figure X shows an example of boundary half-edges with and without mobius connections.
 
 <Add normal boundary links figure and mobius boundary link figures here!>
 
@@ -314,21 +583,21 @@ Step 1: Create individual vertices. We create instances of vertices with their p
 
 This step takes O(V) time, where V is the number of vertices in the mesh.
 
-Step 2: Construct individual faces. To build an individual face, we create consecutive instances of halfedges, with their start and end vertices. Meanwhile, every vertex will be assigned a pointer to its outgoing halfedge when we create halfedges. For each halfedge, We then add the previous and next pointers to its previous halfedge and next halfedge respectively. 
+Step 2: Construct individual faces. To build an individual face, we create consecutive instances of half-edges, with their start and end vertices. Meanwhile, every vertex will be assigned a pointer to its outgoing half-edge when we create half-edges. For each half-edge, We then add the previous and next pointers to its previous half-edge and next half-edge respectively. 
 
-This step takes O(E) time, where E is the number of halfedges in the mesh.
+This step takes O(E) time, where E is the number of half-edges in the mesh.
 
-Step 3: Build sibling links. For every halfedge, we need to find if there exist a sibling or mobius sibling from other faces in this mesh. If its start vertex is same with the end of another halfedge, and its end vertex is same with the start of another halfedge, we then find a sibling. If it has the same start and end vertex with another halfedge, we then find a mobius sibling. 
+Step 3: Build sibling links. For every half-edge, we need to find if there exist a sibling or mobius sibling from other faces in this mesh. If its start vertex is same with the end of another half-edge, and its end vertex is same with the start of another half-edge, we then find a sibling. If it has the same start and end vertex with another half-edge, we then find a mobius sibling. 
 
-In this project, with the implementation of hashtable, the ID of a halfedge is related with its start vertex ID and end vertex ID. The mobius sibling link is actually generated in step 2. When we create the halfedge, if its ID is equal to a halfedge that we created before, we know they are mobius siblings. The search of normal sibling is also in constant time because we can calculate the ID of its sibling halfedge knowing that start and end vertex are reversed. 
+In this project, with the implementation of hashtable, the ID of a half-edge is related with its start vertex ID and end vertex ID. The mobius sibling link is actually generated in step 2. When we create the half-edge, if its ID is equal to a half-edge that we created before, we know they are mobius siblings. The search of normal sibling is also in constant time because we can calculate the ID of its sibling half-edge knowing that start and end vertex are reversed. 
 
-This step takes O(E) time, where E is number of halfedges in the mesh.
+This step takes O(E) time, where E is number of half-edges in the mesh.
 
-Step 4: Build boundary links. After step 3, if a halfedge does not have a sibling or mobius sibling, it lies on the boundary of this mesh. We need to build the boundary links to these halfedges.
+Step 4: Build boundary links. After step 3, if a half-edge does not have a sibling or mobius sibling, it lies on the boundary of this mesh. We need to build the boundary links to these half-edges.
 
-To do this, we need a counter to keep track of how many times we cross a mobius connection. We 1) set counter equal to zero and start from one halfedge on the boundary, 2) we go to its next halfedge if the counter is even, or its previous halfedge if the counter is odd, 3) we then go to its the sibling or moibus sibling, the counter increase by 1 if it is a mobius sibling, 4) check if the current halfedge is on boundary, if not, we repeat 2) and 3) until we reach to one, and 5) this boundary halfedge shares one vertex with our last boundary halfedge, so we can build boundary links between them, and 6) we repeat 1) to 5) to build bounary links until we reach the starting boundary halfedge in 1). From 1) to 6), one boundary loop of this mesh is built. And we move on to build other loops by repeating 1) to 6), until every boundary halfedges have boundary links to its adjacent boundaries.
+To do this, we need a counter to keep track of how many times we cross a mobius connection. We 1) set counter equal to zero and start from one half-edge on the boundary, 2) we go to its next half-edge if the counter is even, or its previous half-edge if the counter is odd, 3) we then go to its the sibling or moibus sibling, the counter increase by 1 if it is a mobius sibling, 4) check if the current half-edge is on boundary, if not, we repeat 2) and 3) until we reach to one, and 5) this boundary half-edge shares one vertex with our last boundary half-edge, so we can build boundary links between them, and 6) we repeat 1) to 5) to build bounary links until we reach the starting boundary half-edge in 1). From 1) to 6), one boundary loop of this mesh is built. And we move on to build other loops by repeating 1) to 6), until every boundary half-edges have boundary links to its adjacent boundaries.
 
-This step takes O(E) time, where E is the number of halfedges in the mesh.
+This step takes O(E) time, where E is the number of half-edges in the mesh.
 
 Now this mesh contains everything that we need to start a Catmull-Clark subdivision. In total, it takes O(E) time from step 1 to step 4.
 
@@ -339,12 +608,12 @@ Building from basic elements is not the only way to create the initial mesh for 
 In order to make a copy, we create one element instance for every element that belongs to the original mesh. The copy of a mesh will keep the adjacency for elements and positions of vertices. Therefore, new element instances remain exact same adjacency information as the original mesh, except that the element ID is different and pointers are pointing to the new instances. 
 
 \subsubsection{Mesh Transformation}
-In a 3D transformation, the positions for all vertices in the mesh will perform transformation. The adjacency of original mesh remains the same, so halfedges and faces will transform at the same time while vertices transform. Typically, for linear transformations, we multiply the transformation matrix to the position of every vertex from the original mesh.
+In a 3D transformation, the positions for all vertices in the mesh will perform transformation. The adjacency of original mesh remains the same, so half-edges and faces will transform at the same time while vertices transform. Typically, for linear transformations, we multiply the transformation matrix to the position of every vertex from the original mesh.
 
 \subsubsection{Merging Meshes}
-Meshes can be merged into a new mesh if sibling links can be made between some of the boundary halfedges that belongs them. This merge of boundary halfedge will keep the new mesh as a 2-manifold. We also want the elements ID from these meshes stays different, so no collision occurs after we merge them together.
+Meshes can be merged into a new mesh if sibling links can be made between some of the boundary half-edges that belongs them. This merge of boundary half-edge will keep the new mesh as a 2-manifold. We also want the elements ID from these meshes stays different, so no collision occurs after we merge them together.
 
-Two types of mesh merging are implemented in this project: automatic merging and manual merging. In automatic merging, we define a very small tolerance value. If any pair of vertices on the boundary of the two meshes has a distance smaller than the tolerance, we check if their boundary halfedges can be merged with sibling links. If they do, we merge them, continue to trace along the boundaries of these two meshes and merge boundary halfedges until we can't.
+Two types of mesh merging are implemented in this project: automatic merging and manual merging. In automatic merging, we define a very small tolerance value. If any pair of vertices on the boundary of the two meshes has a distance smaller than the tolerance, we check if their boundary half-edges can be merged with sibling links. If they do, we merge them, continue to trace along the boundaries of these two meshes and merge boundary half-edges until we can't.
 
 In manual merging, we force to merge boundaries from two meshes even if the distance of their vertices are larger than tolerance. In practice, we have four ways to perform the manual merging. Assume we would like to force merge the boundary of Mesh 1 and Mesh 2, we can apply one of the following strategies:
 
@@ -360,21 +629,21 @@ In manual merging, we force to merge boundaries from two meshes even if the dist
 Catmull-Clark subdivision also requires two types of traversals in a mesh: 1) traversal around a face, and 2) traversal around a vertex. Traversal around a face is necessary to build face points and calculate face normal in the face. Traversal around a vertex is necessary to build vertex points and calculate vertex normal in the face.
 
 \subsubsection{Traversal Around Face}
-The traversal around a face lead to all the edges and vertices belong to this face. It starts from one side halfedge of this face, follows the halfedge flow, and ends at starting the halfedge of the traversal.
+The traversal around a face lead to all the edges and vertices belong to this face. It starts from one side half-edge of this face, follows the half-edge flow, and ends at starting the half-edge of the traversal.
 Traversals of all faces in a mesh takes O(E) time, where E is the number of faces in the mesh.
 
 \subsubsection{Traversal Around Vertex}
 The traversal around a vertex leads to all edges and faces that contain this vertex. The traversal of a vertex need to consider two issues: 1) is this vertex on a boundary, and  2) is this vertex on a mobius connection. This makes four different types of vertex traversals. See Figure \ref{figure:traversalAroundVertexNormal} - \ref{figure:traversalAroundVertexMobiusB} for examples.
 
-In the vertex traversal without boundary and mobius issue, we start from one outgoing halfedge of this vertex. We continue to go to the next outgoing halfedge by going to the successor of its sibling until we hit the first outgoing halfedge. In the example of Figure \ref{figure:traversalAroundVertexNormal}, if start and end at halfedge $e_1$, the sequence of traversal is: $e_1$ (sibling link to) $e_1'$ (successor link to) $e_2$ (sibling link to) $e_2'$ (successor link to) $e_3$ (sibling link to) $e_3'$ (successor link to) $e_4$ (sibling link to ) $e_4'$  (successor link to)  $e_1$.
+In the vertex traversal without boundary and mobius issue, we start from one outgoing half-edge of this vertex. We continue to go to the next outgoing half-edge by going to the successor of its sibling until we hit the first outgoing half-edge. In the example of Figure \ref{figure:traversalAroundVertexNormal}, if start and end at half-edge $e_1$, the sequence of traversal is: $e_1$ (sibling link to) $e_1'$ (successor link to) $e_2$ (sibling link to) $e_2'$ (successor link to) $e_3$ (sibling link to) $e_3'$ (successor link to) $e_4$ (sibling link to ) $e_4'$  (successor link to)  $e_1$.
 
-In order to address the issue of a vertex on boundary, instead of using sibling links, we use boundary links. In the example of Figure \ref{figure:traversalAroundVertexNormalB}, we have a boundary $e_4'$ to $e_2$. If start and end at halfedge $e_1$, the sequence of traversal is: $e_1$ (sibling link to) $e_1'$ (successor link to) $e_2$ (boundary link to) $e_4'$ (successor link to)  $e_1$.
+In order to address the issue of a vertex on boundary, instead of using sibling links, we use boundary links. In the example of Figure \ref{figure:traversalAroundVertexNormalB}, we have a boundary $e_4'$ to $e_2$. If start and end at half-edge $e_1$, the sequence of traversal is: $e_1$ (sibling link to) $e_1'$ (successor link to) $e_2$ (boundary link to) $e_4'$ (successor link to)  $e_1$.
 
-To address the issue of vertex on a mobius connection, instead of using normal links, we use mobius links. At the same time, we switch between the successor and predecessor to the sibling every time we hit a mobius connection.  In the example of Figure \ref{figure:traversalAroundVertexNormal}, $e_1$ to $e_1'$ and $e_3$ to $e_3'$ have mobius siblings rather than normal sibling. If start and end at halfedge $e_1$, the sequence of traversal is: $e_1$ (mobius sibling link to) $e_1'$ (predecessor link to) $e_2$ (sibling link to) $e_2'$ (predecessor link to) $e_3$ (mobius sibling link to) $e_3'$ (successor link to) $e_4$ (sibling link to ) $e_4'$  (successor link to)  $e_1$.
+To address the issue of vertex on a mobius connection, instead of using normal links, we use mobius links. At the same time, we switch between the successor and predecessor to the sibling every time we hit a mobius connection.  In the example of Figure \ref{figure:traversalAroundVertexNormal}, $e_1$ to $e_1'$ and $e_3$ to $e_3'$ have mobius siblings rather than normal sibling. If start and end at half-edge $e_1$, the sequence of traversal is: $e_1$ (mobius sibling link to) $e_1'$ (predecessor link to) $e_2$ (sibling link to) $e_2'$ (predecessor link to) $e_3$ (mobius sibling link to) $e_3'$ (successor link to) $e_4$ (sibling link to ) $e_4'$  (successor link to)  $e_1$.
 
-If boundary and mobius connection both occur, we use a combination of the two methods above. In the example of Figure \ref{figure:traversalAroundVertexNormal}, $e_1$ to $e_1'$ and $e_3$ to $e_3'$ have mobius siblings rather than normal sibling and we have a mobius boundary connection between $e_4'$ and $e_2$. If starting and ending at halfedge $e_1$, the sequence of traversal is: $e_1$ (mobius sibling link to) $e_1'$ (predecessor link to) $e_2$ (mobius boundary link to ) $e_4'$  (successor link to)  $e_1$.
+If boundary and mobius connection both occur, we use a combination of the two methods above. In the example of Figure \ref{figure:traversalAroundVertexNormal}, $e_1$ to $e_1'$ and $e_3$ to $e_3'$ have mobius siblings rather than normal sibling and we have a mobius boundary connection between $e_4'$ and $e_2$. If starting and ending at half-edge $e_1$, the sequence of traversal is: $e_1$ (mobius sibling link to) $e_1'$ (predecessor link to) $e_2$ (mobius boundary link to ) $e_4'$  (successor link to)  $e_1$.
 
-As a summary of the four different situations above, in a vertex traversal, we 1) start the traversal from with one outgoing halfedge of the vertex, 2) go to sibling or boundary link halfedge, 3) go to the next or previous halfedge that contains the vertex as one end, and 4) repeat 2) and 3) until we reach to the starting outgoing halfedge. This vertex traversal runs in O(E) time, where E is the total number of halfedges in the mesh.
+As a summary of the four different situations above, in a vertex traversal, we 1) start the traversal from with one outgoing half-edge of the vertex, 2) go to sibling or boundary link half-edge, 3) go to the next or previous half-edge that contains the vertex as one end, and 4) repeat 2) and 3) until we reach to the starting outgoing half-edge. This vertex traversal runs in O(E) time, where E is the total number of half-edges in the mesh.
 
 %Figure3
 \begin{figure}[ht]
@@ -595,7 +864,7 @@ As a summary of the four different situations above, in a vertex traversal, we 1
 
 \section{Catumll-Clark Subdivision} \label{sec:ccsd}
 
-Catmull-Clark subdivision is a recursive call on a mesh that we build in section X. Four each level of Catmull-Clark subdivision, we divide every polygon face in the mesh into N quadrilateral faces, where N is the number of halfedges of the polygon face. The new vertices for these sub-faces can be classified into three groups: 1) face points, 2) edge points, and 3) vertex points. We also need to add adjacency information to new sub-faces so that they can be subdivided for the next level. Therefore, each level of subdivision is done in two steps: 1) compute the positions of new vertices, and 2) compile a new mesh given the new vertices.
+Catmull-Clark subdivision is a recursive call on a mesh that we build in section X. Four each level of Catmull-Clark subdivision, we divide every polygon face in the mesh into N quadrilateral faces, where N is the number of half-edges of the polygon face. The new vertices for these sub-faces can be classified into three groups: 1) face points, 2) edge points, and 3) vertex points. We also need to add adjacency information to new sub-faces so that they can be subdivided for the next level. Therefore, each level of subdivision is done in two steps: 1) compute the positions of new vertices, and 2) compile a new mesh given the new vertices.
 
 \subsection{Compute New Vertex Positions}
 There are three steps to compute the positions of vertices in the new mesh: 1) make new face points, 2) make new edge points, and 3) make new Vertex Points. Apart from finding the positions for these new vertices, we also need to assign unique IDs for them so no collision will occur for the new mesh.
@@ -607,29 +876,29 @@ $$v_f = \frac{v_1 + v_2 + ... + v_n}{n}$$
 
 Therefore, in order to get the face point position, we can do a traversal around a face, find all vertices and get the average of their positions.
 
-This step takes O(E) running time, where E is the number of halfedges in the kth level subdivision mesh.
+This step takes O(E) running time, where E is the number of half-edges in the kth level subdivision mesh.
 
 \subsubsection{Edge Points}
-Edge points are related with halfedges from the mesh. In this project, we used the idea from (Reference) and define the sharpness of a halfedge as either infinite sharp or smooth. Depends on the position and sharpness of the edge, we have two ways to calculate the edge point. 
+Edge points are related with half-edges from the mesh. In this project, we used the idea from (Reference) and define the sharpness of a half-edge as either infinite sharp or smooth. Depends on the position and sharpness of the edge, we have two ways to calculate the edge point. 
 
-If a halfedge does not lie on the boundary, it has a sibling link or mobius link to anther halfedge. For the halfedges that are not marked as sharp, the position of edge point of a halfedge is the average of its start vertex position, end vertex position, the face point position of the face it belongs to, and the face point position of the face its sibling or mobius sibling belongs to. If we label the edge point as $v_e$, the start and end vertices as $v_1$ and $v_2$, the face point of its face is $v_3$ and the face point of its sibling face is $v_4$, the equation to calculate edge point is,
+If a half-edge does not lie on the boundary, it has a sibling link or mobius link to anther half-edge. For the half-edges that are not marked as sharp, the position of edge point of a half-edge is the average of its start vertex position, end vertex position, the face point position of the face it belongs to, and the face point position of the face its sibling or mobius sibling belongs to. If we label the edge point as $v_e$, the start and end vertices as $v_1$ and $v_2$, the face point of its face is $v_3$ and the face point of its sibling face is $v_4$, the equation to calculate edge point is,
 
 $$v_e = \frac{v_1 + v_2 + v_3 + v_4}{4}$$
 
-If a halfedge lie on the boundary or it is marked as sharp, the position of the edge point is the average of its start vertex position and end vertex position. If we label the edge point as $v_e$, the start and end vertices as $v_1$ and $v_2$, the equation to calculate edge point is,
+If a half-edge lie on the boundary or it is marked as sharp, the position of the edge point is the average of its start vertex position and end vertex position. If we label the edge point as $v_e$, the start and end vertices as $v_1$ and $v_2$, the equation to calculate edge point is,
 
 $$v_e = \frac{v_1 + v_2}{2}$$
 
-This step takes O(E) running time, where E is the number of halfedges in the kth level subdivision mesh.
+This step takes O(E) running time, where E is the number of half-edges in the kth level subdivision mesh.
 
 \subsubsection{Vertex Points}
-Vertex points are related with vertices from the mesh. In order to find the vertex point, we traverse around an original vertex in the mesh, find the information we need from adjacent faces and halfedges and count the number of sharp halfedges we cross in the traversal. The number of sharp halfedges linking with this vertex determines methods to calculate vertex points.
+Vertex points are related with vertices from the mesh. In order to find the vertex point, we traverse around an original vertex in the mesh, find the information we need from adjacent faces and half-edges and count the number of sharp half-edges we cross in the traversal. The number of sharp half-edges linking with this vertex determines methods to calculate vertex points.
 
 1) A vertex with three or more incident sharp edges is called a corner, the new vertex point has same position with the original vertex. If we label the vertex point as $v_p$, the original vertex as $v_1$, the equation to calculate vertex point is,
 
 $$v_p = v_1$$
 
-2) A vertex with two incident sharp edges is called a crease vertex. If we label the vertex point as $v_p$, the original vertex as $v_1$ and the two halfedges are labeled with $v_1v_2$ and $v_1v_3$. The equation to calculate vertex point is,
+2) A vertex with two incident sharp edges is called a crease vertex. If we label the vertex point as $v_p$, the original vertex as $v_1$ and the two half-edges are labeled with $v_1v_2$ and $v_1v_3$. The equation to calculate vertex point is,
 
 $$v_p=\frac{v_2 + 6v_1 + v_3}{8}$$
 
@@ -653,7 +922,7 @@ $$v_p=\frac{27}{32}v_0 + \frac{3}{64}(v_2 + v_4 + v_5 + v_7) + \frac{3}{128}(v_1
 
 respectively. We can see that Catmull-Clark has more weights on the immediate neighbor vertices $v_2$, $v_4$, $v_5$, and $v_7$, while DeRose has much more on the original vertex. In this project, we used DeRose's equation to calculate vertex point for a normal vertex.
 
-This step takes O(E) running time, where E is the number of halfedges in the kth level subdivision mesh.
+This step takes O(E) running time, where E is the number of half-edges in the kth level subdivision mesh.
 
 \begin{figure}[ht]
   \centering
@@ -697,19 +966,19 @@ This step takes O(E) running time, where E is the number of halfedges in the kth
 \subsection{Compile a New Mesh}
 The newly generated vertices also need to be linked with each other. We compile the new mesh with traversal around face for every face from the original mesh.
 
-For every halfedge $v_iv_j$ in the face, we create four new halfedges. If we denote its edge point of the current halfedge as $v_e$ and the face point of its face as $v_f$, the four new halfedges are $v_iv_e$, $v_ev_j$, $v_ev_f$, and $v_fv_e$. An example in shown in Figure \ref{figure:compileNewMesh}. The halfedge $v_1v_2$ generated $v_1v_e$, $v_ev_2$, $v_ev_f$, $v_fv_e$. We also add the following adjacency information while generating sub-halfedges: 
+For every half-edge $v_iv_j$ in the face, we create four new half-edges. If we denote its edge point of the current half-edge as $v_e$ and the face point of its face as $v_f$, the four new half-edges are $v_iv_e$, $v_ev_j$, $v_ev_f$, and $v_fv_e$. An example in shown in Figure \ref{figure:compileNewMesh}. The half-edge $v_1v_2$ generated $v_1v_e$, $v_ev_2$, $v_ev_f$, $v_fv_e$. We also add the following adjacency information while generating sub-half-edges: 
 
-1) Add one outgoing halfedge pointer to every new vertex. If the new halfedge is on mobius connection, mark the new vertex on mobius connection.
+1) Add one outgoing half-edge pointer to every new vertex. If the new half-edge is on mobius connection, mark the new vertex on mobius connection.
 
-2) Add previous and next pointers to the sub-halfedges. 
+2) Add previous and next pointers to the sub-half-edges. 
 
 3) Add sibling pointers to every pair of $v_ev_f$ and $v_fv_e$.
 
-4) $v_iv_e$ and $v_ev_j$ need to inherit the sharpness and boundary feature from their parent halfedge, 
+4) $v_iv_e$ and $v_ev_j$ need to inherit the sharpness and boundary feature from their parent half-edge, 
 
-5) If $v_iv_j$ is not on boundary, we add sibling links between $v_iv_e$ and the corresponding sub-halfedge of its parent's sibling and add sibling links between $v_ev_j$ and the corresponding sub-halfedge of its parent's sibling.
+5) If $v_iv_j$ is not on boundary, we add sibling links between $v_iv_e$ and the corresponding sub-half-edge of its parent's sibling and add sibling links between $v_ev_j$ and the corresponding sub-half-edge of its parent's sibling.
 
-6) If $v_iv_j$ is on the boundary and has boundary links with its boundary neighbor halfedges, we add boundary links for $v_iv_e$ and the corresponding sub-halfedge of its parent's boundary neighbor. We also add boundary links for $v_iv_e$ and the corresponding sub-halfedge of its parent's boundary neighbor.
+6) If $v_iv_j$ is on the boundary and has boundary links with its boundary neighbor half-edges, we add boundary links for $v_iv_e$ and the corresponding sub-half-edge of its parent's boundary neighbor. We also add boundary links for $v_iv_e$ and the corresponding sub-half-edge of its parent's boundary neighbor.
 
 \begin{figure}[ht]
   \centering
@@ -742,15 +1011,15 @@ For every halfedge $v_iv_j$ in the face, we create four new halfedges. If we den
     \node [above right] at (2, 2) {$v_f$};
     \node [below right] at (4, 2) {$v_e$};
   \end{tikzpicture}
-  \caption{Create four sub-halfedges for one halfedge in subdivision.}
+  \caption{Create four sub-half-edges for one half-edge in subdivision.}
   \label{figure:compileNewMesh}
 \end{figure}
 
 When the traversal around face is done for every face in the level k subdivision mesh, the level k + 1 subdivision mesh would be created.
 
-This step takes O(E') running time, where E' is the number of halfedges in the (k + 1)th level subdivision mesh.
+This step takes O(E') running time, where E' is the number of half-edges in the (k + 1)th level subdivision mesh.
 
-As a summary, the Catmull-Clark at kth level takes O(E') running time, where E' is the number of halfedges in the (k + 1)th level subdivision mesh.
+As a summary, the Catmull-Clark at kth level takes O(E') running time, where E' is the number of half-edges in the (k + 1)th level subdivision mesh.
 
 \newpage
 \section{Offset Mesh} \label{sec:offset}
@@ -765,42 +1034,42 @@ In order to get the offset mesh, we need two steps: 1) calculate vertex normal f
 The vertex normal for a vertex is commonly defined as the average for the surface normal of all faces adjacent to the vertex. To get the surface normal for a face of N polygon, we use Newell's Method.
 
 \subsubsection{Newell's Method and Surface Normal}
-Newell's method defines the surface normal as the normalized average for cross products of all consecutive halfedges in the face. For a polygon face with n halfedges, we denote them as $v_0v_1$, $v_1v_2$, ...,$v_{n-1}v_0$, where $ n \ge 3$. The surface normal $N_{f}$ is,
+Newell's method defines the surface normal as the normalized average for cross products of all consecutive half-edges in the face. For a polygon face with n half-edges, we denote them as $v_0v_1$, $v_1v_2$, ...,$v_{n-1}v_0$, where $ n \ge 3$. The surface normal $N_{f}$ is,
 
 $$N_{f} = normalize(\sum\limits_{i=1}^{n-2} (v_i - v_{i - 1}) \times (v_{i + 1} - v_{i}) + (v_{n - 1} - v_{n - 2}) \times (v_0 - v_{n - 1}) + (v_0 - v_{n - 1}) \times (v_1 - v_0))$$
 
-Therefore, we calculate surface normal for every face in the mesh by traversal around face. It takes O(E) running time, where E is the number of halfedges in the mesh.
+Therefore, we calculate surface normal for every face in the mesh by traversal around face. It takes O(E) running time, where E is the number of half-edges in the mesh.
 
 \subsubsection{Vertex normal}
 We calculate vertex normal by traversal around vertex. If a vertex $v$ is not on a mobius connction, we denote the m faces adjacent to vertex $v$ are $f_0, f_1, ..., f_m$, the vertex normal $N_v$ is,
 
 $$N_{v} = normalize(\sum\limits_{i=1}^{m-1} N_{f_i})$$
 
-However, when $v$ is on mobius connection, the halfedge flows for some adjacent faces are in opposite directions (clockwise vs. counter clockwise). It leads to surface normal in opposite directions. We need to fix this issue by introducing a mobius counter. In the vertex traversal, we start by adding the surfaces normal when we find a face. When we cross a mobius connection, we add the negative surface normal for the upcoming faces until we cross another mobius connection.
+However, when $v$ is on mobius connection, the half-edge flows for some adjacent faces are in opposite directions (clockwise vs. counter clockwise). It leads to surface normal in opposite directions. We need to fix this issue by introducing a mobius counter. In the vertex traversal, we start by adding the surfaces normal when we find a face. When we cross a mobius connection, we add the negative surface normal for the upcoming faces until we cross another mobius connection.
 
 Another way to address this mobius vertex issue is to check the dot product of every surface normal with the sum that we have got. If the dot product is positive, we add this surface normal, if not, we add its negative surface normal.
 
-Calculating all vertex normal takes O(E) running time, where E is the number of halfedges in the mesh.
+Calculating all vertex normal takes O(E) running time, where E is the number of half-edges in the mesh.
 
 \subsection{Positive and Negative Offset Meshes}
 
 For a mesh with no mobius connection, the positive and negative offset meshes will have no connection with each other. We get the positive offset by copy the mesh, and translate every vertex along its normal with an offset value. 
 
-For negative offset, we still want to copy the mesh but the halfedge flow in the faces is in opposite directions. We then translate every vertex along the opposite direction of its normal with an offset value.
+For negative offset, we still want to copy the mesh but the half-edge flow in the faces is in opposite directions. We then translate every vertex along the opposite direction of its normal with an offset value.
 
 When there is a mobius connection, positive offset mesh and negative offset will join each other at the mobius connection. Normal of vertices on mobius connection may not reflect the direction for its positive translation. 
 
 In this project, we make the translations of vertex positions with traversal around face. If a vertex is on mobius connection, we can check the dot product of its normal and the face normal for the face it belongs to. If the dot product is positive, we translate along this vertex normal for its positive offset and the opposite for its negative offset. If the dot product is negative, we translate along this vertex normal for its negative offset and the opposite for its positive offset.
 
-This step takes O(E) running time, where E is the number of halfedges in the mesh.
+This step takes O(E) running time, where E is the number of half-edges in the mesh.
 
 \subsection{Cover Mesh}
 
-We also need to build the cover mesh to connect positive offset with negative offset. For a mesh with no mobius connection, we traverse along its boundary. For every halfedge $v_iv_j$ on the boundary, we build a quadrilateral face $v_{posJ}v_{posI}v_{negI}v_{negJ}$, where $v_{posI}$ and $v_{posJ}$ are the positive offset for $v_i$ and $v_j$, and $v_{negI}$ and $v_{negJ}$ are the negative offset for $v_i$ and $v_j$.
+We also need to build the cover mesh to connect positive offset with negative offset. For a mesh with no mobius connection, we traverse along its boundary. For every half-edge $v_iv_j$ on the boundary, we build a quadrilateral face $v_{posJ}v_{posI}v_{negI}v_{negJ}$, where $v_{posI}$ and $v_{posJ}$ are the positive offset for $v_i$ and $v_j$, and $v_{negI}$ and $v_{negJ}$ are the negative offset for $v_i$ and $v_j$.
 
 As we mentioned before, normal of vertices on mobius connection may not reflect the direction for its positive translation. For a vertex $v_i$ on mobius connection, we need to check the dot product of its normal with the surface normal that it belongs to. If the dot product is positive, we use $v_i$'s vertex normal to calculate $v_{posI}$ and negative vertex normal to calculate $v_{negI}$. If the dot product is negative, we use $v_i$'s vertex normal to calculate $v_{negI}$ and negative vertex normal to calculate $v_{posI}$. After this check for $v_i$ and $v_j$, we build the quadrilateral face $v_{posJ}v_{posI}v_{negI}v_{negJ}$.
 
-This step takes O(E) running time, where E is the number of boundary halfedges in the mesh.
+This step takes O(E) running time, where E is the number of boundary half-edges in the mesh.
 
 The offset mesh will be the combination of the positive offset, negative offset and cover mesh that we build above. In total, it takes O(E) running time to build the offset mesh.
 
@@ -844,11 +1113,11 @@ The input and output of subdivision or offset are polygon meshes. Figure \ref{fi
 The basic information we need to build an initial mesh is: 1) the position for all vertices in the mesh, and 2) the polygon defined with these vertices.
 This information can be retrieved in two ways. It can come from the graphical user interface. Or it is read from a file contains vertex and polygon information.
 \subsubsection{Input File Parser}
-Currently, the input of initial polygon mesh comes from file input, which defines the position of vertices, and how polygons are built from these vertices. As long as the polygons are defined in a continuous flow of halfedges, or a loop of consecutive vertices in the right order, it is good to build the initial mesh of subdivision.
+Currently, the input of initial polygon mesh comes from file input, which defines the position of vertices, and how polygons are built from these vertices. As long as the polygons are defined in a continuous flow of half-edges, or a loop of consecutive vertices in the right order, it is good to build the initial mesh of subdivision.
 
 A question was raised on the read of vertices. As mentioned in section X, the assumption of vertex in the mesh is ``no two vertices share same position in a mesh". The problem of vertex having same positions is that mesh at that position is seen as a boundary.  The subdivision will shrink the mesh at this boundary and so it will be separated. Here, we define ``same position" as the distance between two vertex is smaller than a tolerance value.
 
-Reading from the input file, if the parser finds a new vertex having same position that we parsed before, we can merge these two vertices immediately. Or we can keep both of them as different vertices and create a temporary mesh. We then go through the boundary of the temporary mesh and check if any two halfedges can be merged. The problem with merging immediately is that the merge operation should be done on the unit of halfedge in order to maintain the property of 2-manifold. 
+Reading from the input file, if the parser finds a new vertex having same position that we parsed before, we can merge these two vertices immediately. Or we can keep both of them as different vertices and create a temporary mesh. We then go through the boundary of the temporary mesh and check if any two half-edges can be merged. The problem with merging immediately is that the merge operation should be done on the unit of half-edge in order to maintain the property of 2-manifold. 
 
 If we force to merge vertex immediately, it may result in a non-2-manifold geometry. In the example of Figure \ref{figure:parserMerge}, $v_0$ and $v_0'$ are very close to each other (probably smaller than the tolerance we defined). If we merge these two vertices directly, the result will be a non-2-manifold and the program can not figure out how to trace the boundary of this geometry.
 
@@ -982,7 +1251,7 @@ Tetra is a single-sided geometry with 4 mobius connections. The initial mesh is 
 
 \newpage
 \section{Conclusion and Future Works}
-In this project, with the extended definition of halfedge data structure for single-sided surfaces, we build 1) a subdivision machine that can take in an initial polygon mesh and produce n level Catmull-Clark subdivision surface, 2) an offset machine that can take in a polygon mesh and generate offset mesh, and 3) input and output user interfaces to take in the data and display the result. It can be used to emulate sculptures and be used for the purpose of design and re-engineering.
+In this project, with the extended definition of half-edge data structure for single-sided surfaces, we build 1) a subdivision machine that can take in an initial polygon mesh and produce n level Catmull-Clark subdivision surface, 2) an offset machine that can take in a polygon mesh and generate offset mesh, and 3) input and output user interfaces to take in the data and display the result. It can be used to emulate sculptures and be used for the purpose of design and re-engineering.
 
 More works would be done on the input and output end of this subdivision machine in the future. An integrated GUI will be designed to complete the following tasks: 
 
