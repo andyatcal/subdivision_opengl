@@ -147,7 +147,7 @@ void init(int level){
 void init(int level, string inputSIF){
 
     //makeWithSIF(glMesh, inputSIF);
-    makeWithQuadSIF(glMesh, inputSIF);
+    makeWithSIF(glMesh, inputSIF);
     //cout<<glMesh.faceVect.size()<<" "<< glMesh.vertVect.size()<<endl;
     Subdivision myCC(glMesh);
     glMesh = myCC.ccSubdivision(level);
