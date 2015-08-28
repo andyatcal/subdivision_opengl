@@ -221,16 +221,20 @@ void addPolygonFaceToMesh(vector<Vertex*> vertices, Mesh & mesh,
 // @param mesh: refer to the mesh to build connection in.
 // This one takes O(E) time.
 void buildBoundaryPointers(Mesh &mesh) {
-    unordered_map<Vertex*, vector<Halfedge*> > &boundaryEdgeTable = mesh.boundaryEdgeTable;
+    unordered_map<Vertex*, vector<Halfedge*> >
+     &boundaryEdgeTable = mesh.boundaryEdgeTable;
     unordered_map<Vertex*, vector<Halfedge*> >::iterator evIt;
     vector<Halfedge*> boundaryEdgesAtThisPoint;
     vector<Halfedge*>::iterator eIt;
-    for(evIt = boundaryEdgeTable.begin(); evIt != boundaryEdgeTable.end(); evIt++) {
+    for(evIt = boundaryEdgeTable.begin(); evIt
+     != boundaryEdgeTable.end(); evIt++) {
         boundaryEdgesAtThisPoint = evIt -> second;
         if(!boundaryEdgesAtThisPoint.empty()) {
-            for(eIt = boundaryEdgesAtThisPoint.begin(); eIt < boundaryEdgesAtThisPoint.end(); eIt++) {
+            for(eIt = boundaryEdgesAtThisPoint.begin();
+             eIt < boundaryEdgesAtThisPoint.end(); eIt++) {
                 Halfedge * currEdge = (*eIt);
-                if(currEdge -> previousBoundary == NULL && currEdge -> mobiusBoundary == NULL) {
+                if(currEdge -> previousBoundary == NULL
+                 && currEdge -> mobiusBoundary == NULL) {
                     int mobiusCounter = 0;
                     Halfedge * firstBoundaryEdge = currEdge;
                     //cout<<"first: "<<currEdge -> start -> ID<<" "<<currEdge -> end -> ID<<endl;
@@ -244,7 +248,8 @@ void buildBoundaryPointers(Mesh &mesh) {
                         } else {
                             nextBoundaryEdge = currEdge -> previous;
                         }
-                        while(nextBoundaryEdge -> sibling != NULL || nextBoundaryEdge -> mobiusSibling != NULL) {
+                        while(nextBoundaryEdge -> sibling != NULL
+                         || nextBoundaryEdge -> mobiusSibling != NULL) {
                             if(nextBoundaryEdge -> sibling != NULL) {
                                 nextBoundaryEdge = nextBoundaryEdge -> sibling;
                             } else {
