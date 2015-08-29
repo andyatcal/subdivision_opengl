@@ -152,14 +152,14 @@ void init(int level, string inputSIF){
     Subdivision myCC(glMesh);
     glMesh = myCC.ccSubdivision(level);
     computeNormals(glMesh);
-    Offset offset(glMesh, 0.04);
+    Offset offset(glMesh, 0.035);
     vector<Mesh> meshes;
     bool full = true;
     if(full) {
         offset.makeFullOffset();
         glOffMesh = offset.offsetMesh;
         Subdivision myOffCC(glOffMesh);
-        glOffMesh = myOffCC.ccSubdivision(1);
+        glOffMesh = myOffCC.ccSubdivision(0);
         computeNormals(glOffMesh);
         meshes.push_back(glOffMesh);
     } else {
